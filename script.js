@@ -1,4 +1,10 @@
+/* ═══════════════════════════════════════════════════════════
+   FAIRRISS — script.js
+   Network-Commerce Platform MVP
+═══════════════════════════════════════════════════════════ */
+
 'use strict';
+
 /* ── 1. HELPERS ──────────────────────────────────────────── */
 const $ = (s, ctx = document) => ctx.querySelector(s);
 const $$ = (s, ctx = document) => [...ctx.querySelectorAll(s)];
