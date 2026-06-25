@@ -1,11 +1,11 @@
-/* ═══════════════════════════════════════════════════════════
-   FAIRRISS — script.js
+/* ===========================================================
+   FAIRRISS - script.js
    Network-Commerce Platform MVP
-═══════════════════════════════════════════════════════════ */
+=========================================================== */
 
 'use strict';
 
-/* ── 1. HELPERS ──────────────────────────────────────────── */
+/*  1. HELPERS  */
 const $ = (s, ctx = document) => ctx.querySelector(s);
 const $$ = (s, ctx = document) => [...ctx.querySelectorAll(s)];
 const uid = () => crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -23,7 +23,7 @@ const timeAgo = (iso) => {
 const initials = (name) => name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 const escHtml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-/* ── 2. DATA STORE (localStorage-backed) ─────────────────── */
+/*  2. DATA STORE (localStorage-backed)  */
 const STORE_KEY = 'fairriss_mvp_v1';
 
 const DEFAULT_DATA = {
@@ -59,14 +59,14 @@ const DEFAULT_DATA = {
     { id: 'o5', creatorId: 'u4', wheelIds: ['w3'], type: 'partnership', title: 'Growth Agency Co-Marketing Partner', description: 'We run paid acquisition for 12 DTC brands and want to partner with a complementary agency (email, SEO, CRO) for referral sharing and joint pitches.', skills: ['Marketing', 'Agency', 'Partnership'], location: 'US-based preferred', remoteOk: true, status: 'open', metadata: { equity: null }, viewCount: 14, applicationCount: 3, expiresAt: '2025-08-20T00:00:00Z', createdAt: '2025-07-06T08:30:00Z' },
   ],
   deals: [
-    { id: 'd1', wheelId: 'w2', buyerId: 'u5', sellerId: 'u2', title: 'Website Redesign Project', scope: 'Complete redesign of Nova SaaS marketing site (5 core pages) in Figma. Includes discovery, wireframes, high-fidelity mockups, and developer handoff.', deliverables: [ { id: 'del1', title: 'Discovery & wireframes', done: true }, { id: 'del2', title: 'High-fidelity Figma mockups', done: false }, { id: 'del3', title: 'Developer handoff (Zeplin)', done: false }, { id: 'del4', title: 'Revision round (×2)', done: false } ], status: 'in_progress', priceCents: 450000, currency: 'USD', paymentType: 'lump_sum', startDate: '2025-07-01', endDate: '2025-08-15', platformFeePct: 3, creatorCommissionPct: 2.5, messages: [ { id: 'm1', senderId: 'u5', body: 'Hi Marcus, we loved your portfolio. The Nova rebrand is one of our biggest priorities this quarter.', createdAt: '2025-07-01T09:00:00Z' }, { id: 'm2', senderId: 'u2', body: 'Thanks! I went through the brief. I have some questions about the brand voice — can we jump on a quick call?', createdAt: '2025-07-01T10:30:00Z' }, { id: 'm3', senderId: 'u5', body: 'Absolutely. Booking one now. Also just sent the current brand assets to your email.', createdAt: '2025-07-01T10:45:00Z' } ], createdAt: '2025-06-28T00:00:00Z' },
-    { id: 'd2', wheelId: 'w1', buyerId: 'u1', sellerId: 'u3', title: 'Member Portal Development', scope: 'Build the member dashboard for The Founders Circle — authentication, profile pages, and deal listing MVP.', deliverables: [ { id: 'del5', title: 'Auth system (magic link)', done: true }, { id: 'del6', title: 'Profile CRUD + avatar upload', done: true }, { id: 'del7', title: 'Deal list + filter views', done: false } ], status: 'in_progress', priceCents: 800000, currency: 'USD', paymentType: 'milestones', startDate: '2025-06-15', endDate: '2025-08-30', platformFeePct: 3, creatorCommissionPct: 2, messages: [ { id: 'm4', senderId: 'u1', body: 'Priya, the auth and profile work looks clean. Deadline for the deal views is still Aug 30 — are we on track?', createdAt: '2025-07-04T14:00:00Z' }, { id: 'm5', senderId: 'u3', body: 'Yes — I am starting deal views Monday. Should have a preview by EOW.', createdAt: '2025-07-04T14:22:00Z' } ], createdAt: '2025-06-12T00:00:00Z' },
-    { id: 'd3', wheelId: 'w1', buyerId: 'u2', sellerId: 'u6', title: 'Brand Identity for Osei Studio', scope: 'Complete brand identity for Marcus Osei Design Studio: wordmark, icon, color palette, type system, and business card design.', deliverables: [ { id: 'del8', title: 'Discovery & mood boards', done: true }, { id: 'del9', title: 'Wordmark concepts (×3)', done: true }, { id: 'del10', title: 'Final identity system', done: true }, { id: 'del11', title: 'File handoff', done: true } ], status: 'paid', priceCents: 320000, currency: 'USD', paymentType: 'lump_sum', startDate: '2025-05-01', endDate: '2025-06-01', platformFeePct: 3, creatorCommissionPct: 2.5, messages: [], createdAt: '2025-04-28T00:00:00Z' },
+    { id: 'd1', wheelId: 'w2', buyerId: 'u5', sellerId: 'u2', title: 'Website Redesign Project', scope: 'Complete redesign of Nova SaaS marketing site (5 core pages) in Figma. Includes discovery, wireframes, high-fidelity mockups, and developer handoff.', deliverables: [ { id: 'del1', title: 'Discovery & wireframes', done: true }, { id: 'del2', title: 'High-fidelity Figma mockups', done: false }, { id: 'del3', title: 'Developer handoff (Zeplin)', done: false }, { id: 'del4', title: 'Revision round (x2)', done: false } ], status: 'in_progress', priceCents: 450000, currency: 'USD', paymentType: 'lump_sum', startDate: '2025-07-01', endDate: '2025-08-15', platformFeePct: 3, creatorCommissionPct: 2.5, messages: [ { id: 'm1', senderId: 'u5', body: 'Hi Marcus, we loved your portfolio. The Nova rebrand is one of our biggest priorities this quarter.', createdAt: '2025-07-01T09:00:00Z' }, { id: 'm2', senderId: 'u2', body: 'Thanks! I went through the brief. I have some questions about the brand voice - can we jump on a quick call?', createdAt: '2025-07-01T10:30:00Z' }, { id: 'm3', senderId: 'u5', body: 'Absolutely. Booking one now. Also just sent the current brand assets to your email.', createdAt: '2025-07-01T10:45:00Z' } ], createdAt: '2025-06-28T00:00:00Z' },
+    { id: 'd2', wheelId: 'w1', buyerId: 'u1', sellerId: 'u3', title: 'Member Portal Development', scope: 'Build the member dashboard for The Founders Circle - authentication, profile pages, and deal listing MVP.', deliverables: [ { id: 'del5', title: 'Auth system (magic link)', done: true }, { id: 'del6', title: 'Profile CRUD + avatar upload', done: true }, { id: 'del7', title: 'Deal list + filter views', done: false } ], status: 'in_progress', priceCents: 800000, currency: 'USD', paymentType: 'milestones', startDate: '2025-06-15', endDate: '2025-08-30', platformFeePct: 3, creatorCommissionPct: 2, messages: [ { id: 'm4', senderId: 'u1', body: 'Priya, the auth and profile work looks clean. Deadline for the deal views is still Aug 30 - are we on track?', createdAt: '2025-07-04T14:00:00Z' }, { id: 'm5', senderId: 'u3', body: 'Yes - I am starting deal views Monday. Should have a preview by EOW.', createdAt: '2025-07-04T14:22:00Z' } ], createdAt: '2025-06-12T00:00:00Z' },
+    { id: 'd3', wheelId: 'w1', buyerId: 'u2', sellerId: 'u6', title: 'Brand Identity for Osei Studio', scope: 'Complete brand identity for Marcus Osei Design Studio: wordmark, icon, color palette, type system, and business card design.', deliverables: [ { id: 'del8', title: 'Discovery & mood boards', done: true }, { id: 'del9', title: 'Wordmark concepts (x3)', done: true }, { id: 'del10', title: 'Final identity system', done: true }, { id: 'del11', title: 'File handoff', done: true } ], status: 'paid', priceCents: 320000, currency: 'USD', paymentType: 'lump_sum', startDate: '2025-05-01', endDate: '2025-06-01', platformFeePct: 3, creatorCommissionPct: 2.5, messages: [], createdAt: '2025-04-28T00:00:00Z' },
   ],
   posts: [
-    { id: 'p1', wheelId: 'w1', authorId: 'u1', type: 'announcement', body: '🚀 Welcome to Q3! This week we have three open opportunities in the feed — a Head of Product role at Nova, an iOS eng referral from Marcus, and a brand identity service request. Check them out. Let\'s make each other money.', likes: 24, createdAt: '2025-07-07T09:00:00Z' },
-    { id: 'p2', wheelId: 'w1', authorId: 'u2', type: 'referral', body: 'Forwarding a senior iOS engineer role at Relay — great team, solid equity, full remote. Relay builds B2B payments. DM me for the warm intro if you know someone. Referral bonus: $500 if they get hired.', likes: 11, createdAt: '2025-07-07T11:30:00Z' },
-    { id: 'p3', wheelId: 'w1', authorId: 'u3', type: 'post', body: 'PSA: I finished the auth module for the portal. Magic link is live on staging — you can test it at founders.staging.app. Would love feedback on the UX, especially the "verify your email" flow.', likes: 8, createdAt: '2025-07-06T16:00:00Z' },
+    { id: 'p1', wheelId: 'w1', authorId: 'u1', type: 'announcement', body: ' Welcome to Q3! This week we have three open opportunities in the feed - a Head of Product role at Nova, an iOS eng referral from Marcus, and a brand identity service request. Check them out. Let\'s make each other money.', likes: 24, createdAt: '2025-07-07T09:00:00Z' },
+    { id: 'p2', wheelId: 'w1', authorId: 'u2', type: 'referral', body: 'Forwarding a senior iOS engineer role at Relay - great team, solid equity, full remote. Relay builds B2B payments. DM me for the warm intro if you know someone. Referral bonus: $500 if they get hired.', likes: 11, createdAt: '2025-07-07T11:30:00Z' },
+    { id: 'p3', wheelId: 'w1', authorId: 'u3', type: 'post', body: 'PSA: I finished the auth module for the portal. Magic link is live on staging - you can test it at founders.staging.app. Would love feedback on the UX, especially the "verify your email" flow.', likes: 8, createdAt: '2025-07-06T16:00:00Z' },
     { id: 'p4', wheelId: 'w1', authorId: 'u5', type: 'post', body: 'Nova SaaS just crossed 500 paying customers. Hosting a private dinner in SF on July 18 for anyone in this Wheel who\'s in the Bay Area. RSVP in DMs.', likes: 31, createdAt: '2025-07-05T12:00:00Z' },
   ],
   referrals: [
@@ -224,9 +224,9 @@ class Store {
 
 const store = new Store();
 
-/* ── 3. TOAST ─────────────────────────────────────────────── */
+/*  3. TOAST  */
 function toast(msg, type = 'default') {
-  const icons = { default: '⚡', success: '✓', error: '✗' };
+  const icons = { default: '', success: 'v', error: 'x' };
   const el = document.createElement('div');
   el.className = `toast ${type}`;
   el.innerHTML = `<span>${icons[type]}</span><span>${escHtml(msg)}</span>`;
@@ -235,7 +235,7 @@ function toast(msg, type = 'default') {
   setTimeout(() => { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); }, 3200);
 }
 
-/* ── 4. MODAL ─────────────────────────────────────────────── */
+/*  4. MODAL  */
 function openModal(id) { $(`#${id}`)?.classList.add('open'); }
 function closeModal(id) { $(`#${id}`)?.classList.remove('open'); }
 function closeAllModals() { $$('.modal-overlay').forEach(m => m.classList.remove('open')); }
@@ -245,7 +245,7 @@ document.addEventListener('click', e => {
   if (e.target.classList.contains('modal-close')) closeAllModals();
 });
 
-/* ── 5. ROUTER ────────────────────────────────────────────── */
+/*  5. ROUTER  */
 const PAGES = ['home', 'wheels', 'members', 'opportunities', 'deals', 'profile', 'wheel-detail', 'deal-detail', 'analytics'];
 let currentPage = 'home';
 let pageParams = {};
@@ -285,7 +285,7 @@ function renderPage() {
   renders[currentPage]?.();
 }
 
-/* ── 6. AUTH ─────────────────────────────────────────────── */
+/*  6. AUTH  */
 function renderAuth() {
   document.body.innerHTML = `
   <div class="auth-screen">
@@ -296,17 +296,17 @@ function renderAuth() {
       </div>
       <div class="auth-hex-grid">
         <div class="auth-hex-row">
-          <div class="auth-hex-item">🤝</div>
-          <div class="auth-hex-item lit">💡</div>
+          <div class="auth-hex-item"></div>
+          <div class="auth-hex-item lit"></div>
         </div>
         <div class="auth-hex-row">
-          <div class="auth-hex-item lit">⚡</div>
-          <div class="auth-hex-item">🎯</div>
-          <div class="auth-hex-item lit">💰</div>
+          <div class="auth-hex-item lit"></div>
+          <div class="auth-hex-item"></div>
+          <div class="auth-hex-item lit"></div>
         </div>
         <div class="auth-hex-row">
-          <div class="auth-hex-item">🔗</div>
-          <div class="auth-hex-item lit">🚀</div>
+          <div class="auth-hex-item"></div>
+          <div class="auth-hex-item lit"></div>
         </div>
       </div>
       <p class="auth-brand-tagline">The platform where professional networks become commerce engines.</p>
@@ -325,10 +325,10 @@ function renderAuth() {
       <div id="auth-signup-form" class="hidden">
         <div class="form-stack">
           <div class="auth-role-grid" id="role-selector">
-            <div class="auth-role-card selected" data-role="member"><div class="auth-role-icon">👤</div><div class="auth-role-name">Member</div><div class="auth-role-desc">Join Wheels, post & find opportunities</div></div>
-            <div class="auth-role-card" data-role="creator"><div class="auth-role-icon">⚡</div><div class="auth-role-name">Creator</div><div class="auth-role-desc">Build and monetise your own Wheel</div></div>
-            <div class="auth-role-card" data-role="brand"><div class="auth-role-icon">🏢</div><div class="auth-role-name">Brand</div><div class="auth-role-desc">Sponsor Wheels, post opportunities</div></div>
-            <div class="auth-role-card" data-role="service"><div class="auth-role-icon">🔧</div><div class="auth-role-name">Service Provider</div><div class="auth-role-desc">Offer professional services</div></div>
+            <div class="auth-role-card selected" data-role="member"><div class="auth-role-icon"></div><div class="auth-role-name">Member</div><div class="auth-role-desc">Join Wheels, post & find opportunities</div></div>
+            <div class="auth-role-card" data-role="creator"><div class="auth-role-icon"></div><div class="auth-role-name">Creator</div><div class="auth-role-desc">Build and monetise your own Wheel</div></div>
+            <div class="auth-role-card" data-role="brand"><div class="auth-role-icon"></div><div class="auth-role-name">Brand</div><div class="auth-role-desc">Sponsor Wheels, post opportunities</div></div>
+            <div class="auth-role-card" data-role="service"><div class="auth-role-icon"></div><div class="auth-role-name">Service Provider</div><div class="auth-role-desc">Offer professional services</div></div>
           </div>
           <div class="form-row">
             <div class="form-group"><label class="form-label">Full Name</label><input class="form-control" id="su-name" placeholder="Alex Chen"></div>
@@ -350,7 +350,7 @@ function renderAuth() {
     btn.className = 'btn btn-outline w-full';
     btn.style.justifyContent = 'flex-start';
     btn.style.gap = '.75rem';
-    btn.innerHTML = `${avatarHtml(u, 'md')} <div style="text-align:left"><div class="t-body" style="font-weight:600">${escHtml(u.name)}</div><div class="t-small c-text3">${u.role} · Trust ${u.trustScore}</div></div>`;
+    btn.innerHTML = `${avatarHtml(u, 'md')} <div style="text-align:left"><div class="t-body" style="font-weight:600">${escHtml(u.name)}</div><div class="t-small c-text3">${u.role} . Trust ${u.trustScore}</div></div>`;
     btn.addEventListener('click', () => { store.login(u.id); renderPage(); });
     ul.appendChild(btn);
   });
@@ -389,7 +389,7 @@ function renderAuth() {
   });
 }
 
-/* ── 7. AVATAR HELPERS ────────────────────────────────────── */
+/*  7. AVATAR HELPERS  */
 const PALETTE = ['#0F1F3D','#6D28D9','#047857','#C2410C','#0369A1','#BE185D','#374151'];
 function getColor(userId) { return PALETTE[(parseInt(userId.replace(/\D/g,'') || '0') % PALETTE.length)]; }
 function avatarHtml(user, size = 'md') {
@@ -402,7 +402,7 @@ function hexBadge(wheel, size = 48) {
   return `<div class="wheel-hex-mini" style="background:${wheel.hexColor||'#0F1F3D'};width:${size}px;height:${h}px;font-size:${Math.round(size*.35)}px">${wheel.name[0]}</div>`;
 }
 
-/* ── 8. SHELL ─────────────────────────────────────────────── */
+/*  8. SHELL  */
 function renderShell(me) {
   if ($('.shell')) {
     updateShellDynamic(me);
@@ -417,7 +417,7 @@ function renderShell(me) {
       </div>
       <div class="header-search">
         <svg class="header-search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" placeholder="Search members, deals, opportunities…" id="global-search">
+        <input type="text" placeholder="Search members, deals, opportunities..." id="global-search">
       </div>
       <div class="header-actions">
         <div style="position:relative">
@@ -461,9 +461,9 @@ function renderShell(me) {
           ${avatarHtml(me, 'sm')}
           <div class="sidebar-user-info">
             <div class="sidebar-user-name">${escHtml(me.name)}</div>
-            <div class="sidebar-user-role">${me.role} · Trust ${me.trustScore}</div>
+            <div class="sidebar-user-role">${me.role} . Trust ${me.trustScore}</div>
           </div>
-          <button class="btn-ghost btn-xs" onclick="event.stopPropagation();store.logout();renderPage();" title="Logout">↩</button>
+          <button class="btn-ghost btn-xs" onclick="event.stopPropagation();store.logout();renderPage();" title="Logout"></button>
         </div>
       </div>
     </aside>
@@ -549,7 +549,7 @@ function renderNotifPanel() {
     </div>
     ${notifs.length ? notifs.map(n => `
       <div class="notif-item ${n.read ? '' : 'unread'}" onclick="store.markNotifRead('${n.id}');renderPage()">
-        <div class="notif-icon">${{deal_message:'💬',new_member:'👤',deal_completed:'✅',new_opportunity:'🎯'}[n.type]||'🔔'}</div>
+        <div class="notif-icon">${{deal_message:'',new_member:'',deal_completed:'',new_opportunity:''}[n.type]||''}</div>
         <div>
           <div class="notif-text">${n.text}</div>
           <div class="notif-time">${timeAgo(n.createdAt)}</div>
@@ -557,7 +557,7 @@ function renderNotifPanel() {
       </div>`).join('') : '<div class="empty-state" style="padding:1.5rem"><div>No notifications yet</div></div>'}`;
 }
 
-/* ── 9. ICONS ─────────────────────────────────────────────── */
+/*  9. ICONS  */
 function icon(name) {
   const icons = {
     home: `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
@@ -578,7 +578,7 @@ function icon(name) {
   return icons[name] || '';
 }
 
-/* ── 10. HOME PAGE ────────────────────────────────────────── */
+/*  10. HOME PAGE  */
 function renderHome() {
   const me = store.getMe();
   const myDeals = store.getMyDeals();
@@ -593,7 +593,7 @@ function renderHome() {
   $('#page-home').innerHTML = `
   <div class="page-head">
     <div class="page-head-left">
-      <h1 class="page-title">Good morning, ${me.name.split(' ')[0]} 👋</h1>
+      <h1 class="page-title">Good morning, ${me.name.split(' ')[0]} </h1>
       <p class="page-sub">Here's what's happening in your network.</p>
     </div>
     <div class="page-actions">
@@ -629,22 +629,22 @@ function renderHome() {
     <div>
       <div class="flex justify-between items-center mb-3">
         <h2 class="t-h2">Network Feed</h2>
-        <button class="btn btn-ghost btn-sm" onclick="navigate('wheels')">All Wheels →</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigate('wheels')">All Wheels </button>
       </div>
       <div id="home-feed">
-        ${allPosts.length ? allPosts.map(p => renderFeedPost(p)).join('') : '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">Feed is quiet</div><div class="empty-desc">Join Wheels to see posts from your network</div></div>'}
+        ${allPosts.length ? allPosts.map(p => renderFeedPost(p)).join('') : '<div class="empty-state"><div class="empty-icon"></div><div class="empty-title">Feed is quiet</div><div class="empty-desc">Join Wheels to see posts from your network</div></div>'}
       </div>
     </div>
     <div>
       <div class="flex justify-between items-center mb-3">
         <h2 class="t-h2">Active Deals</h2>
-        <button class="btn btn-ghost btn-sm" onclick="navigate('deals')">All Deals →</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigate('deals')">All Deals </button>
       </div>
-      ${activeDeals.length ? activeDeals.map(d => renderDealCardCompact(d)).join('') : `<div class="card"><div class="empty-state" style="padding:1.5rem"><div class="empty-icon">🤝</div><div class="empty-title">No active deals</div><div class="empty-desc">Create a deal with another member to get started</div><button class="btn btn-primary btn-sm" onclick="openModal('modal-create-deal')">Create Deal</button></div></div>`}
+      ${activeDeals.length ? activeDeals.map(d => renderDealCardCompact(d)).join('') : `<div class="card"><div class="empty-state" style="padding:1.5rem"><div class="empty-icon"></div><div class="empty-title">No active deals</div><div class="empty-desc">Create a deal with another member to get started</div><button class="btn btn-primary btn-sm" onclick="openModal('modal-create-deal')">Create Deal</button></div></div>`}
 
       <div class="flex justify-between items-center mt-4 mb-3">
         <h2 class="t-h2">Fresh Opportunities</h2>
-        <button class="btn btn-ghost btn-sm" onclick="navigate('opportunities')">All →</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigate('opportunities')">All </button>
       </div>
       ${opps.map(o => renderOppCardCompact(o)).join('')}
     </div>
@@ -671,7 +671,7 @@ function renderFeedPost(post) {
         <div class="post-author-name">${escHtml(author?.name || 'Unknown')}</div>
         <div class="post-meta">
           <span>${timeAgo(post.createdAt)}</span>
-          ${wheel ? `<span>·</span><span style="color:var(--teal-dim)">${escHtml(wheel.name)}</span>` : ''}
+          ${wheel ? `<span>.</span><span style="color:var(--teal-dim)">${escHtml(wheel.name)}</span>` : ''}
         </div>
       </div>
       <span class="post-type-pill ${post.type === 'announcement' ? 'post-announce' : post.type === 'referral' ? 'post-referral' : ''} type-badge">${typeLabels[post.type] || post.type}</span>
@@ -739,7 +739,7 @@ function dealStatusBadge(status) {
   return `<span class="status-badge status-${status}"><span class="status-dot"></span>${status.replace('_',' ')}</span>`;
 }
 
-/* ── 11. WHEELS PAGE ─────────────────────────────────────── */
+/*  11. WHEELS PAGE  */
 function renderWheels() {
   const myWheels = store.getMyWheels();
   const allWheels = store.get('wheels');
@@ -763,7 +763,7 @@ function renderWheels() {
     <div class="wheel-grid">${discoverWheels.map(w => renderWheelCard(w, true)).join('')}</div>
   ` : ''}
 
-  ${myWheels.length === 0 && discoverWheels.length === 0 ? `<div class="empty-state"><div class="empty-icon">⬡</div><div class="empty-title">No Wheels yet</div><div class="empty-desc">Create your first Wheel to start building your network commerce community</div><button class="btn btn-primary" onclick="openModal('modal-create-wheel')">Create Your First Wheel</button></div>` : ''}`;
+  ${myWheels.length === 0 && discoverWheels.length === 0 ? `<div class="empty-state"><div class="empty-icon"></div><div class="empty-title">No Wheels yet</div><div class="empty-desc">Create your first Wheel to start building your network commerce community</div><button class="btn btn-primary" onclick="openModal('modal-create-wheel')">Create Your First Wheel</button></div>` : ''}`;
 
   $$('.wheel-card', $('#page-wheels')).forEach(card => {
     card.addEventListener('click', () => navigate('wheel-detail', { wheelId: card.dataset.wheelId }));
@@ -806,7 +806,7 @@ function renderWheelCard(w, discover = false) {
   </div>`;
 }
 
-/* ── 12. WHEEL DETAIL ────────────────────────────────────── */
+/*  12. WHEEL DETAIL  */
 function renderWheelDetail() {
   const wheel = store.get('wheels').find(w => w.id === pageParams.wheelId);
   if (!wheel) { navigate('wheels'); return; }
@@ -847,7 +847,7 @@ function renderWheelDetail() {
   </div>
 
   <div class="tab-panel active" id="tab-feed">
-    ${posts.length ? posts.map(p => renderFeedPost(p)).join('') : '<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-title">No posts yet</div><div class="empty-desc">Be the first to post in this Wheel</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-post\')">Post Something</button></div>'}
+    ${posts.length ? posts.map(p => renderFeedPost(p)).join('') : '<div class="empty-state"><div class="empty-icon"></div><div class="empty-title">No posts yet</div><div class="empty-desc">Be the first to post in this Wheel</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-post\')">Post Something</button></div>'}
   </div>
   <div class="tab-panel" id="tab-members">
     <div class="member-grid">${members.map(u => renderMemberCard(u)).join('')}</div>
@@ -857,7 +857,7 @@ function renderWheelDetail() {
       <span class="t-body c-text3">${opps.length} open opportunities</span>
       <button class="btn btn-teal btn-sm" onclick="openModal('modal-create-opp')">${icon('plus')} Post Opportunity</button>
     </div>
-    <div class="opp-list">${opps.length ? opps.map(o => renderOppCard(o)).join('') : '<div class="empty-state"><div class="empty-icon">🎯</div><div class="empty-title">No opportunities yet</div><div class="empty-desc">Post the first opportunity in this Wheel</div></div>'}</div>
+    <div class="opp-list">${opps.length ? opps.map(o => renderOppCard(o)).join('') : '<div class="empty-state"><div class="empty-icon"></div><div class="empty-title">No opportunities yet</div><div class="empty-desc">Post the first opportunity in this Wheel</div></div>'}</div>
   </div>`;
 
   // Tabs
@@ -886,7 +886,7 @@ function renderWheelDetail() {
   });
 }
 
-/* ── 13. MEMBERS PAGE ────────────────────────────────────── */
+/*  13. MEMBERS PAGE  */
 function renderMembers() {
   const me = store.getMe();
   const myWheels = store.getMyWheels();
@@ -915,15 +915,15 @@ function renderMembers() {
   <div class="filter-bar">
     <div class="filter-input-wrap">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input class="search-input-sm" id="member-search" placeholder="Search members…" value="${escHtml(q)}">
+      <input class="search-input-sm" id="member-search" placeholder="Search members..." value="${escHtml(q)}">
     </div>
     <div class="filter-sep"></div>
     <button class="filter-pill ${filterAvail==='all'?'active':''}" onclick="navigate('members',{avail:'all',q:'${escHtml(q)}'})">All</button>
-    <button class="filter-pill ${filterAvail==='available'?'active':''}" onclick="navigate('members',{avail:'available',q:'${escHtml(q)}'})">● Available</button>
-    <button class="filter-pill ${filterAvail==='limited'?'active':''}" onclick="navigate('members',{avail:'limited',q:'${escHtml(q)}'})">◐ Limited</button>
-    <button class="filter-pill ${filterAvail==='unavailable'?'active':''}" onclick="navigate('members',{avail:'unavailable',q:'${escHtml(q)}'})">○ Unavailable</button>
+    <button class="filter-pill ${filterAvail==='available'?'active':''}" onclick="navigate('members',{avail:'available',q:'${escHtml(q)}'})">* Available</button>
+    <button class="filter-pill ${filterAvail==='limited'?'active':''}" onclick="navigate('members',{avail:'limited',q:'${escHtml(q)}'})"> Limited</button>
+    <button class="filter-pill ${filterAvail==='unavailable'?'active':''}" onclick="navigate('members',{avail:'unavailable',q:'${escHtml(q)}'})"> Unavailable</button>
   </div>
-  <div class="member-grid">${allMembers.length ? allMembers.map(u => renderMemberCard(u)).join('') : '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🔍</div><div class="empty-title">No members match your filters</div></div>'}</div>`;
+  <div class="member-grid">${allMembers.length ? allMembers.map(u => renderMemberCard(u)).join('') : '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon"></div><div class="empty-title">No members match your filters</div></div>'}</div>`;
 
   let searchTimeout;
   $('#member-search')?.addEventListener('input', e => {
@@ -957,7 +957,7 @@ function renderMemberCard(u) {
     </div>
     ${u.skills?.length ? `<div class="skill-tags">${u.skills.slice(0,4).map((s,i) => `<span class="skill-tag${i===0?' primary':''}">${escHtml(s)}</span>`).join('')}</div>` : ''}
     <div class="member-card-footer">
-      <span class="avail-badge ${u.availability||'unavailable'}">${{available:'● Available',limited:'◐ Limited',unavailable:'○ Unavailable'}[u.availability||'unavailable']}</span>
+      <span class="avail-badge ${u.availability||'unavailable'}">${{available:'* Available',limited:' Limited',unavailable:' Unavailable'}[u.availability||'unavailable']}</span>
       <div class="flex gap-1">
         <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openModal('modal-create-deal')">${icon('deal')} Deal</button>
         <button class="btn btn-outline btn-xs" onclick="event.stopPropagation()">${icon('msg')} Message</button>
@@ -966,7 +966,7 @@ function renderMemberCard(u) {
   </div>`;
 }
 
-/* ── 14. OPPORTUNITIES PAGE ───────────────────────────────── */
+/*  14. OPPORTUNITIES PAGE  */
 function renderOpportunities() {
   const filter = pageParams.type || 'all';
   const q = pageParams.q || '';
@@ -993,10 +993,10 @@ function renderOpportunities() {
     <div class="filter-sep"></div>
     <div class="filter-input-wrap">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input class="search-input-sm" id="opp-search" placeholder="Search…" value="${escHtml(q)}">
+      <input class="search-input-sm" id="opp-search" placeholder="Search..." value="${escHtml(q)}">
     </div>
   </div>
-  <div class="opp-list">${opps.length ? opps.map(o => renderOppCard(o)).join('') : '<div class="empty-state"><div class="empty-icon">🎯</div><div class="empty-title">No opportunities found</div><div class="empty-desc">Be the first to post one</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-opp\')">Post Opportunity</button></div>'}  </div>`;
+  <div class="opp-list">${opps.length ? opps.map(o => renderOppCard(o)).join('') : '<div class="empty-state"><div class="empty-icon"></div><div class="empty-title">No opportunities found</div><div class="empty-desc">Be the first to post one</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-opp\')">Post Opportunity</button></div>'}  </div>`;
 
   let st;
   $('#opp-search')?.addEventListener('input', e => { clearTimeout(st); st = setTimeout(() => navigate('opportunities', { type: filter, q: e.target.value }), 300); });
@@ -1009,13 +1009,13 @@ function renderOpportunities() {
 function renderOppCard(o) {
   const creator = store.getUser(o.creatorId);
   const META = {
-    job: `${fmtMoney(o.metadata?.salaryMin||0)} – ${fmtMoney(o.metadata?.salaryMax||0)} · ${o.metadata?.type||''}`,
+    job: `${fmtMoney(o.metadata?.salaryMin||0)} - ${fmtMoney(o.metadata?.salaryMax||0)} . ${o.metadata?.type||''}`,
     partnership: `Equity: ${o.metadata?.equity||'TBD'}`,
     collaboration: `Commitment: ${o.metadata?.commitment||'TBD'}`,
     investment: `Ticket: ${o.metadata?.ticketSize||'TBD'}`,
     referral: `Bonus: ${o.metadata?.bonus ? fmtMoney(o.metadata.bonus) : 'TBD'}`,
-    service: `Budget: ${o.metadata?.budgetMin ? `${fmtMoney(o.metadata.budgetMin)} – ${fmtMoney(o.metadata.budgetMax)}` : 'TBD'}`,
-    service_request: `Budget: ${o.metadata?.budgetMin ? `${fmtMoney(o.metadata.budgetMin)} – ${fmtMoney(o.metadata.budgetMax)}` : 'TBD'}`,
+    service: `Budget: ${o.metadata?.budgetMin ? `${fmtMoney(o.metadata.budgetMin)} - ${fmtMoney(o.metadata.budgetMax)}` : 'TBD'}`,
+    service_request: `Budget: ${o.metadata?.budgetMin ? `${fmtMoney(o.metadata.budgetMin)} - ${fmtMoney(o.metadata.budgetMax)}` : 'TBD'}`,
   };
   return `
   <div class="opp-card" data-opp-id="${o.id}">
@@ -1035,7 +1035,7 @@ function renderOppCard(o) {
     <div class="opp-right">
       <div class="opp-value">${META[o.type] || ''}</div>
       <div class="opp-posted">${timeAgo(o.createdAt)}</div>
-      <button class="btn btn-teal btn-sm mt-2" onclick="event.stopPropagation();toast('Application submitted!','success');this.textContent='Applied ✓';this.disabled=true">Apply</button>
+      <button class="btn btn-teal btn-sm mt-2" onclick="event.stopPropagation();toast('Application submitted!','success');this.textContent='Applied v';this.disabled=true">Apply</button>
     </div>
   </div>`;
 }
@@ -1050,7 +1050,7 @@ function renderOppDetail(oppId) {
       ${avatarHtml(creator, 'md')}
       <div>
         <div class="t-h3">${escHtml(creator?.name||'')}</div>
-        <div class="t-small c-text3">${timeAgo(o.createdAt)} · ${o.viewCount} views · ${o.applicationCount} applied</div>
+        <div class="t-small c-text3">${timeAgo(o.createdAt)} . ${o.viewCount} views . ${o.applicationCount} applied</div>
       </div>
       <span class="type-badge type-${o.type}" style="margin-left:auto">${o.type.replace('_',' ')}</span>
     </div>
@@ -1064,7 +1064,7 @@ function renderOppDetail(oppId) {
     </div>`;
 }
 
-/* ── 15. DEALS PAGE ──────────────────────────────────────── */
+/*  15. DEALS PAGE  */
 function renderDeals() {
   const deals = store.getMyDeals();
   const me = store.getMe();
@@ -1099,7 +1099,7 @@ function renderDeals() {
         <div class="deal-card-top">
           <div>
             <div class="deal-title">${escHtml(d.title)}</div>
-            <div class="deal-parties">${avatarHtml(other,'sm')} with ${escHtml(other?.name||'?')} · ${d.buyerId===me.id?'You are Buyer':'You are Seller'}</div>
+            <div class="deal-parties">${avatarHtml(other,'sm')} with ${escHtml(other?.name||'?')} . ${d.buyerId===me.id?'You are Buyer':'You are Seller'}</div>
           </div>
           <div style="text-align:right">
             <div class="deal-amount">${fmtMoney(d.priceCents/100,d.currency)}</div>
@@ -1117,11 +1117,11 @@ function renderDeals() {
           <span class="t-micro c-text3">${d.messages?.length||0} messages</span>
         </div>
       </div>`;
-    }).join('') : '<div class="empty-state"><div class="empty-icon">🤝</div><div class="empty-title">No deals yet</div><div class="empty-desc">Create your first deal with another member</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-deal\')">Create Deal</button></div>'}
+    }).join('') : '<div class="empty-state"><div class="empty-icon"></div><div class="empty-title">No deals yet</div><div class="empty-desc">Create your first deal with another member</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-deal\')">Create Deal</button></div>'}
   </div>`;
 }
 
-/* ── 16. DEAL DETAIL PAGE ────────────────────────────────── */
+/*  16. DEAL DETAIL PAGE  */
 function renderDealDetail() {
   const deal = store.getDeal(pageParams.dealId);
   if (!deal) { navigate('deals'); return; }
@@ -1146,7 +1146,7 @@ function renderDealDetail() {
 
   $('#page-deal-detail').innerHTML = `
   <div class="mb-3">
-    <button class="btn btn-ghost btn-sm" onclick="navigate('deals')">← Back to Deals</button>
+    <button class="btn btn-ghost btn-sm" onclick="navigate('deals')"> Back to Deals</button>
   </div>
   <div class="deal-detail-header">
     <div class="flex justify-between items-start mb-3">
@@ -1229,7 +1229,7 @@ function renderDealDetail() {
           }).join('') || '<div class="empty-state" style="padding:1.5rem"><div>No messages yet</div></div>'}
         </div>
         <div class="message-input-row">
-          <input class="message-input" id="deal-msg-input" placeholder="Write a message…">
+          <input class="message-input" id="deal-msg-input" placeholder="Write a message...">
           <button class="btn btn-teal btn-sm" id="deal-msg-send">${icon('send')}</button>
         </div>
       </div>
@@ -1263,7 +1263,7 @@ window.updateDealStatus = (dealId, newStatus) => {
   renderDealDetail();
 };
 
-/* ── 17. PROFILE PAGE ────────────────────────────────────── */
+/*  17. PROFILE PAGE  */
 function renderProfile() {
   const userId = pageParams.userId || store.getMe()?.id;
   const u = store.getUser(userId);
@@ -1276,7 +1276,7 @@ function renderProfile() {
 
   $('#page-profile').innerHTML = `
   <div class="mb-3">
-    <button class="btn btn-ghost btn-sm" onclick="history.back ? history.back() : navigate('members')">← Back</button>
+    <button class="btn btn-ghost btn-sm" onclick="history.back ? history.back() : navigate('members')"> Back</button>
   </div>
   <div class="profile-header">
     <div class="flex justify-between items-start">
@@ -1286,7 +1286,7 @@ function renderProfile() {
         <p class="profile-title-text">${escHtml((u.skills||[])[0] || u.role)}</p>
         <div class="profile-header-meta">
           ${u.location ? `<span class="profile-meta-item">${icon('map')} ${escHtml(u.location)}</span>` : ''}
-          <span class="avail-badge ${u.availability}" style="font-size:.75rem">${{available:'● Available',limited:'◐ Limited Availability',unavailable:'○ Unavailable'}[u.availability||'unavailable']}</span>
+          <span class="avail-badge ${u.availability}" style="font-size:.75rem">${{available:'* Available',limited:' Limited Availability',unavailable:' Unavailable'}[u.availability||'unavailable']}</span>
         </div>
       </div>
       <div style="text-align:center">
@@ -1334,7 +1334,7 @@ function renderProfile() {
             <div class="rep-label">Converted</div>
           </div>
           <div class="rep-item">
-            <div class="rep-value">${u.reviewAvg ? `${u.reviewAvg}★` : '—'}</div>
+            <div class="rep-value">${u.reviewAvg ? `${u.reviewAvg}*` : '-'}</div>
             <div class="rep-label">Avg Review</div>
           </div>
           <div class="rep-item">
@@ -1375,7 +1375,7 @@ window.saveProfileSkills = () => {
   renderProfile();
 };
 
-/* ── 18. ANALYTICS PAGE ───────────────────────────────────── */
+/*  18. ANALYTICS PAGE  */
 function renderAnalytics() {
   const me = store.getMe();
   const myWheels = store.getMyWheels().filter(w => w.creatorId === me.id);
@@ -1429,7 +1429,7 @@ function renderAnalytics() {
         ${allDeals.slice(0,5).map(d => {
           const buyer = store.getUser(d.buyerId), seller = store.getUser(d.sellerId);
           return `<div class="flex gap-2 items-center mb-3">
-            <div class="flex-1"><div class="t-small" style="font-weight:600">${escHtml(d.title)}</div><div class="t-micro c-text4">${escHtml(buyer?.name||'?')} → ${escHtml(seller?.name||'?')}</div></div>
+            <div class="flex-1"><div class="t-small" style="font-weight:600">${escHtml(d.title)}</div><div class="t-micro c-text4">${escHtml(buyer?.name||'?')}  ${escHtml(seller?.name||'?')}</div></div>
             <div style="text-align:right">${dealStatusBadge(d.status)}<div class="t-micro c-text4 mt-1">${fmtMoney(d.priceCents/100)}</div></div>
           </div>`;
         }).join('') || '<div class="t-body c-text3">No deals yet in your Wheels</div>'}
@@ -1448,13 +1448,13 @@ function renderAnalytics() {
   </div>`;
 }
 
-/* ── 19. MODALS ───────────────────────────────────────────── */
+/*  19. MODALS  */
 function buildModals() {
   return `
   <!-- Create Wheel -->
   <div class="modal-overlay" id="modal-create-wheel">
     <div class="modal">
-      <div class="modal-header"><span class="modal-title">Create a Wheel</span><button class="modal-close">✕</button></div>
+      <div class="modal-header"><span class="modal-title">Create a Wheel</span><button class="modal-close"></button></div>
       <div class="modal-body">
         <div class="form-stack">
           <div class="form-group"><label class="form-label">Wheel Name *</label><input class="form-control" id="cw-name" placeholder="The Founders Circle"></div>
@@ -1489,7 +1489,7 @@ function buildModals() {
   <!-- Create Opportunity -->
   <div class="modal-overlay" id="modal-create-opp">
     <div class="modal modal-lg">
-      <div class="modal-header"><span class="modal-title">Post an Opportunity</span><button class="modal-close">✕</button></div>
+      <div class="modal-header"><span class="modal-title">Post an Opportunity</span><button class="modal-close"></button></div>
       <div class="modal-body">
         <div class="form-stack">
           <div class="form-group"><label class="form-label">Type *</label>
@@ -1498,12 +1498,12 @@ function buildModals() {
             </select>
           </div>
           <div class="form-group"><label class="form-label">Title *</label><input class="form-control" id="co-title" placeholder="Head of Product at Acme Corp"></div>
-          <div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="co-desc" rows="4" placeholder="Tell members about this opportunity…"></textarea></div>
+          <div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="co-desc" rows="4" placeholder="Tell members about this opportunity..."></textarea></div>
           <div class="form-row">
             <div class="form-group"><label class="form-label">Location</label><input class="form-control" id="co-location" placeholder="Remote, New York, etc."></div>
-            <div class="form-group"><label class="form-label">Skills Required</label><input class="form-control" id="co-skills" placeholder="React, Design, Growth…"></div>
+            <div class="form-group"><label class="form-label">Skills Required</label><input class="form-control" id="co-skills" placeholder="React, Design, Growth..."></div>
           </div>
-          <div class="form-group"><label class="form-label">Compensation / Value</label><input class="form-control" id="co-comp" placeholder="$120k–$150k / $500 bonus / 25% equity…"></div>
+          <div class="form-group"><label class="form-label">Compensation / Value</label><input class="form-control" id="co-comp" placeholder="$120k-$150k / $500 bonus / 25% equity..."></div>
           <div class="form-group"><label class="form-label">Post to Wheels</label>
             <div id="co-wheel-selector" style="display:flex;flex-direction:column;gap:.5rem;margin-top:.375rem"></div>
           </div>
@@ -1519,16 +1519,16 @@ function buildModals() {
   <!-- Create Deal -->
   <div class="modal-overlay" id="modal-create-deal">
     <div class="modal modal-lg">
-      <div class="modal-header"><span class="modal-title">Create a Deal</span><button class="modal-close">✕</button></div>
+      <div class="modal-header"><span class="modal-title">Create a Deal</span><button class="modal-close"></button></div>
       <div class="modal-body">
         <div class="form-stack">
           <div class="form-group"><label class="form-label">Deal Title *</label><input class="form-control" id="cd-title" placeholder="Website Redesign Project"></div>
           <div class="form-group"><label class="form-label">Counterparty (Seller) *</label>
             <select class="form-control" id="cd-seller">
-              <option value="">Select member…</option>
+              <option value="">Select member...</option>
             </select>
           </div>
-          <div class="form-group"><label class="form-label">Scope *</label><textarea class="form-control" id="cd-scope" rows="3" placeholder="Describe what you are buying/selling…"></textarea></div>
+          <div class="form-group"><label class="form-label">Scope *</label><textarea class="form-control" id="cd-scope" rows="3" placeholder="Describe what you are buying/selling..."></textarea></div>
           <div class="form-row">
             <div class="form-group"><label class="form-label">Price ($) *</label><input class="form-control" id="cd-price" type="number" min="1" placeholder="5000"></div>
             <div class="form-group"><label class="form-label">Payment Type</label>
@@ -1559,13 +1559,13 @@ function buildModals() {
   <!-- Create Post -->
   <div class="modal-overlay" id="modal-create-post">
     <div class="modal">
-      <div class="modal-header"><span class="modal-title">New Post</span><button class="modal-close">✕</button></div>
+      <div class="modal-header"><span class="modal-title">New Post</span><button class="modal-close"></button></div>
       <div class="modal-body">
         <div class="form-stack">
           <div class="form-group"><label class="form-label">Type</label>
             <select class="form-control" id="cp-type"><option value="post">Post</option><option value="announcement">Announcement</option><option value="referral">Referral</option></select>
           </div>
-          <div class="form-group"><label class="form-label">Message *</label><textarea class="form-control" id="cp-body" rows="4" placeholder="Share something with your Wheel…"></textarea></div>
+          <div class="form-group"><label class="form-label">Message *</label><textarea class="form-control" id="cp-body" rows="4" placeholder="Share something with your Wheel..."></textarea></div>
         </div>
       </div>
       <div class="modal-footer">
@@ -1578,7 +1578,7 @@ function buildModals() {
   <!-- Opp Detail -->
   <div class="modal-overlay" id="modal-opp-detail">
     <div class="modal modal-lg">
-      <div class="modal-header"><span class="modal-title" id="modal-opp-title">Opportunity</span><button class="modal-close">✕</button></div>
+      <div class="modal-header"><span class="modal-title" id="modal-opp-title">Opportunity</span><button class="modal-close"></button></div>
       <div class="modal-body" id="modal-opp-body"></div>
       <div class="modal-footer">
         <button class="btn btn-outline" onclick="closeAllModals()">Close</button>
@@ -1648,7 +1648,7 @@ function bindModalForms() {
     navigate('opportunities');
   });
 
-  // Create Deal — populate selects
+  // Create Deal - populate selects
   $('#modal-create-deal')?.addEventListener('click', () => {
     const sel = $('#cd-seller');
     const wsel = $('#cd-wheel');
@@ -1698,7 +1698,7 @@ function bindModalForms() {
   });
 }
 
-/* ── 20. BOOT ─────────────────────────────────────────────── */
+/*  20. BOOT  */
 window.navigate = navigate;
 window.openModal = openModal;
 window.closeModal = closeModal;
