@@ -187,9 +187,14 @@ window.ob2Finish=()=>{const wantTo=[...$$('.want-lbl input:checked')].map(i=>i.v
 const PALETTE=['#0F1F3D','#6D28D9','#047857','#C2410C','#0369A1','#BE185D','#374151'];
 function getColor(id){return PALETTE[(parseInt(id.replace(/\D/g,'')||'0')%PALETTE.length)];}
 function avatarHtml(u,size='md'){
-  if(!u)return '<div class="avatar avatar-'+size+'" style="background:#ddd"></div>';
-  if(u.profilePics&&u.profilePics[0])return '<img src="'+u.profilePics[0]+'" class="avatar avatar-'+size+'" style="object-fit:cover">';
-  return '<div class="avatar avatar-'+size+'" style="background:'+getColor(u.id)+';color:#fff">'+initials(u.name)+'</div>';
+  const px={sm:32,md:44,lg:64,xl:80}[size]||44;
+  if(!u)return '<div class="avatar avatar-'+size+'" style="background:#ddd;width:'+px+'px;height:'+px+'px"></div>';
+  if(u.profilePics&&u.profilePics[0])return '<img src="'+u.profilePics[0]+'" style="width:'+px+'px;height:'+px+'px;border-radius:50%;object-fit:cover;display:block;flex-shrink:0">';
+  return '<div class="avatar avatar-'+size+'" style="background:'+getColor(u.id)+';color:#fff;width:'+px+'px;height:'+px+'px">'+initials(u.name)+'</div>';
+}
+function profilePhotoHtml(u){
+  if(u.profilePics&&u.profilePics[0])return '<img src="'+u.profilePics[0]+'" style="width:160px;height:160px;border-radius:50%;object-fit:cover;border:5px solid rgba(255,255,255,.25);box-shadow:0 8px 32px rgba(0,0,0,.3);display:block">';
+  return '<div class="profile-avatar-lg">'+initials(u.name)+'</div>';
 }
 function hexBadge(w,size=48){const h=Math.round(size*1.14);return '<div class="wheel-hex-mini" style="background:'+(w.hexColor||'#0F1F3D')+';width:'+size+'px;height:'+h+'px;font-size:'+Math.round(size*.35)+'px">'+w.name[0]+'</div>';}
 function dealStatusBadge(s){return '<span class="status-badge status-'+s+'"><span class="status-dot"></span>'+s.replace('_',' ')+'</span>';}
@@ -427,7 +432,7 @@ function renderProfile() {
 
   $('#page-profile').innerHTML='<div class="mb-3"><button class="btn btn-ghost btn-sm" onclick="navigate(\'members\')">Back</button></div>'+
   '<div class="profile-header"><div class="flex justify-between items-start"><div>'+
-  '<div style="position:relative;display:inline-block;margin-bottom:1rem">'+(u.profilePics&&u.profilePics[0]?'<img src="'+u.profilePics[0]+'" style="width:160px;height:160px;border-radius:50%;object-fit:cover;border:5px solid rgba(255,255,255,.25);box-shadow:0 8px 32px rgba(0,0,0,.3)">':'<div class="profile-avatar-lg">'+initials(u.name)+'</div>')+
+  '<div style="position:relative;display:inline-block;margin-bottom:1rem">'+profilePhotoHtml(u)+
   (isMe?'<label style="position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--navy)">'+icon('camera')+'<input type="file" accept="image/*" style="display:none" onchange="uploadPic(event,0)"></label>':'')+'</div>'+
   '<h1 class="profile-name">'+escHtml(u.name)+'</h1>'+(u.jobTitle?'<div style="color:rgba(255,255,255,.85);font-size:1rem;font-weight:600;margin-bottom:.25rem">'+escHtml(u.jobTitle)+(u.company?' at '+escHtml(u.company):'')+'</div>':'')+'<p class="profile-title-text">'+escHtml(u.userType||u.role)+'</p>'+
   '<div class="profile-header-meta">'+(u.location?'<span class="profile-meta-item">'+icon('map')+' '+escHtml(u.location)+'</span>':'')+'<span class="avail-badge '+(u.availability||'unavailable')+'" style="font-size:.75rem">'+(u.availability==='available'?'Available':u.availability==='limited'?'Limited':'Unavailable')+'</span></div></div>'+
