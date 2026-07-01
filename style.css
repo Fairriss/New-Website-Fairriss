@@ -775,13 +775,14 @@ select.form-control { cursor: pointer; }
   background: radial-gradient(circle, rgba(0,201,167,.15) 0%, transparent 70%);
 }
 .profile-avatar-lg {
-  width: 160px; height: 160px; border-radius: 50%;
+  width: 180px; height: 180px; border-radius: 50%;
   background: var(--navy-mid);
-  border: 5px solid rgba(255,255,255,.25);
-  box-shadow: 0 8px 32px rgba(0,0,0,.3);
+  border: 5px solid rgba(255,255,255,.3);
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
   display: flex; align-items: center; justify-content: center;
-  font-size: 3.5rem; font-weight: 800; color: var(--teal);
+  font-size: 4rem; font-weight: 800; color: var(--teal);
   margin-bottom: 1rem;
+  flex-shrink: 0;
 }
 .profile-name { font-size: 1.5rem; font-weight: 800; color: var(--white); letter-spacing: -.025em; margin-bottom: .25rem; }
 .profile-title-text { font-size: .9375rem; color: rgba(255,255,255,.65); margin-bottom: .75rem; }
