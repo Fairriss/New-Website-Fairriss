@@ -193,7 +193,7 @@ function avatarHtml(u,size='md'){
   return '<div class="avatar avatar-'+size+'" style="background:'+getColor(u.id)+';color:#fff;width:'+px+'px;height:'+px+'px">'+initials(u.name)+'</div>';
 }
 function profilePhotoHtml(u){
-  if(u.profilePics&&u.profilePics[0])return '<img src="'+u.profilePics[0]+'" style="width:160px;height:160px;border-radius:50%;object-fit:cover;border:5px solid rgba(255,255,255,.25);box-shadow:0 8px 32px rgba(0,0,0,.3);display:block">';
+  if(u.profilePics&&u.profilePics[0])return '<img src="'+u.profilePics[0]+'" style="width:180px!important;height:180px!important;min-width:180px;min-height:180px;border-radius:50%;object-fit:cover;object-position:center;border:5px solid rgba(255,255,255,.3);box-shadow:0 8px 32px rgba(0,0,0,.4);display:block">';
   return '<div class="profile-avatar-lg">'+initials(u.name)+'</div>';
 }
 function hexBadge(w,size=48){const h=Math.round(size*1.14);return '<div class="wheel-hex-mini" style="background:'+(w.hexColor||'#0F1F3D')+';width:'+size+'px;height:'+h+'px;font-size:'+Math.round(size*.35)+'px">'+w.name[0]+'</div>';}
@@ -424,16 +424,16 @@ function renderProfile() {
     '<div style="display:flex;gap:.625rem;margin-top:1rem;flex-wrap:wrap">' +
     [0,1,2,3,4].map(i => {
       const pic = (u.profilePics||[])[i];
-      if(pic) return '<div style="position:relative"><img src="'+pic+'" style="width:100px;height:100px;border-radius:var(--radius-sm);object-fit:cover;border:2px solid rgba(255,255,255,.2)"><label style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.4);border-radius:var(--radius-sm);opacity:0;cursor:pointer;transition:.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">'+icon('camera')+'<input type="file" accept="image/*" style="display:none" onchange="uploadPic(event,'+i+')"></label></div>';
-      return '<label style="width:100px;height:100px;border-radius:var(--radius-sm);border:2px dashed rgba(255,255,255,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.5);font-size:.625rem;gap:.25rem">'+icon('camera')+'Photo '+(i+1)+'<input type="file" accept="image/*" style="display:none" onchange="uploadPic(event,'+i+')"></label>';
+      if(pic) return '<div style="position:relative"><img src="'+pic+'" style="width:150px;height:160px;border-radius:var(--radius-sm);object-fit:cover;border:3px solid rgba(255,255,255,.25);box-shadow:0 4px 16px rgba(0,0,0,.3)"><label style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.4);border-radius:var(--radius-sm);opacity:0;cursor:pointer;transition:.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">'+icon('camera')+'<input type="file" accept="image/*" style="display:none" onchange="uploadPic(event,'+i+')"></label></div>';
+      return '<label style="width:150px;height:160px;border-radius:var(--radius-sm);border:2px dashed rgba(255,255,255,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.5);font-size:.625rem;gap:.25rem">'+icon('camera')+'Photo '+(i+1)+'<input type="file" accept="image/*" style="display:none" onchange="uploadPic(event,'+i+')"></label>';
     }).join('') + '</div>'
   ) : ((u.profilePics||[]).filter(Boolean).length > 1 ?
-    '<div style="display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap">'+(u.profilePics||[]).slice(1).filter(Boolean).map(p=>'<img src="'+p+'" style="width:100px;height:100px;border-radius:var(--radius-sm);object-fit:cover">').join('')+'</div>' : '');
+    '<div style="display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap">'+(u.profilePics||[]).slice(1).filter(Boolean).map(p=>'<img src="'+p+'" style="width:150px;height:160px;border-radius:var(--radius-sm);object-fit:cover">').join('')+'</div>' : '');
 
   $('#page-profile').innerHTML='<div class="mb-3"><button class="btn btn-ghost btn-sm" onclick="navigate(\'members\')">Back</button></div>'+
   '<div class="profile-header"><div class="flex justify-between items-start"><div>'+
   '<div style="position:relative;display:inline-block;margin-bottom:1rem">'+profilePhotoHtml(u)+
-  (isMe?'<label style="position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--navy)">'+icon('camera')+'<input type="file" accept="image/*" style="display:none" onchange="uploadPic(event,0)"></label>':'')+'</div>'+
+  (isMe?'<label style="position:absolute;bottom:8px;right:8px;width:36px;height:36px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--navy);box-shadow:0 2px 8px rgba(0,0,0,.3)">'+icon('camera')+'<input type="file" accept="image/*" style="display:none" onchange="uploadPic(event,0)"></label>':'')+'</div>'+
   '<h1 class="profile-name">'+escHtml(u.name)+'</h1>'+(u.jobTitle?'<div style="color:rgba(255,255,255,.85);font-size:1rem;font-weight:600;margin-bottom:.25rem">'+escHtml(u.jobTitle)+(u.company?' at '+escHtml(u.company):'')+'</div>':'')+'<p class="profile-title-text">'+escHtml(u.userType||u.role)+'</p>'+
   '<div class="profile-header-meta">'+(u.location?'<span class="profile-meta-item">'+icon('map')+' '+escHtml(u.location)+'</span>':'')+'<span class="avail-badge '+(u.availability||'unavailable')+'" style="font-size:.75rem">'+(u.availability==='available'?'Available':u.availability==='limited'?'Limited':'Unavailable')+'</span></div></div>'+
   '<div style="text-align:center"><div class="trust-score-circle" style="--pct:'+u.trustScore+'%"><div class="trust-score-inner"><div class="trust-score-num-lg">'+u.trustScore+'</div><div class="trust-score-label">Trust</div></div></div></div></div>'+picSection+'</div>'+
