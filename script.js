@@ -266,9 +266,14 @@ function renderHome() {
   $$('.post-like-btn',('#page-home')).forEach(btn=>{btn.onclick=()=>{store.likePost(btn.dataset.postId);renderHome();};});
 }
 
+
+function renderPostBody(text) {
+  return escHtml(text).replace(/@(\w[\w ]*)/g, '<span style="color:var(--teal);font-weight:600">@$1</span>');
+}
+
 function renderFeedPost(post) {
   const author=store.getUser(post.authorId), wheel=store.get('wheels').find(w=>w.id===post.wheelId);
-  return '<div class="feed-post"><div class="post-header">'+avatarHtml(author,'md')+'<div class="post-author-info"><div class="post-author-name">'+escHtml(author?.name||'')+'</div><div class="post-meta"><span>'+timeAgo(post.createdAt)+'</span>'+(wheel?'<span>-</span><span style="color:var(--teal-dim)">'+escHtml(wheel.name)+'</span>':'')+'</div></div><span class="type-badge '+(post.type==='announcement'?'type-job':post.type==='referral'?'type-partnership':'type-service')+'" style="margin-left:auto">'+post.type+'</span></div><div class="post-body">'+escHtml(post.body)+'</div><div class="post-actions"><button class="post-action-btn post-like-btn" data-post-id="'+post.id+'"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> '+post.likes+'</button></div></div>';
+  return '<div class="feed-post"><div class="post-header">'+avatarHtml(author,'md')+'<div class="post-author-info"><div class="post-author-name">'+escHtml(author?.name||'')+'</div><div class="post-meta"><span>'+timeAgo(post.createdAt)+'</span>'+(wheel?'<span>-</span><span style="color:var(--teal-dim)">'+escHtml(wheel.name)+'</span>':'')+'</div></div><span class="type-badge '+(post.type==='announcement'?'type-job':post.type==='referral'?'type-partnership':'type-service')+'" style="margin-left:auto">'+post.type+'</span></div><div class="post-body">'+renderPostBody(post.body)+'</div><div class="post-actions"><button class="post-action-btn post-like-btn" data-post-id="'+post.id+'"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> '+post.likes+'</button></div></div>';
 }
 
 function renderDealCardCompact(d) {
@@ -283,12 +288,12 @@ function renderWheels() {
   (myWheels.length?'<div class="wheel-grid">'+myWheels.map(w=>renderWheelCard(w)).join('')+'</div>':'')+
   (discoverWheels.length?'<h2 class="t-h2 mb-3 mt-2">Discover Wheels</h2><div class="wheel-grid">'+discoverWheels.map(w=>renderWheelCard(w,true)).join('')+'</div>':'')+
   (!myWheels.length&&!discoverWheels.length?'<div class="empty-state"><div class="empty-icon">&#x2B22;</div><div class="empty-title">No Wheels yet</div><button class="btn btn-primary" onclick="openModal(\'modal-create-wheel\')">Create Your First Wheel</button></div>':'');
-  $$('.wheel-card','#page-wheels').forEach(c=>c.onclick=()=>navigate('wheel-detail',{wheelId:c.dataset.wheelId}));
-  $$('.join-wheel-btn','#page-wheels').forEach(btn=>{btn.onclick=e=>{e.stopPropagation();store.joinWheel(btn.dataset.wheelId);const w=store.get('wheels').find(x=>x.id===btn.dataset.wheelId);toast('Joined '+w.name+'!','success');updateShellDynamic(store.getMe());renderWheels();};});
+  $$('.wheel-card',document.getElementById('page-wheels')).forEach(c=>c.onclick=()=>navigate('wheel-detail',{wheelId:c.dataset.wheelId}));
+  $$('.join-wheel-btn',document.getElementById('page-wheels')).forEach(btn=>{btn.onclick=e=>{e.stopPropagation();store.joinWheel(btn.dataset.wheelId);const w=store.get('wheels').find(x=>x.id===btn.dataset.wheelId);toast('Joined '+w.name+'!','success');updateShellDynamic(store.getMe());renderWheels();};});
 }
 
 function renderWheelCard(w,discover=false) {
-  return '<div class="wheel-card" data-wheel-id="'+w.id+'"><div class="wheel-card-cover" style="background:'+(w.coverGradient||'var(--navy)')+'"></div><div class="wheel-card-body">'+hexBadge(w,48)+'<div class="wheel-card-name">'+escHtml(w.name)+'</div><div class="wheel-card-desc">'+escHtml(w.description)+'</div><div class="wheel-card-meta"><span class="wheel-meta-item">'+icon('users')+' '+fmt(w.memberCount)+'</span><span class="wheel-meta-item">'+escHtml(w.category)+'</span>'+(w.isEventWheel?'<span class="type-badge type-partnership" style="font-size:.6rem">Events</span>':'')+'</div></div><div class="wheel-card-footer"><span class="tier-badge tier-free">Open - Free</span>'+(discover?'<button class="btn btn-teal btn-sm join-wheel-btn" data-wheel-id="'+w.id+'">Join</button>':'')+'</div></div>';
+  return '<div class="wheel-card" data-wheel-id="'+w.id+'" onclick="navigate(\'wheel-detail\',{wheelId:\''+w.id+'\'})" style="cursor:pointer"><div class="wheel-card-cover" style="background:'+(w.coverGradient||'var(--navy)')+'"></div><div class="wheel-card-body">'+hexBadge(w,48)+'<div class="wheel-card-name">'+escHtml(w.name)+'</div><div class="wheel-card-desc">'+escHtml(w.description)+'</div><div class="wheel-card-meta"><span class="wheel-meta-item">'+icon('users')+' '+fmt(w.memberCount)+'</span><span class="wheel-meta-item">'+escHtml(w.category)+'</span>'+(w.isEventWheel?'<span class="type-badge type-partnership" style="font-size:.6rem">Events</span>':'')+'</div></div><div class="wheel-card-footer"><span class="tier-badge tier-free">Open - Free</span>'+(discover?'<button class="btn btn-teal btn-sm join-wheel-btn" data-wheel-id="'+w.id+'">Join</button>':'')+'</div></div>';
 }
 
 function renderWheelDetail() {
@@ -304,10 +309,10 @@ function renderWheelDetail() {
   '<div class="tab-panel" id="tab-members"><div class="member-grid">'+members.map(u=>renderMemberCard(u)).join('')+'</div></div>'+
   '<div class="tab-panel" id="tab-opportunities"><div class="flex justify-between items-center mb-3"><span class="t-body c-text3">'+opps.length+' open</span><button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-opp\')">'+icon('plus')+' Post</button></div><div class="opp-list">'+(opps.length?opps.map(o=>renderOppCard(o)).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F3AF;</div><div class="empty-title">No opportunities yet</div></div>')+'</div></div>'+
   '<div class="tab-panel" id="tab-events"><div class="flex justify-between items-center mb-3"><span class="t-body c-text3">'+events.length+' events</span>'+(isCreator?'<button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-event\')">'+icon('plus')+' Create Event</button>':'')+'</div>'+(events.length?events.map(ev=>renderEventCard(ev)).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F39F;</div><div class="empty-title">No events yet</div></div>')+'</div>';
-  $$('.tab-item','#page-wheel-detail').forEach(tab=>{tab.onclick=()=>{$$('.tab-item','#page-wheel-detail').forEach(t=>t.classList.remove('active'));$$('.tab-panel','#page-wheel-detail').forEach(p=>p.classList.remove('active'));tab.classList.add('active');document.getElementById('tab-'+tab.dataset.tab)?.classList.add('active');};});
-  $$('.post-like-btn','#page-wheel-detail').forEach(btn=>{btn.onclick=()=>{store.likePost(btn.dataset.postId);renderWheelDetail();};});
-  $$('.member-card','#page-wheel-detail').forEach(c=>c.onclick=()=>navigate('profile',{userId:c.dataset.userId}));
-  $$('.opp-card','#page-wheel-detail').forEach(c=>c.onclick=()=>{openModal('modal-opp-detail');renderOppDetail(c.dataset.oppId);});
+  $$('.tab-item',document.getElementById('page-wheel-detail')).forEach(tab=>{tab.onclick=()=>{$$('.tab-item',document.getElementById('page-wheel-detail')).forEach(t=>t.classList.remove('active'));$$('.tab-panel',document.getElementById('page-wheel-detail')).forEach(p=>p.classList.remove('active'));tab.classList.add('active');document.getElementById('tab-'+tab.dataset.tab)?.classList.add('active');};});
+  $$('.post-like-btn',document.getElementById('page-wheel-detail')).forEach(btn=>{btn.onclick=()=>{store.likePost(btn.dataset.postId);renderWheelDetail();};});
+  $$('.member-card',document.getElementById('page-wheel-detail')).forEach(c=>c.onclick=()=>navigate('profile',{userId:c.dataset.userId}));
+  $$('.opp-card',document.getElementById('page-wheel-detail')).forEach(c=>c.onclick=()=>{openModal('modal-opp-detail');renderOppDetail(c.dataset.oppId);});
 }
 
 function renderEventCard(ev) {
@@ -355,7 +360,7 @@ function renderMembers() {
   '<div class="filter-bar"><div class="filter-input-wrap"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input class="search-input-sm" id="member-search" placeholder="Search members..." value="'+escHtml(q)+'"></div><div class="filter-sep"></div><button class="filter-pill '+(filterAvail==='all'?'active':'')+'" onclick="navigate(\'members\',{avail:\'all\'})">All</button><button class="filter-pill '+(filterAvail==='available'?'active':'')+'" onclick="navigate(\'members\',{avail:\'available\'})">Available</button><button class="filter-pill '+(filterAvail==='limited'?'active':'')+'" onclick="navigate(\'members\',{avail:\'limited\'})">Limited</button></div>'+
   '<div class="member-grid">'+(members.length?members.map(u=>renderMemberCard(u)).join(''):'<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">&#x1F50D;</div><div class="empty-title">No members match</div></div>')+'</div>';
   let st; $('#member-search').oninput=e=>{clearTimeout(st);st=setTimeout(()=>navigate('members',{q:e.target.value,avail:filterAvail}),300);};
-  $$('.member-card','#page-members').forEach(c=>c.onclick=()=>navigate('profile',{userId:c.dataset.userId}));
+  $$('.member-card',document.getElementById('page-members')).forEach(c=>c.onclick=()=>navigate('profile',{userId:c.dataset.userId}));
 }
 
 function renderMemberCard(u) {
@@ -369,7 +374,7 @@ function renderOpportunities() {
   '<div class="filter-bar">'+['all','job','partnership','collaboration','investment','referral','service'].map(t=>'<button class="filter-pill '+(filter===t?'active':'')+'" onclick="navigate(\'opportunities\',{type:\''+t+'\',q:\''+escHtml(q)+'\'})"><span class="type-badge type-'+t+'" style="'+(t==='all'?'background:none;color:inherit;font-size:.8125rem;font-weight:500;padding:0':'')+'">'+t.replace('_',' ')+'</span></button>').join('')+'<div class="filter-input-wrap" style="margin-left:auto"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input class="search-input-sm" id="opp-search" placeholder="Search..." value="'+escHtml(q)+'"></div></div>'+
   '<div class="opp-list">'+(opps.length?opps.map(o=>renderOppCard(o)).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F3AF;</div><div class="empty-title">No opportunities found</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-opp\')">Post One</button></div>')+'</div>';
   let st; $('#opp-search').oninput=e=>{clearTimeout(st);st=setTimeout(()=>navigate('opportunities',{type:filter,q:e.target.value}),300);};
-  $$('.opp-card','#page-opportunities').forEach(c=>c.onclick=()=>{openModal('modal-opp-detail');renderOppDetail(c.dataset.oppId);});
+  $$('.opp-card',document.getElementById('page-opportunities')).forEach(c=>c.onclick=()=>{openModal('modal-opp-detail');renderOppDetail(c.dataset.oppId);});
 }
 
 function renderOppCard(o) {
@@ -487,6 +492,58 @@ function buildModals() {
   '<div class="modal-overlay" id="modal-opp-detail"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title" id="modal-opp-title">Opportunity</span><button class="modal-close">x</button></div><div class="modal-body" id="modal-opp-body"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Close</button><button class="btn btn-teal" onclick="toast(\'Application submitted!\',\'success\');closeAllModals()">Apply Now</button></div></div></div>';
 }
 
+
+// ---- @MENTION AUTOCOMPLETE ----
+function initMentionAutocomplete(textareaId, wheelId) {
+  const ta = document.getElementById(textareaId);
+  if (!ta) return;
+  let dropdown = document.getElementById('mention-dropdown');
+  if (!dropdown) {
+    dropdown = document.createElement('div');
+    dropdown.id = 'mention-dropdown';
+    dropdown.style.cssText = 'position:fixed;background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);z-index:9999;min-width:220px;max-height:200px;overflow-y:auto;display:none';
+    document.body.appendChild(dropdown);
+  }
+  ta.addEventListener('input', () => {
+    const val = ta.value, pos = ta.selectionStart;
+    const before = val.slice(0, pos);
+    const match = before.match(/@(\w*)$/);
+    if (!match) { dropdown.style.display = 'none'; return; }
+    const members = wheelId ? store.getWheelMembers(wheelId) : store.getMyWheels().flatMap(w => store.getWheelMembers(w.id));
+    const seen = new Set();
+    const unique = members.filter(u => { if(seen.has(u.id)) return false; seen.add(u.id); return true; });
+    const q = match[1].toLowerCase();
+    const filtered = unique.filter(u => u.id !== store.getMe()?.id && (u.name.toLowerCase().includes(q) || (u.username||'').toLowerCase().includes(q))).slice(0, 6);
+    if (!filtered.length) { dropdown.style.display = 'none'; return; }
+    const rect = ta.getBoundingClientRect();
+    dropdown.style.left = rect.left + 'px';
+    dropdown.style.top = (rect.top + rect.height + 4) + 'px';
+    dropdown.style.display = 'block';
+    dropdown.innerHTML = filtered.map(u =>
+      '<div style="display:flex;align-items:center;gap:.625rem;padding:.625rem 1rem;cursor:pointer;transition:background .15s" onmouseover="this.style.background=\'var(--surface)\'" onmouseout="this.style.background=\'\'" onclick="insertMention(\'' + textareaId + '\',\'' + escHtml(u.name) + '\')">' +
+      avatarHtml(u,'sm') +
+      '<div><div style="font-size:.875rem;font-weight:600;color:var(--navy)">' + escHtml(u.name) + '</div>' +
+      '<div style="font-size:.75rem;color:var(--text-3)">@' + escHtml(u.username||u.name.split(' ')[0].toLowerCase()) + '</div></div></div>'
+    ).join('');
+  });
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Escape') dropdown.style.display = 'none';
+  });
+}
+
+window.insertMention = (textareaId, name) => {
+  const ta = document.getElementById(textareaId); if (!ta) return;
+  const val = ta.value, pos = ta.selectionStart;
+  const before = val.slice(0, pos), after = val.slice(pos);
+  const atIdx = before.lastIndexOf('@');
+  ta.value = before.slice(0, atIdx) + '@' + name + ' ' + after;
+  ta.focus();
+  const newPos = atIdx + name.length + 2;
+  ta.setSelectionRange(newPos, newPos);
+  const dd = document.getElementById('mention-dropdown');
+  if (dd) dd.style.display = 'none';
+};
+
 window.applyTemplate=(el)=>{
   $$('#wheel-templates .auth-role-card').forEach(c=>c.classList.remove('selected')); el.classList.add('selected');
   const t=JSON.parse(el.dataset.tpl);
@@ -517,12 +574,26 @@ function bindModalForms() {
     store.addNotif(sellerId,'deal_message','<strong>'+store.getMe().name+'</strong> proposed a deal: '+escHtml(title));
     toast('Deal proposed!','success'); closeAllModals(); navigate('deal-detail',{dealId:d.id});
   });
+  // init @mention on post textarea when modal opens
+  document.getElementById('modal-create-post')?.addEventListener('click', () => {
+    setTimeout(() => initMentionAutocomplete('cp-body', pageParams.wheelId||null), 50);
+  });
   $('#create-post-btn')?.addEventListener('click',()=>{
     const body=$('#cp-body').value.trim();
     if(!body){toast('Message is required','error');return;}
     const wheelId=pageParams.wheelId||store.getMyWheels()[0]?.id;
     if(!wheelId){toast('Join a Wheel first','error');return;}
     store.createPost({wheelId,body,type:$('#cp-type').value});
+    // notify @mentioned members
+    const mentions=[...body.matchAll(/@(\w+)/g)].map(m=>m[1].toLowerCase());
+    if(mentions.length){
+      const members=store.getWheelMembers(wheelId);
+      members.forEach(m=>{
+        if(mentions.includes(m.username?.toLowerCase()||m.name.split(' ')[0].toLowerCase())){
+          if(m.id!==store.getMe().id) store.addNotif(m.id,'mention','<strong>'+escHtml(store.getMe().name)+'</strong> mentioned you in a post: "'+escHtml(body.slice(0,60))+(body.length>60?'...':'')+'"');
+        }
+      });
+    }
     toast('Post published!','success'); closeAllModals(); renderWheelDetail();
   });
   $('#create-event-btn')?.addEventListener('click',()=>{
