@@ -775,11 +775,12 @@ select.form-control { cursor: pointer; }
   background: radial-gradient(circle, rgba(0,201,167,.15) 0%, transparent 70%);
 }
 .profile-avatar-lg {
-  width: 80px; height: 80px; border-radius: 50%;
+  width: 160px; height: 160px; border-radius: 50%;
   background: var(--navy-mid);
-  border: 3px solid rgba(255,255,255,.2);
+  border: 5px solid rgba(255,255,255,.25);
+  box-shadow: 0 8px 32px rgba(0,0,0,.3);
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.75rem; font-weight: 800; color: var(--teal);
+  font-size: 3.5rem; font-weight: 800; color: var(--teal);
   margin-bottom: 1rem;
 }
 .profile-name { font-size: 1.5rem; font-weight: 800; color: var(--white); letter-spacing: -.025em; margin-bottom: .25rem; }
@@ -900,10 +901,10 @@ select.form-control { cursor: pointer; }
   font-weight: 800; flex-shrink: 0;
   overflow: hidden;
 }
-.avatar-sm { width: 28px; height: 28px; font-size: .6875rem; }
-.avatar-md { width: 36px; height: 36px; font-size: .875rem; }
-.avatar-lg { width: 48px; height: 48px; font-size: 1.125rem; }
-.avatar-xl { width: 64px; height: 64px; font-size: 1.375rem; }
+.avatar-sm { width: 32px; height: 32px; font-size: .75rem; }
+.avatar-md { width: 44px; height: 44px; font-size: 1rem; }
+.avatar-lg { width: 64px; height: 64px; font-size: 1.375rem; }
+.avatar-xl { width: 80px; height: 80px; font-size: 1.75rem; }
 
 .divider { height: 1px; background: var(--border); margin: 1rem 0; }
 .gap-1 { gap: .25rem; } .gap-2 { gap: .5rem; } .gap-3 { gap: .75rem; } .gap-4 { gap: 1rem; }
