@@ -244,7 +244,7 @@ function updateShellDynamic(me) {
 
 function renderNotifPanel() {
   const notifs=store.getMyNotifs();
-  const icons={deal_message:'&#x1F4AC;',new_member:'&#x1F464;',deal_completed:'&#x2705;',new_opportunity:'&#x1F3AF;'};
+  const icons={deal_message:'&#x1F4AC;',new_member:'&#x1F464;',deal_completed:'&#x2705;',new_opportunity:'&#x1F3AF;',wheel_invite:'&#x1F517;',mention:'&#x0040;'};
   $('#notif-panel').innerHTML='<div class="notif-panel-head"><span class="notif-panel-title">Notifications</span></div>'+
     (notifs.length?notifs.map(n=>'<div class="notif-item '+(n.read?'':'unread')+'"><div class="notif-icon">'+(icons[n.type]||'&#x1F514;')+'</div><div><div class="notif-text">'+n.text+'</div><div class="notif-time">'+timeAgo(n.createdAt)+'</div></div></div>').join(''):'<div class="empty-state" style="padding:1.5rem">No notifications yet</div>');
 }
@@ -301,13 +301,44 @@ function renderDealCardCompact(d) {
   return '<div class="deal-card" onclick="navigate(\'deal-detail\',{dealId:\''+d.id+'\'})"><div class="deal-card-top"><div><div class="deal-title">'+escHtml(d.title)+'</div><div class="deal-parties">'+avatarHtml(other,'sm')+' '+escHtml(other?.name||'?')+'</div></div><div><div class="deal-amount">'+fmtMoney(d.priceCents/100,d.currency)+'</div>'+dealStatusBadge(d.status)+'</div></div><div class="deal-stages">'+STAGES.map((s,i)=>'<div class="deal-stage-dot '+(i<si?'done':i===si?'current':'')+'"></div>').join('')+'</div><div class="deal-card-footer"><span class="deal-due">'+icon('clock')+' '+(d.endDate||'TBD')+'</span><span class="t-micro c-text3">'+timeAgo(d.createdAt)+'</span></div></div>';
 }
 
+
+function renderPopularWheels(suggestions) {
+  if (!suggestions || !suggestions.length) return '';
+  let html = '<div class="mb-4">';
+  html += '<h2 class="t-h2 mb-1">Popular Wheels to Join</h2>';
+  html += '<p class="t-small c-text3 mb-3">Suggested communities based on what people are building</p>';
+  html += '<div class="wheel-grid">';
+  suggestions.forEach(s => {
+    const color = s.hex || '#0F1F3D';
+    html += '<div class="wheel-card" style="cursor:pointer">';
+    html += '<div class="wheel-card-cover" style="background:linear-gradient(135deg,' + color + 'cc,' + color + ')"></div>';
+    html += '<div class="wheel-card-body">';
+    html += '<div style="width:48px;height:48px;border-radius:50%;background:' + color + ';display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1.25rem;margin-top:-1.5rem;margin-bottom:.75rem;box-shadow:0 4px 12px rgba(0,0,0,.25)">' + escHtml(s.emoji) + '</div>';
+    html += '<div class="wheel-card-name">' + escHtml(s.name) + '</div>';
+    html += '<div class="wheel-card-desc">' + escHtml(s.desc) + '</div>';
+    html += '<div class="wheel-card-meta"><span class="wheel-meta-item">' + escHtml(s.category) + '</span></div>';
+    html += '</div>';
+    html += '<div class="wheel-card-footer"><span class="tier-badge tier-free">Open - Free</span>';
+    html += '<button class="btn btn-teal btn-sm popular-create-btn" data-idx="' + SUGGESTED_WHEELS.indexOf(s) + '">Create</button>';
+    html += '</div></div>';
+  });
+  html += '</div></div>';
+  return html;
+}
+
 function renderWheels() {
   const myWheels=store.getMyWheels(), discoverWheels=store.get('wheels').filter(w=>!store.isMember(w.id));
+  // Popular suggested wheels - top 4 from SUGGESTED_WHEELS not already created
+  const existingNames=store.get('wheels').map(w=>w.name.toLowerCase());
+  const popularSuggested=SUGGESTED_WHEELS.filter(s=>!existingNames.includes(s.name.toLowerCase())).slice(0,4);
   $('#page-wheels').innerHTML='<div class="page-head"><div class="page-head-left"><h1 class="page-title">My Wheels</h1><p class="page-sub">Your private network communities</p></div><div class="page-actions"><button class="btn btn-primary" onclick="openModal(\'modal-create-wheel\')">'+icon('plus')+' Create Wheel</button></div></div>'+
   (myWheels.length?'<div class="wheel-grid">'+myWheels.map(w=>renderWheelCard(w)).join('')+'</div>':'')+
-  (discoverWheels.length?'<h2 class="t-h2 mb-3 mt-2">Discover Wheels</h2><div class="wheel-grid">'+discoverWheels.map(w=>renderWheelCard(w,true)).join('')+'</div>':'')+
+  renderPopularWheels(popularSuggested)+(discoverWheels.length?'<h2 class="t-h2 mb-3 mt-2">Discover Wheels</h2><div class="wheel-grid">'+discoverWheels.map(w=>renderWheelCard(w,true)).join('')+'</div>':'')+
   (!myWheels.length&&!discoverWheels.length?'<div class="empty-state"><div class="empty-icon">&#x2B22;</div><div class="empty-title">No Wheels yet</div><button class="btn btn-primary" onclick="openModal(\'modal-create-wheel\')">Create Your First Wheel</button></div>':'');
-  $$('.wheel-card',document.getElementById('page-wheels')).forEach(c=>c.onclick=()=>navigate('wheel-detail',{wheelId:c.dataset.wheelId}));
+  $$('.wheel-card',document.getElementById('page-wheels')).forEach(c=>c.onclick=()=>{if(c.dataset.wheelId)navigate('wheel-detail',{wheelId:c.dataset.wheelId});});
+  $$('.popular-create-btn',document.getElementById('page-wheels')).forEach(btn=>{
+    btn.onclick=e=>{e.stopPropagation();const s=SUGGESTED_WHEELS[parseInt(btn.dataset.idx)];if(s)createFromTemplate(s);};
+  });
   $$('.join-wheel-btn',document.getElementById('page-wheels')).forEach(btn=>{btn.onclick=e=>{e.stopPropagation();store.joinWheel(btn.dataset.wheelId);const w=store.get('wheels').find(x=>x.id===btn.dataset.wheelId);toast('Joined '+w.name+'!','success');updateShellDynamic(store.getMe());renderWheels();};});
 }
 
@@ -321,7 +352,7 @@ function renderWheelDetail() {
   const members=store.getWheelMembers(wheel.id), posts=store.getPosts(wheel.id);
   const opps=store.getOpportunities({wheelId:wheel.id}), events=store.getEvents(wheel.id);
   const isCreator=wheel.creatorId===store.getMe()?.id;
-  $('#page-wheel-detail').innerHTML='<div class="page-head"><div class="flex gap-3 items-center">'+hexBadge(wheel,44)+'<div><h1 class="page-title" style="margin-bottom:0">'+escHtml(wheel.name)+'</h1><p class="page-sub">'+escHtml(wheel.description)+'</p></div></div><div class="page-actions">'+(isCreator?'<button class="btn btn-outline btn-sm" onclick="openModal(\'modal-create-event\')">+ Event</button>':'')+'<button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-post\')">+ Post</button></div></div>'+
+  $('#page-wheel-detail').innerHTML='<div class="page-head"><div class="flex gap-3 items-center">'+hexBadge(wheel,44)+'<div><h1 class="page-title" style="margin-bottom:0">'+escHtml(wheel.name)+'</h1><p class="page-sub">'+escHtml(wheel.description)+'</p></div></div><div class="page-actions">'+(isCreator?'<button class="btn btn-outline btn-sm" onclick="openInviteModal(\''+wheel.id+'\')">👤 Invite</button><button class="btn btn-outline btn-sm" onclick="openModal(\'modal-create-event\')">+ Event</button>':'')+'<button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-post\')">+ Post</button></div></div>'+
   '<div class="stats-grid" style="grid-template-columns:repeat(4,1fr)"><div class="stat-card"><span class="stat-label">Members</span><span class="stat-value">'+fmt(wheel.memberCount)+'</span></div><div class="stat-card"><span class="stat-label">Opportunities</span><span class="stat-value">'+opps.length+'</span></div><div class="stat-card"><span class="stat-label">Events</span><span class="stat-value">'+events.length+'</span></div><div class="stat-card"><span class="stat-label">Commission</span><span class="stat-value">'+wheel.dealCommission+'%</span></div></div>'+
   '<div class="tabs"><div class="tab-item active" data-tab="feed">Feed</div><div class="tab-item" data-tab="members">Members ('+members.length+')</div><div class="tab-item" data-tab="opportunities">Opportunities ('+opps.length+')</div><div class="tab-item" data-tab="events">Events ('+events.length+')</div></div>'+
   '<div class="tab-panel active" id="tab-feed">'+(posts.length?posts.map(p=>renderFeedPost(p)).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F4DD;</div><div class="empty-title">No posts yet</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-post\')">Post Something</button></div>')+'</div>'+
@@ -370,18 +401,45 @@ function renderEventCard(ev) {
 window.buyTicket=(eid)=>{if(store.buyTicket(eid)){toast('Ticket purchased! Check your email for confirmation.','success');renderWheelDetail();}else toast('Sorry, this event is sold out.','error');};
 
 function renderMembers() {
-  const q=(pageParams.q||'').toLowerCase(), filterAvail=pageParams.avail||'all';
-  const seen=new Set();
-  let members=store.getMyWheels().flatMap(w=>store.getWheelMembers(w.id)).filter(u=>{if(seen.has(u.id))return false;seen.add(u.id);return true;});
-  if(q)members=members.filter(u=>u.name.toLowerCase().includes(q)||(u.bio||'').toLowerCase().includes(q)||(u.skills||[]).some(s=>s.toLowerCase().includes(q)));
-  if(filterAvail!=='all')members=members.filter(u=>u.availability===filterAvail);
-  $('#page-members').innerHTML='<div class="page-head"><div class="page-head-left"><h1 class="page-title">Members</h1><p class="page-sub">'+members.length+' people across your Wheels</p></div><div class="page-actions"><button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-deal\')">'+icon('plus')+' Create Deal</button></div></div>'+
-  '<div class="filter-bar"><div class="filter-input-wrap"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input class="search-input-sm" id="member-search" placeholder="Search members..." value="'+escHtml(q)+'"></div><div class="filter-sep"></div><button class="filter-pill '+(filterAvail==='all'?'active':'')+'" onclick="navigate(\'members\',{avail:\'all\'})">All</button><button class="filter-pill '+(filterAvail==='available'?'active':'')+'" onclick="navigate(\'members\',{avail:\'available\'})">Available</button><button class="filter-pill '+(filterAvail==='limited'?'active':'')+'" onclick="navigate(\'members\',{avail:\'limited\'})">Limited</button></div>'+
-  '<div class="member-grid">'+(members.length?members.map(u=>renderMemberCard(u)).join(''):'<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">&#x1F50D;</div><div class="empty-title">No members match</div></div>')+'</div>';
-  let st; $('#member-search').oninput=e=>{clearTimeout(st);st=setTimeout(()=>navigate('members',{q:e.target.value,avail:filterAvail}),300);};
-  $$('.member-card',document.getElementById('page-members')).forEach(c=>c.onclick=()=>navigate('profile',{userId:c.dataset.userId}));
+  const q=(pageParams.q||'').toLowerCase();
+  const filterAvail=pageParams.avail||'all';
+  const filterLoc=(pageParams.loc||'').toLowerCase();
+  let members=[...store.get('users')].filter(u=>u.id!==store.getMe()?.id);
+  if(q) members=members.filter(u=>
+    u.name.toLowerCase().includes(q)||
+    (u.bio||'').toLowerCase().includes(q)||
+    (u.skills||[]).some(s=>s.toLowerCase().includes(q))||
+    (u.jobTitle||'').toLowerCase().includes(q)||
+    (u.userType||'').toLowerCase().includes(q)
+  );
+  if(filterAvail!=='all') members=members.filter(u=>u.availability===filterAvail);
+  if(filterLoc) members=members.filter(u=>(u.location||'').toLowerCase().includes(filterLoc));
+  const allLocs=[...new Set(store.get('users').map(u=>(u.location||'').split(',')[0].trim()).filter(Boolean))];
+  const el=document.getElementById('page-members');
+  el.innerHTML=
+  '<div class="page-head"><div class="page-head-left"><h1 class="page-title">Find People</h1><p class="page-sub">'+members.length+' '+(q?'results for &quot;'+escHtml(q)+'&quot;':'professionals on Fairriss')+'</p></div><div class="page-actions"><button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-deal\')">'+icon('plus')+' Create Deal</button></div></div>'+
+  '<div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.25rem;box-shadow:var(--shadow-sm)">'+
+  '<div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end">'+
+  '<div style="flex:2;min-width:200px"><label style="font-size:.8125rem;font-weight:600;color:var(--text-2);display:block;margin-bottom:.375rem">Role, skill or name</label>'+
+  '<div style="position:relative"><svg style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--text-4)" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'+
+  '<input class="form-control" id="member-search" placeholder="e.g. Graphic Designer, Developer..." value="'+escHtml(q)+'" style="padding-left:2.25rem"></div></div>'+
+  '<div style="flex:1;min-width:150px"><label style="font-size:.8125rem;font-weight:600;color:var(--text-2);display:block;margin-bottom:.375rem">Location</label>'+
+  '<input class="form-control" id="loc-search" placeholder="City, country or town..." value="'+escHtml(filterLoc)+'"></div>'+
+  '<div><label style="font-size:.8125rem;font-weight:600;color:var(--text-2);display:block;margin-bottom:.375rem">Availability</label>'+
+  '<div style="display:flex;gap:.375rem">'+
+  '<button class="filter-pill '+(filterAvail==='all'?'active':'')+'" onclick="navigate(\'members\',{q:\''+escHtml(q)+'\',avail:\'all\',loc:\''+escHtml(filterLoc)+'\'\'})">All</button>'+
+  '<button class="filter-pill '+(filterAvail==='available'?'active':'')+'" onclick="navigate(\'members\',{q:\''+escHtml(q)+'\',avail:\'available\',loc:\''+escHtml(filterLoc)+'\'})">Available</button>'+
+  '<button class="filter-pill '+(filterAvail==='limited'?'active':'')+'" onclick="navigate(\'members\',{q:\''+escHtml(q)+'\',avail:\'limited\',loc:\''+escHtml(filterLoc)+'\'})">Limited</button>'+
+  '</div></div></div>'+
+  (allLocs.length&&!filterLoc?'<div style="margin-top:.875rem;display:flex;gap:.375rem;flex-wrap:wrap;align-items:center"><span style="font-size:.75rem;color:var(--text-4);font-weight:600;margin-right:.25rem">Browse by city:</span>'+allLocs.slice(0,8).map(l=>'<button class="filter-pill" style="font-size:.75rem;padding:.2rem .625rem" onclick="navigate(\'members\',{q:\''+escHtml(q)+'\',avail:\''+filterAvail+'\',loc:\''+escHtml(l)+'\'})" >'+escHtml(l)+'</button>').join('')+'</div>':'')+'</div>'+
+  (members.length?'<div class="member-grid">'+members.map(u=>renderMemberCard(u)).join('')+'</div>':
+  '<div class="empty-state"><div class="empty-icon">&#x1F50D;</div><div class="empty-title">No results found</div><div class="empty-desc">Try a different skill, name, or location</div></div>');
+  let st,st2;
+  const ms=$('#member-search'),ls=$('#loc-search');
+  if(ms) ms.oninput=e=>{clearTimeout(st);st=setTimeout(()=>navigate('members',{q:e.target.value,avail:filterAvail,loc:filterLoc}),300);};
+  if(ls) ls.oninput=e=>{clearTimeout(st2);st2=setTimeout(()=>navigate('members',{q,avail:filterAvail,loc:e.target.value}),300);};
+  $$('.member-card',el).forEach(c=>c.onclick=()=>navigate('profile',{userId:c.dataset.userId}));
 }
-
 function renderMemberCard(u) {
   const dotClass={available:'avail-available',limited:'avail-limited',unavailable:'avail-unavailable'}[u.availability]||'avail-unavailable';
   return '<div class="member-card" data-user-id="'+u.id+'"><div class="member-card-top"><div class="member-avatar-wrap">'+avatarHtml(u,'lg')+'<span class="member-avail-dot '+dotClass+'"></span></div><div class="flex-1"><div class="member-name">'+escHtml(u.name)+'</div><div class="member-title">'+escHtml(u.jobTitle||(u.skills||[])[0]||u.role)+'</div>'+(u.company?'<div class="t-micro c-text4">'+escHtml(u.company)+'</div>':'')+'<div class="member-trust"><div class="trust-bar-wrap"><div class="trust-bar-fill" style="width:'+u.trustScore+'%"></div></div><span class="trust-score-num">'+u.trustScore+'</span></div></div></div>'+(u.skills?.length?'<div class="skill-tags">'+u.skills.slice(0,4).map((s,i)=>'<span class="skill-tag'+(i===0?' primary':'')+'">'+escHtml(s)+'</span>').join('')+'</div>':'')+'<div class="member-card-footer"><span class="avail-badge '+(u.availability||'unavailable')+'">'+(u.availability==='available'?'Available':u.availability==='limited'?'Limited':'Unavailable')+'</span><button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openModal(\'modal-create-deal\')">Deal</button></div></div>';
@@ -613,6 +671,7 @@ function buildModals() {
   '<div class="modal-overlay" id="modal-create-deal"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Create a Deal</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Deal Title *</label><input class="form-control" id="cd-title" placeholder="Website Redesign Project"></div><div class="form-group"><label class="form-label">Counterparty (Seller) *</label><select class="form-control" id="cd-seller"><option value="">Select member...</option></select></div><div class="form-group"><label class="form-label">Scope *</label><textarea class="form-control" id="cd-scope" rows="3" placeholder="Describe what you are buying..."></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Price ($) *</label><input class="form-control" id="cd-price" type="number" min="1" placeholder="5000"></div><div class="form-group"><label class="form-label">Payment Type</label><select class="form-control" id="cd-payment-type"><option value="lump_sum">Lump Sum</option><option value="milestones">Milestones</option></select></div></div><div class="form-row"><div class="form-group"><label class="form-label">Start Date</label><input class="form-control" id="cd-start" type="date"></div><div class="form-group"><label class="form-label">End Date</label><input class="form-control" id="cd-end" type="date"></div></div><div class="form-group"><label class="form-label">Deliverables <span>one per line</span></label><textarea class="form-control" id="cd-deliverables" rows="3" placeholder="Discovery and wireframes&#10;High-fidelity mockups&#10;Developer handoff"></textarea></div><div class="form-group"><label class="form-label">Wheel</label><select class="form-control" id="cd-wheel"><option value="">None (direct deal)</option></select></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-deal-btn">Propose Deal</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-post"><div class="modal"><div class="modal-header"><span class="modal-title">New Post</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Type</label><select class="form-control" id="cp-type"><option value="post">Post</option><option value="announcement">Announcement</option><option value="referral">Referral</option></select></div><div class="form-group"><label class="form-label">Message</label><textarea class="form-control" id="cp-body" rows="3" placeholder="Share something with your Wheel... Use @name to mention someone"></textarea></div><div class="form-group"><label class="form-label">Link <span>(optional)</span></label><input class="form-control" id="cp-link" placeholder="https://..."></div><div class="form-group"><label class="form-label">Photo <span>(optional)</span></label><input type="file" id="cp-photo" accept="image/*" class="form-control" style="padding:.375rem" onchange="previewPostPhoto(event)"><div id="cp-photo-preview" style="margin-top:.5rem"></div></div><div class="form-group"><label class="form-label">Video <span>(optional)</span></label><input type="file" id="cp-video" accept="video/*" class="form-control" style="padding:.375rem" onchange="previewPostVideo(event)"><div id="cp-video-preview" style="margin-top:.5rem"></div></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-post-btn">Publish</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-event"><div class="modal"><div class="modal-header"><span class="modal-title">Create Event</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Event Title *</label><input class="form-control" id="ev-title" placeholder="Founders Dinner - Toronto"></div><div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="ev-desc" rows="3" placeholder="What is this event about?"></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Date *</label><input class="form-control" id="ev-date" type="date"></div><div class="form-group"><label class="form-label">Time</label><input class="form-control" id="ev-time" type="time"></div></div><div class="form-group"><label class="form-label">Location *</label><input class="form-control" id="ev-location" placeholder="Toronto, ON or Virtual"></div><div class="form-row"><div class="form-group"><label class="form-label">Ticket Price ($) <span>0 = Free</span></label><input class="form-control" id="ev-price" type="number" min="0" placeholder="75"></div><div class="form-group"><label class="form-label">Total Tickets *</label><input class="form-control" id="ev-count" type="number" min="1" placeholder="50"></div></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-event-btn">Create Event</button></div></div></div>'+
+  '<div class="modal-overlay" id="modal-invite-wheel"><div class="modal"><div class="modal-header"><span class="modal-title">Invite to Wheel</span><button class="modal-close">x</button></div><div class="modal-body"><p class="t-small c-text3 mb-3">Select members to invite. They will get a notification.</p><div id="invite-member-list" style="display:flex;flex-direction:column;gap:.5rem;max-height:320px;overflow-y:auto"></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="send-invites-btn">Send Invites</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-opp-detail"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title" id="modal-opp-title">Opportunity</span><button class="modal-close">x</button></div><div class="modal-body" id="modal-opp-body"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Close</button><button class="btn btn-teal" onclick="toast(\'Application submitted!\',\'success\');closeAllModals()">Apply Now</button></div></div></div>';
 }
 
@@ -766,6 +825,59 @@ window.renderHome=renderHome; window.renderProfile=renderProfile;
 window.renderWheelDetail=renderWheelDetail; window.renderDealDetail=renderDealDetail;
 window.renderOppDetail=renderOppDetail;
 
+
+
+window.createFromTemplate = (s) => {
+  // Create the wheel directly from a suggested template
+  const color = s.hex || '#0F1F3D';
+  const w = store.createWheel({
+    name: s.name,
+    slug: s.name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,''),
+    description: s.desc,
+    category: s.category,
+    dealCommission: 2.5,
+    hexColor: color,
+    coverGradient: 'linear-gradient(135deg,' + color + 'cc,' + color + ')',
+    isEventWheel: s.category === 'Events',
+  });
+  toast('Wheel "' + s.name + '" created!', 'success');
+  updateShellDynamic(store.getMe());
+  navigate('wheel-detail', {wheelId: w.id});
+};
+
+
+window.openInviteModal = (wheelId) => {
+  openModal('modal-invite-wheel');
+  const wheel = store.get('wheels').find(w => w.id === wheelId);
+  const currentMemberIds = store.getWheelMembers(wheelId).map(u => u.id);
+  const nonMembers = store.get('users').filter(u => !currentMemberIds.includes(u.id));
+  const list = document.getElementById('invite-member-list');
+  if (!list) return;
+  list.innerHTML = nonMembers.length ? nonMembers.map(u =>
+    '<label style="display:flex;align-items:center;gap:.75rem;padding:.75rem;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:background .15s">' +
+    '<input type="checkbox" value="' + u.id + '" style="width:18px;height:18px;accent-color:var(--teal);flex-shrink:0">' +
+    avatarHtml(u, 'md') +
+    '<div><div style="font-size:.875rem;font-weight:600;color:var(--navy)">' + escHtml(u.name) + '</div>' +
+    '<div style="font-size:.75rem;color:var(--text-3)">' + escHtml(u.jobTitle||u.userType||u.role) + (u.location?' - '+escHtml(u.location):'') + '</div></div>' +
+    '</label>'
+  ).join('') : '<div class="empty-state" style="padding:1.5rem">Everyone is already a member!</div>';
+
+  const sendBtn = document.getElementById('send-invites-btn');
+  if (sendBtn) {
+    sendBtn.onclick = () => {
+      const selected = [...list.querySelectorAll('input:checked')].map(i => i.value);
+      if (!selected.length) { toast('Select at least one person to invite', 'error'); return; }
+      const me = store.getMe();
+      selected.forEach(userId => {
+        store.addNotif(userId, 'wheel_invite',
+          '<strong>' + escHtml(me.name) + '</strong> invited you to join <strong>' + escHtml(wheel.name) + '</strong> &mdash; <span style="color:var(--teal);cursor:pointer" onclick="store.joinWheel(\''+wheelId+'\');toast(\'Joined '+escHtml(wheel.name)+'!\',\'success\');renderPage()">Accept</span>'
+        );
+      });
+      toast('Invite sent to ' + selected.length + ' member' + (selected.length > 1 ? 's' : '') + '!', 'success');
+      closeAllModals();
+    };
+  }
+};
 
 window.previewPostPhoto = (e) => {
   const file = e.target.files[0]; if (!file) return;
