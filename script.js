@@ -263,7 +263,7 @@ function renderHome() {
   '<div class="flex justify-between items-center mt-4 mb-3"><h2 class="t-h2">Fresh Opportunities</h2><button class="btn btn-ghost btn-sm" onclick="navigate(\'opportunities\')">All</button></div>'+
   opps.map(o=>'<div class="card card-sm mb-2" style="cursor:pointer" onclick="openModal(\'modal-opp-detail\');renderOppDetail(\''+o.id+'\')"><div class="flex gap-3 items-start"><div class="flex-1"><div class="t-h3 mb-1">'+escHtml(o.title)+'</div><div class="flex gap-2 items-center"><span class="type-badge type-'+o.type+'">'+o.type.replace('_',' ')+'</span><span class="t-micro c-text4">'+timeAgo(o.createdAt)+'</span></div></div><button class="btn btn-teal btn-xs">Apply</button></div></div>').join('')+
   '</div></div>';
-  $$('.post-like-btn',('#page-home')).forEach(btn=>{btn.onclick=()=>{store.likePost(btn.dataset.postId);renderHome();};});
+  $$('.post-like-btn',document.getElementById('page-home')).forEach(btn=>{btn.onclick=()=>{store.likePost(btn.dataset.postId);renderHome();};});
 }
 
 
