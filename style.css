@@ -131,8 +131,8 @@ ul, ol { list-style: none; }
 }
 .auth-hex-row { display: flex; gap: 8px; }
 .auth-hex-item {
-  width: 56px; height: 64px;
-  clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  width: 60px; height: 60px;
+  border-radius: 50%;
   background: rgba(255,255,255,.06);
   border: 1px solid rgba(255,255,255,.1);
   display: flex; align-items: center; justify-content: center;
@@ -198,14 +198,15 @@ ul, ol { list-style: none; }
   height: 100%;
 }
 .header-logo-mark {
-  width: 32px; height: 36px;
-  clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  width: 34px; height: 34px;
+  border-radius: 50%;
   background: var(--navy);
   display: flex; align-items: center; justify-content: center;
   color: var(--teal);
   font-weight: 900;
   font-size: .875rem;
   flex-shrink: 0;
+  border: 2px solid var(--teal);
 }
 .header-logo-text { font-size: 1.0625rem; font-weight: 800; color: var(--navy); letter-spacing: -.025em; }
 
@@ -318,8 +319,7 @@ ul, ol { list-style: none; }
 .sidebar-wheel-item:hover { background: var(--surface); }
 .sidebar-wheel-item.active { background: var(--teal-subtle); }
 .wheel-hex-mini {
-  width: 28px; height: 32px;
-  clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: .75rem; font-weight: 700;
   flex-shrink: 0;
@@ -763,25 +763,25 @@ select.form-control { cursor: pointer; }
 .profile-header {
   background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
   border-radius: var(--radius-lg);
-  padding: 2rem;
+  padding: 1.5rem 2rem;
   margin-bottom: 1.5rem;
   position: relative;
   overflow: hidden;
 }
 .profile-header::after {
   content: '';
-  position: absolute; right: -40px; top: -40px;
-  width: 200px; height: 200px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(0,201,167,.15) 0%, transparent 70%);
+  position: absolute; right: -60px; bottom: -60px;
+  width: 220px; height: 220px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,201,167,.1) 0%, transparent 70%);
+  pointer-events: none;
 }
 .profile-avatar-lg {
-  width: 180px; height: 180px; border-radius: 50%;
+  width: 120px; height: 120px; border-radius: 50%;
   background: var(--navy-mid);
-  border: 5px solid rgba(255,255,255,.3);
-  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  border: 4px solid rgba(255,255,255,.3);
+  box-shadow: 0 6px 24px rgba(0,0,0,.4);
   display: flex; align-items: center; justify-content: center;
-  font-size: 4rem; font-weight: 800; color: var(--teal);
-  margin-bottom: 1rem;
+  font-size: 2.75rem; font-weight: 800; color: var(--teal);
   flex-shrink: 0;
 }
 .profile-name { font-size: 1.5rem; font-weight: 800; color: var(--white); letter-spacing: -.025em; margin-bottom: .25rem; }
