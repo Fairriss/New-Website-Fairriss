@@ -272,8 +272,27 @@ function renderPostBody(text) {
 }
 
 function renderFeedPost(post) {
-  const author=store.getUser(post.authorId), wheel=store.get('wheels').find(w=>w.id===post.wheelId);
-  return '<div class="feed-post"><div class="post-header">'+avatarHtml(author,'md')+'<div class="post-author-info"><div class="post-author-name">'+escHtml(author?.name||'')+'</div><div class="post-meta"><span>'+timeAgo(post.createdAt)+'</span>'+(wheel?'<span>-</span><span style="color:var(--teal-dim)">'+escHtml(wheel.name)+'</span>':'')+'</div></div><span class="type-badge '+(post.type==='announcement'?'type-job':post.type==='referral'?'type-partnership':'type-service')+'" style="margin-left:auto">'+post.type+'</span></div><div class="post-body">'+renderPostBody(post.body)+'</div><div class="post-actions"><button class="post-action-btn post-like-btn" data-post-id="'+post.id+'"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> '+post.likes+'</button></div></div>';
+  const author = store.getUser(post.authorId);
+  const wheel = store.get('wheels').find(w => w.id === post.wheelId);
+  const typeBadge = post.type==='announcement'?'type-job':post.type==='referral'?'type-partnership':'type-service';
+  let html = '<div class="feed-post">';
+  html += '<div class="post-header">' + avatarHtml(author,'md');
+  html += '<div class="post-author-info"><div class="post-author-name">' + escHtml(author?.name||'') + '</div>';
+  html += '<div class="post-meta"><span>' + timeAgo(post.createdAt) + '</span>' + (wheel?'<span>-</span><span style="color:var(--teal-dim)">' + escHtml(wheel.name) + '</span>':'') + '</div></div>';
+  html += '<span class="type-badge ' + typeBadge + '" style="margin-left:auto">' + post.type + '</span></div>';
+  if (post.body) html += '<div class="post-body">' + renderPostBody(post.body) + '</div>';
+  if (post.photo) html += '<div style="margin:.75rem 0"><img src="' + post.photo + '" style="width:100%;max-height:360px;object-fit:cover;border-radius:var(--radius-sm);display:block"></div>';
+  if (post.video) html += '<div style="margin:.75rem 0"><video src="' + post.video + '" controls style="width:100%;max-height:320px;border-radius:var(--radius-sm);background:#000;display:block"></video></div>';
+  if (post.link) {
+    const href = post.link.startsWith('http') ? post.link : 'https://' + post.link;
+    const label = post.link.replace(/^https?:\/\//,'').replace(/\/$/,'');
+    html += '<a href="' + escHtml(href) + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:.5rem;padding:.625rem .875rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--teal);font-size:.875rem;font-weight:500;text-decoration:none;margin:.75rem 0">';
+    html += '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>' + escHtml(label) + '</a>';
+  }
+  html += '<div class="post-actions"><button class="post-action-btn post-like-btn" data-post-id="' + post.id + '">';
+  html += '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> ' + post.likes + '</button></div>';
+  html += '</div>';
+  return html;
 }
 
 function renderDealCardCompact(d) {
@@ -419,6 +438,61 @@ function renderDealDetail() {
 }
 window.updateDealStatus=(id,status)=>{store.updateDeal(id,{status});toast('Deal moved to '+status.replace('_',' '),'success');updateShellDynamic(store.getMe());renderDealDetail();};
 
+
+function renderAboutCard(u, isMe) {
+  let html = '<div class="card mb-4"><h2 class="t-h2 mb-3">About</h2>';
+  if (isMe) {
+    html += '<textarea class="form-control mb-2" id="profile-bio" rows="3">' + escHtml(u.bio||'') + '</textarea>';
+    html += '<div class="form-row mb-2">';
+    html += '<div class="form-group"><label class="form-label">Job Title</label><input class="form-control" id="profile-title" value="' + escHtml(u.jobTitle||'') + '" placeholder="CEO, Designer..."></div>';
+    html += '<div class="form-group"><label class="form-label">Company</label><input class="form-control" id="profile-company" value="' + escHtml(u.company||'') + '" placeholder="Acme Corp..."></div>';
+    html += '</div>';
+    html += '<div class="form-group mb-3"><label class="form-label">Website / Link</label><input class="form-control" id="profile-website" value="' + escHtml(u.website||'') + '" placeholder="yoursite.com or linkedin.com/in/you"></div>';
+    html += '<div class="form-group mb-3"><label class="form-label">Additional Links <span>(portfolio, social, etc.)</span></label>';
+    html += '<div id="profile-links-list" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:.625rem">';
+    (u.links||[]).forEach((lnk,i) => {
+      html += '<div style="display:flex;gap:.5rem;align-items:center"><input class="form-control profile-link-input" value="' + escHtml(lnk) + '" placeholder="https://..." style="flex:1"><button class="btn btn-ghost btn-xs" onclick="removeLink(' + i + ')" style="color:var(--red)">Remove</button></div>';
+    });
+    html += '</div><button class="btn btn-outline btn-xs" onclick="addLinkField()">+ Add Link</button></div>';
+    html += '<button class="btn btn-outline btn-sm" onclick="saveProfileInfo()">Save</button>';
+  } else {
+    html += '<p class="t-body mb-3" style="color:var(--text-2);line-height:1.7">' + escHtml(u.bio||'No bio yet.') + '</p>';
+    const links = (u.links||[]).filter(Boolean);
+    if (links.length) {
+      html += '<div style="display:flex;flex-direction:column;gap:.5rem">';
+      links.forEach(lnk => {
+        const href = lnk.startsWith('http') ? lnk : 'https://' + lnk;
+        const label = lnk.replace(/^https?:\/\//,'').replace(/\/$/,'');
+        html += '<a href="' + escHtml(href) + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:.5rem;color:var(--teal);font-size:.875rem;font-weight:500;text-decoration:none">';
+        html += '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+        html += escHtml(label) + '</a>';
+      });
+      html += '</div>';
+    }
+  }
+  html += '</div>';
+  return html;
+}
+
+window.addLinkField = () => {
+  const list = document.getElementById('profile-links-list');
+  if (!list) return;
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:.5rem;align-items:center';
+  const idx = list.children.length;
+  div.innerHTML = '<input class="form-control profile-link-input" placeholder="https://..." style="flex:1"><button class="btn btn-ghost btn-xs" onclick="this.parentElement.remove()" style="color:var(--red)">Remove</button>';
+  list.appendChild(div);
+};
+
+window.removeLink = (i) => {
+  const me = store.getMe();
+  const links = [...(me.links||[])];
+  links.splice(i, 1);
+  store.updateMe({links});
+  toast('Link removed', 'success');
+  renderProfile();
+};
+
 function renderProfile() {
   const userId=pageParams.userId||store.getMe()?.id, u=store.getUser(userId);
   if(!u){navigate('home');return;}
@@ -454,6 +528,9 @@ function renderProfile() {
   '<div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">'+
   (u.location?'<span style="color:rgba(255,255,255,.6);font-size:.8125rem;display:flex;align-items:center;gap:.3rem">'+icon('map')+' '+escHtml(u.location)+'</span>':'')+
   '<span class="avail-badge '+(u.availability||'unavailable')+'" style="font-size:.75rem">'+(u.availability==='available'?'Available':u.availability==='limited'?'Limited':'Unavailable')+'</span>'+
+  (u.website?'<a href="'+(u.website.startsWith('http')?u.website:'https://'+u.website)+'" target="_blank" rel="noopener" style="color:var(--teal);font-size:.8125rem;display:flex;align-items:center;gap:.3rem;text-decoration:none;font-weight:500">'+
+  '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>'+
+  escHtml(u.website.replace(/^https?:\/\//,'').replace(/\/$/,''))+'</a>':'')+
   '</div>'+
   '</div>'+
 
@@ -481,8 +558,7 @@ function renderProfile() {
   '</div>'+
   (!isMe?'<div class="flex gap-2 mb-4"><button class="btn btn-primary" onclick="openModal(\'modal-create-deal\')">Create Deal</button><button class="btn btn-outline" onclick="toast(\'Messaging coming in V2\',\'default\')">Message</button><button class="btn btn-ghost" onclick="toast(\'Referral sent!\',\'success\')">Refer</button></div>':'')+
   '<div class="two-col"><div>'+
-  '<div class="card mb-4"><h2 class="t-h2 mb-3">About</h2>'+(isMe?'<textarea class="form-control mb-2" id="profile-bio" rows="3">'+escHtml(u.bio||'')+'</textarea><div class="form-row mb-2"><div class="form-group"><label class="form-label">Job Title</label><input class="form-control" id="profile-title" value="'+escHtml(u.jobTitle||'')+'" placeholder="CEO, Designer..."></div><div class="form-group"><label class="form-label">Company</label><input class="form-control" id="profile-company" value="'+escHtml(u.company||'')+'" placeholder="Acme Corp..."></div></div><button class="btn btn-outline btn-sm" onclick="saveProfileInfo()">Save</button>':'<p class="t-body" style="color:var(--text-2);line-height:1.7">'+escHtml(u.bio||'No bio yet.')+'</p>')+'</div>'+
-  (u.introVideo?'<div class="card mb-4"><h2 class="t-h2 mb-3">'+icon('video')+' Intro Video</h2><video src="'+u.introVideo+'" controls style="width:100%;border-radius:var(--radius-sm);background:#000;max-height:240px"></video>'+(isMe?'<div class="mt-2"><label class="btn btn-ghost btn-sm" style="cursor:pointer">Replace Video<input type="file" accept="video/*" style="display:none" onchange="uploadVideo(event)"></label></div>':'')+'</div>':
+  renderAboutCard(u, isMe)+  (u.introVideo?'<div class="card mb-4"><h2 class="t-h2 mb-3">'+icon('video')+' Intro Video</h2><video src="'+u.introVideo+'" controls style="width:100%;border-radius:var(--radius-sm);background:#000;max-height:240px"></video>'+(isMe?'<div class="mt-2"><label class="btn btn-ghost btn-sm" style="cursor:pointer">Replace Video<input type="file" accept="video/*" style="display:none" onchange="uploadVideo(event)"></label></div>':'')+'</div>':
   (isMe?'<div class="card mb-4"><h2 class="t-h2 mb-3">'+icon('video')+' Intro Video</h2><p class="t-small c-text3 mb-3">Add a short video so people can get to know you before reaching out.</p><label class="btn btn-outline btn-sm" style="cursor:pointer">'+icon('video')+' Upload Intro Video<input type="file" accept="video/*" style="display:none" onchange="uploadVideo(event)"></label></div>':''))+
   '<div class="card mb-4"><h2 class="t-h2 mb-3">'+icon('briefcase')+' Work History</h2>'+
   (u.workHistory||[]).map((j,i)=>'<div style="padding:.875rem;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.625rem"><div class="flex justify-between items-start"><div><div class="t-h3">'+escHtml(j.title)+'</div><div class="t-small c-text3">'+escHtml(j.company)+' - '+escHtml(j.from)+' to '+escHtml(j.to)+'</div></div>'+(isMe?'<button class="btn btn-ghost btn-xs" onclick="removeJob('+i+')">Remove</button>':'')+'</div>'+(j.desc?'<p class="t-small c-text3 mt-1">'+escHtml(j.desc)+'</p>':'')+'</div>').join('')+
@@ -496,7 +572,17 @@ function renderProfile() {
   '</div></div></div>';
 }
 
-window.saveProfileInfo=()=>{store.updateMe({bio:$('#profile-bio').value.trim(),jobTitle:$('#profile-title').value.trim(),company:$('#profile-company').value.trim()});toast('Profile updated','success');};
+window.saveProfileInfo=()=>{
+  const links = [...$$('.profile-link-input')].map(i=>i.value.trim()).filter(Boolean);
+  store.updateMe({
+    bio:$('#profile-bio').value.trim(),
+    jobTitle:$('#profile-title').value.trim(),
+    company:$('#profile-company').value.trim(),
+    website:$('#profile-website')?.value.trim()||'',
+    links
+  });
+  toast('Profile updated','success');
+};
 window.saveSkills=()=>{store.updateMe({skills:$('#profile-skills').value.split(',').map(s=>s.trim()).filter(Boolean)});toast('Skills updated','success');renderProfile();};
 window.addJob=()=>{
   const title=$('#job-title').value.trim(),company=$('#job-company').value.trim();
@@ -524,7 +610,7 @@ function buildModals() {
   return '<div class="modal-overlay" id="modal-create-wheel"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Create a Wheel</span><button class="modal-close">x</button></div><div class="modal-body"><p class="t-small c-text3 mb-3">All Wheels on Fairriss are open and free to join.</p><div class="form-group mb-3"><label class="form-label">Start from a template:</label><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.5rem" id="wheel-templates">'+templateGrid+'</div></div><div class="divider"></div><div class="form-stack"><div class="form-group"><label class="form-label">Wheel Name *</label><input class="form-control" id="cw-name" placeholder="The Founders Circle"></div><div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="cw-desc" rows="3" placeholder="What is this Wheel about?"></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Category</label><select class="form-control" id="cw-cat"><option>Startup</option><option>Design</option><option>Marketing</option><option>Technology</option><option>Finance</option><option>Business</option><option>Events</option><option>Community</option><option>Talent</option><option>Other</option></select></div><div class="form-group"><label class="form-label">Deal Commission (%)</label><input class="form-control" id="cw-commission" type="number" min="0" max="15" step="0.5" placeholder="2.5"></div></div><div class="form-group"><label class="form-label">Accent Color</label><input class="form-control" id="cw-color" type="color" value="#00C9A7" style="height:40px;cursor:pointer"></div><label style="display:flex;align-items:center;gap:.625rem;cursor:pointer"><input type="checkbox" id="cw-is-event" style="width:18px;height:18px;accent-color:var(--teal)"><span class="t-body">This is an Event Wheel (enables ticket selling)</span></label></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-wheel-btn">Create Wheel</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-opp"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Post an Opportunity</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Type *</label><select class="form-control" id="co-type"><option value="job">Job</option><option value="partnership">Partnership</option><option value="collaboration">Collaboration</option><option value="investment">Investment</option><option value="referral">Referral</option><option value="service">Service Request</option></select></div><div class="form-group"><label class="form-label">Title *</label><input class="form-control" id="co-title" placeholder="Head of Product at Acme Corp"></div><div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="co-desc" rows="4" placeholder="Tell members about this opportunity..."></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Location</label><input class="form-control" id="co-location" placeholder="Remote, New York..."></div><div class="form-group"><label class="form-label">Skills Required</label><input class="form-control" id="co-skills" placeholder="React, Design, Growth..."></div></div><div class="form-group"><label class="form-label">Compensation</label><input class="form-control" id="co-comp" placeholder="$120k - $150k or $500 bonus..."></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-opp-btn">Post Opportunity</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-deal"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Create a Deal</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Deal Title *</label><input class="form-control" id="cd-title" placeholder="Website Redesign Project"></div><div class="form-group"><label class="form-label">Counterparty (Seller) *</label><select class="form-control" id="cd-seller"><option value="">Select member...</option></select></div><div class="form-group"><label class="form-label">Scope *</label><textarea class="form-control" id="cd-scope" rows="3" placeholder="Describe what you are buying..."></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Price ($) *</label><input class="form-control" id="cd-price" type="number" min="1" placeholder="5000"></div><div class="form-group"><label class="form-label">Payment Type</label><select class="form-control" id="cd-payment-type"><option value="lump_sum">Lump Sum</option><option value="milestones">Milestones</option></select></div></div><div class="form-row"><div class="form-group"><label class="form-label">Start Date</label><input class="form-control" id="cd-start" type="date"></div><div class="form-group"><label class="form-label">End Date</label><input class="form-control" id="cd-end" type="date"></div></div><div class="form-group"><label class="form-label">Deliverables <span>one per line</span></label><textarea class="form-control" id="cd-deliverables" rows="3" placeholder="Discovery and wireframes&#10;High-fidelity mockups&#10;Developer handoff"></textarea></div><div class="form-group"><label class="form-label">Wheel</label><select class="form-control" id="cd-wheel"><option value="">None (direct deal)</option></select></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-deal-btn">Propose Deal</button></div></div></div>'+
-  '<div class="modal-overlay" id="modal-create-post"><div class="modal"><div class="modal-header"><span class="modal-title">New Post</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Type</label><select class="form-control" id="cp-type"><option value="post">Post</option><option value="announcement">Announcement</option><option value="referral">Referral</option></select></div><div class="form-group"><label class="form-label">Message *</label><textarea class="form-control" id="cp-body" rows="4" placeholder="Share something with your Wheel..."></textarea></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-post-btn">Publish</button></div></div></div>'+
+  '<div class="modal-overlay" id="modal-create-post"><div class="modal"><div class="modal-header"><span class="modal-title">New Post</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Type</label><select class="form-control" id="cp-type"><option value="post">Post</option><option value="announcement">Announcement</option><option value="referral">Referral</option></select></div><div class="form-group"><label class="form-label">Message</label><textarea class="form-control" id="cp-body" rows="3" placeholder="Share something with your Wheel... Use @name to mention someone"></textarea></div><div class="form-group"><label class="form-label">Link <span>(optional)</span></label><input class="form-control" id="cp-link" placeholder="https://..."></div><div class="form-group"><label class="form-label">Photo <span>(optional)</span></label><input type="file" id="cp-photo" accept="image/*" class="form-control" style="padding:.375rem"><div id="cp-photo-preview" style="margin-top:.5rem"></div></div><div class="form-group"><label class="form-label">Video <span>(optional)</span></label><input type="file" id="cp-video" accept="video/*" class="form-control" style="padding:.375rem"><div id="cp-video-preview" style="margin-top:.5rem"></div></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-post-btn">Publish</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-event"><div class="modal"><div class="modal-header"><span class="modal-title">Create Event</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Event Title *</label><input class="form-control" id="ev-title" placeholder="Founders Dinner - Toronto"></div><div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="ev-desc" rows="3" placeholder="What is this event about?"></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Date *</label><input class="form-control" id="ev-date" type="date"></div><div class="form-group"><label class="form-label">Time</label><input class="form-control" id="ev-time" type="time"></div></div><div class="form-group"><label class="form-label">Location *</label><input class="form-control" id="ev-location" placeholder="Toronto, ON or Virtual"></div><div class="form-row"><div class="form-group"><label class="form-label">Ticket Price ($) <span>0 = Free</span></label><input class="form-control" id="ev-price" type="number" min="0" placeholder="75"></div><div class="form-group"><label class="form-label">Total Tickets *</label><input class="form-control" id="ev-count" type="number" min="1" placeholder="50"></div></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-event-btn">Create Event</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-opp-detail"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title" id="modal-opp-title">Opportunity</span><button class="modal-close">x</button></div><div class="modal-body" id="modal-opp-body"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Close</button><button class="btn btn-teal" onclick="toast(\'Application submitted!\',\'success\');closeAllModals()">Apply Now</button></div></div></div>';
 }
@@ -611,27 +697,69 @@ function bindModalForms() {
     store.addNotif(sellerId,'deal_message','<strong>'+store.getMe().name+'</strong> proposed a deal: '+escHtml(title));
     toast('Deal proposed!','success'); closeAllModals(); navigate('deal-detail',{dealId:d.id});
   });
-  // init @mention on post textarea when modal opens
+  // init @mention + reset previews when modal opens
   document.getElementById('modal-create-post')?.addEventListener('click', () => {
-    setTimeout(() => initMentionAutocomplete('cp-body', pageParams.wheelId||null), 50);
+    setTimeout(() => {
+      initMentionAutocomplete('cp-body', pageParams.wheelId||null);
+      const pp = document.getElementById('cp-photo-preview'), vp = document.getElementById('cp-video-preview');
+      // don't reset if already open
+    }, 50);
   });
-  $('#create-post-btn')?.addEventListener('click',()=>{
-    const body=$('#cp-body').value.trim();
-    if(!body){toast('Message is required','error');return;}
-    const wheelId=pageParams.wheelId||store.getMyWheels()[0]?.id;
-    if(!wheelId){toast('Join a Wheel first','error');return;}
-    store.createPost({wheelId,body,type:$('#cp-type').value});
-    // notify @mentioned members
-    const mentions=[...body.matchAll(/@(\w+)/g)].map(m=>m[1].toLowerCase());
-    if(mentions.length){
-      const members=store.getWheelMembers(wheelId);
-      members.forEach(m=>{
-        if(mentions.includes(m.username?.toLowerCase()||m.name.split(' ')[0].toLowerCase())){
-          if(m.id!==store.getMe().id) store.addNotif(m.id,'mention','<strong>'+escHtml(store.getMe().name)+'</strong> mentioned you in a post: "'+escHtml(body.slice(0,60))+(body.length>60?'...':'')+'"');
-        }
-      });
+  // photo/video preview
+  document.getElementById('cp-photo')?.addEventListener('change', e => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const preview = document.getElementById('cp-photo-preview');
+      if (preview) preview.innerHTML = '<img src="' + ev.target.result + '" style="max-width:100%;max-height:200px;border-radius:var(--radius-sm);object-fit:cover">';
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('cp-video')?.addEventListener('change', e => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const preview = document.getElementById('cp-video-preview');
+      if (preview) preview.innerHTML = '<video src="' + ev.target.result + '" controls style="max-width:100%;max-height:180px;border-radius:var(--radius-sm)"></video>';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  $('#create-post-btn')?.addEventListener('click', () => {
+    const body = $('#cp-body')?.value.trim() || '';
+    const link = $('#cp-link')?.value.trim() || '';
+    const photoFile = document.getElementById('cp-photo')?.files[0];
+    const videoFile = document.getElementById('cp-video')?.files[0];
+    if (!body && !link && !photoFile && !videoFile) { toast('Add a message, link, photo or video', 'error'); return; }
+    const wheelId = pageParams.wheelId || store.getMyWheels()[0]?.id;
+    if (!wheelId) { toast('Join a Wheel first', 'error'); return; }
+
+    const readAndPost = (photoData, videoData) => {
+      store.createPost({ wheelId, body, type: $('#cp-type').value, link: link||null, photo: photoData||null, video: videoData||null });
+      const mentions = [...body.matchAll(/@(\w+)/g)].map(m => m[1].toLowerCase());
+      if (mentions.length) {
+        const members = store.getWheelMembers(wheelId);
+        members.forEach(m => {
+          if (mentions.includes(m.username?.toLowerCase()||m.name.split(' ')[0].toLowerCase())) {
+            if (m.id !== store.getMe().id) store.addNotif(m.id,'mention','<strong>'+escHtml(store.getMe().name)+'</strong> mentioned you in a post: "'+escHtml(body.slice(0,60))+(body.length>60?'...':'')+'"');
+          }
+        });
+      }
+      toast('Post published!', 'success'); closeAllModals(); renderWheelDetail();
+    };
+
+    if (photoFile) {
+      const r = new FileReader();
+      r.onload = ev => {
+        if (videoFile) { const r2 = new FileReader(); r2.onload = ev2 => readAndPost(ev.target.result, ev2.target.result); r2.readAsDataURL(videoFile); }
+        else readAndPost(ev.target.result, null);
+      };
+      r.readAsDataURL(photoFile);
+    } else if (videoFile) {
+      const r = new FileReader(); r.onload = ev => readAndPost(null, ev.target.result); r.readAsDataURL(videoFile);
+    } else {
+      readAndPost(null, null);
     }
-    toast('Post published!','success'); closeAllModals(); renderWheelDetail();
   });
   $('#create-event-btn')?.addEventListener('click',()=>{
     const title=$('#ev-title').value.trim(),desc=$('#ev-desc').value.trim(),date=$('#ev-date').value,location=$('#ev-location').value.trim();
