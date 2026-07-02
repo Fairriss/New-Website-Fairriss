@@ -193,7 +193,7 @@ function avatarHtml(u,size='md'){
   return '<div class="avatar avatar-'+size+'" style="background:'+getColor(u.id)+';color:#fff;width:'+px+'px;height:'+px+'px">'+initials(u.name)+'</div>';
 }
 function profilePhotoHtml(u){
-  if(u.profilePics&&u.profilePics[0])return '<img src="'+u.profilePics[0]+'" style="width:120px;height:120px;min-width:120px;min-height:120px;border-radius:50%;object-fit:cover;object-position:center top;border:4px solid rgba(255,255,255,.3);box-shadow:0 6px 24px rgba(0,0,0,.4);display:block">';
+  if(u.profilePics&&u.profilePics[0])return '<img src="'+u.profilePics[0]+'" style="width:130px;height:130px;min-width:130px;min-height:130px;border-radius:50%;object-fit:cover;object-position:center top;border:4px solid rgba(255,255,255,.3);box-shadow:0 6px 24px rgba(0,0,0,.4);display:block">';
   return '<div class="profile-avatar-lg">'+initials(u.name)+'</div>';
 }
 function hexBadge(w,size=48){return '<div class="wheel-hex-mini" style="background:'+(w.hexColor||'#0F1F3D')+';width:'+size+'px;height:'+size+'px;border-radius:50%;font-size:'+Math.round(size*.38)+'px">'+w.name[0]+'</div>';}
@@ -436,31 +436,48 @@ function renderProfile() {
     '<div style="display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap">'+(u.profilePics||[]).slice(1).filter(Boolean).map(p=>'<img src="'+p+'" style="width:150px;height:160px;border-radius:var(--radius-sm);object-fit:cover">').join('')+'</div>' : '');
 
   $('#page-profile').innerHTML='<div class="mb-3"><button class="btn btn-ghost btn-sm" onclick="navigate(\'members\')">Back</button></div>'+
-  '<div class="profile-header" style="padding:1.5rem 2rem">'+
-  '<div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap">'+
-  '<div style="position:relative;flex-shrink:0">'+profilePhotoHtml(u)+
-  (isMe?'<label style="position:absolute;bottom:6px;right:6px;width:30px;height:30px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--navy);box-shadow:0 2px 8px rgba(0,0,0,.4)">'+icon('camera')+'<input type="file" accept="image/*" style="display:none" onchange="uploadPic(event,0)"></label>':'')+'</div>'+
-  '<div style="flex:1;min-width:0">'+
-  '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap">'+
-  '<div>'+
-  '<h1 class="profile-name" style="font-size:1.625rem;margin-bottom:.25rem">'+escHtml(u.name)+'</h1>'+
-  (u.jobTitle?'<div style="color:rgba(255,255,255,.9);font-size:.9375rem;font-weight:600;margin-bottom:.25rem">'+escHtml(u.jobTitle)+(u.company?' at '+escHtml(u.company):'')+'</div>':'')+
-  '<div style="color:rgba(255,255,255,.6);font-size:.8125rem;margin-bottom:.75rem">'+escHtml(u.userType||u.role)+'</div>'+
+  '<div class="profile-header" style="padding:1.75rem 2rem">'+
+  // Top row: photo + name/info side by side + trust score on far right
+  '<div style="display:flex;align-items:center;gap:1.75rem;flex-wrap:wrap">'+
+
+  // Photo with upload button
+  '<div style="position:relative;flex-shrink:0">'+
+  profilePhotoHtml(u)+
+  (isMe?'<label style="position:absolute;bottom:4px;right:4px;width:32px;height:32px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--navy);box-shadow:0 2px 8px rgba(0,0,0,.4)">'+icon('camera')+'<input type="file" accept="image/*" style="display:none" onchange="uploadPic(event,0)"></label>':'')+
+  '</div>'+
+
+  // Name + info block
+  '<div style="flex:1;min-width:180px">'+
+  '<h1 class="profile-name" style="font-size:1.75rem;margin-bottom:.25rem;line-height:1.1">'+escHtml(u.name)+'</h1>'+
+  (u.jobTitle?'<div style="color:rgba(255,255,255,.9);font-size:1rem;font-weight:600;margin-bottom:.2rem">'+escHtml(u.jobTitle)+(u.company?' at '+escHtml(u.company):'')+'</div>':'')+
+  '<div style="color:rgba(255,255,255,.55);font-size:.8125rem;margin-bottom:.75rem">'+escHtml(u.userType||u.role)+'</div>'+
   '<div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">'+
-  (u.location?'<span class="profile-meta-item">'+icon('map')+' '+escHtml(u.location)+'</span>':'')+
+  (u.location?'<span style="color:rgba(255,255,255,.6);font-size:.8125rem;display:flex;align-items:center;gap:.3rem">'+icon('map')+' '+escHtml(u.location)+'</span>':'')+
   '<span class="avail-badge '+(u.availability||'unavailable')+'" style="font-size:.75rem">'+(u.availability==='available'?'Available':u.availability==='limited'?'Limited':'Unavailable')+'</span>'+
   '</div>'+
   '</div>'+
-  '<div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0">'+
-  '<div class="trust-score-circle" style="--pct:'+u.trustScore+'%;width:72px;height:72px">'+
-  '<div class="trust-score-inner" style="width:54px;height:54px">'+
-  '<div class="trust-score-num-lg" style="font-size:1.125rem">'+u.trustScore+'</div>'+
+
+  // Trust score on the right
+  '<div style="flex-shrink:0;text-align:center;margin-left:auto">'+
+  '<div class="trust-score-circle" style="--pct:'+u.trustScore+'%;width:76px;height:76px">'+
+  '<div class="trust-score-inner" style="width:58px;height:58px">'+
+  '<div class="trust-score-num-lg" style="font-size:1.25rem">'+u.trustScore+'</div>'+
   '<div class="trust-score-label">Trust</div>'+
   '</div></div>'+
+  '<div style="color:rgba(255,255,255,.4);font-size:.625rem;margin-top:.25rem;text-transform:uppercase;letter-spacing:.06em">Score</div>'+
   '</div>'+
   '</div>'+
-  (picSection?'<div style="margin-top:1rem">'+picSection.replace('<div style="display:flex;gap:.625rem;margin-top:1rem;flex-wrap:wrap">','<div style="display:flex;gap:.5rem;flex-wrap:wrap">').replace('<div style="display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap">','<div style="display:flex;gap:.5rem;flex-wrap:wrap">')+'</div>':'')+'</div>'+
-  '</div>'+
+
+  // Additional photos row below
+  (picSection?'<div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,.1)">'+
+  '<div style="font-size:.6875rem;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.07em;text-transform:uppercase;margin-bottom:.625rem">Photos</div>'+
+  '<div style="display:flex;gap:.625rem;flex-wrap:wrap">'+
+  [1,2,3,4].map(i => {
+    const pic = (u.profilePics||[])[i];
+    if(pic) return '<div style="position:relative"><img src="'+pic+'" style="width:90px;height:90px;border-radius:var(--radius-sm);object-fit:cover;border:2px solid rgba(255,255,255,.2)"><label style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);border-radius:var(--radius-sm);opacity:0;cursor:pointer;transition:.15s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">'+icon('camera')+'<input type="file" accept="image/*" style="display:none" onchange="uploadPic(event,'+i+')"></label></div>';
+    return isMe?'<label style="width:90px;height:90px;border-radius:var(--radius-sm);border:2px dashed rgba(255,255,255,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.4);font-size:.625rem;gap:.25rem;transition:.15s">'+icon('camera')+'<span>Photo '+(i+1)+'</span><input type="file" accept="image/*" style="display:none" onchange="uploadPic(event,'+i+')"></label>':'';
+  }).join('')+
+  '</div></div>':'')+
   '</div>'+
   (!isMe?'<div class="flex gap-2 mb-4"><button class="btn btn-primary" onclick="openModal(\'modal-create-deal\')">Create Deal</button><button class="btn btn-outline" onclick="toast(\'Messaging coming in V2\',\'default\')">Message</button><button class="btn btn-ghost" onclick="toast(\'Referral sent!\',\'success\')">Refer</button></div>':'')+
   '<div class="two-col"><div>'+
