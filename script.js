@@ -582,6 +582,7 @@ window.saveProfileInfo=()=>{
     links
   });
   toast('Profile updated','success');
+  renderProfile();
 };
 window.saveSkills=()=>{store.updateMe({skills:$('#profile-skills').value.split(',').map(s=>s.trim()).filter(Boolean)});toast('Skills updated','success');renderProfile();};
 window.addJob=()=>{
@@ -610,7 +611,7 @@ function buildModals() {
   return '<div class="modal-overlay" id="modal-create-wheel"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Create a Wheel</span><button class="modal-close">x</button></div><div class="modal-body"><p class="t-small c-text3 mb-3">All Wheels on Fairriss are open and free to join.</p><div class="form-group mb-3"><label class="form-label">Start from a template:</label><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.5rem" id="wheel-templates">'+templateGrid+'</div></div><div class="divider"></div><div class="form-stack"><div class="form-group"><label class="form-label">Wheel Name *</label><input class="form-control" id="cw-name" placeholder="The Founders Circle"></div><div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="cw-desc" rows="3" placeholder="What is this Wheel about?"></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Category</label><select class="form-control" id="cw-cat"><option>Startup</option><option>Design</option><option>Marketing</option><option>Technology</option><option>Finance</option><option>Business</option><option>Events</option><option>Community</option><option>Talent</option><option>Other</option></select></div><div class="form-group"><label class="form-label">Deal Commission (%)</label><input class="form-control" id="cw-commission" type="number" min="0" max="15" step="0.5" placeholder="2.5"></div></div><div class="form-group"><label class="form-label">Accent Color</label><input class="form-control" id="cw-color" type="color" value="#00C9A7" style="height:40px;cursor:pointer"></div><label style="display:flex;align-items:center;gap:.625rem;cursor:pointer"><input type="checkbox" id="cw-is-event" style="width:18px;height:18px;accent-color:var(--teal)"><span class="t-body">This is an Event Wheel (enables ticket selling)</span></label></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-wheel-btn">Create Wheel</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-opp"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Post an Opportunity</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Type *</label><select class="form-control" id="co-type"><option value="job">Job</option><option value="partnership">Partnership</option><option value="collaboration">Collaboration</option><option value="investment">Investment</option><option value="referral">Referral</option><option value="service">Service Request</option></select></div><div class="form-group"><label class="form-label">Title *</label><input class="form-control" id="co-title" placeholder="Head of Product at Acme Corp"></div><div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="co-desc" rows="4" placeholder="Tell members about this opportunity..."></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Location</label><input class="form-control" id="co-location" placeholder="Remote, New York..."></div><div class="form-group"><label class="form-label">Skills Required</label><input class="form-control" id="co-skills" placeholder="React, Design, Growth..."></div></div><div class="form-group"><label class="form-label">Compensation</label><input class="form-control" id="co-comp" placeholder="$120k - $150k or $500 bonus..."></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-opp-btn">Post Opportunity</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-deal"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Create a Deal</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Deal Title *</label><input class="form-control" id="cd-title" placeholder="Website Redesign Project"></div><div class="form-group"><label class="form-label">Counterparty (Seller) *</label><select class="form-control" id="cd-seller"><option value="">Select member...</option></select></div><div class="form-group"><label class="form-label">Scope *</label><textarea class="form-control" id="cd-scope" rows="3" placeholder="Describe what you are buying..."></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Price ($) *</label><input class="form-control" id="cd-price" type="number" min="1" placeholder="5000"></div><div class="form-group"><label class="form-label">Payment Type</label><select class="form-control" id="cd-payment-type"><option value="lump_sum">Lump Sum</option><option value="milestones">Milestones</option></select></div></div><div class="form-row"><div class="form-group"><label class="form-label">Start Date</label><input class="form-control" id="cd-start" type="date"></div><div class="form-group"><label class="form-label">End Date</label><input class="form-control" id="cd-end" type="date"></div></div><div class="form-group"><label class="form-label">Deliverables <span>one per line</span></label><textarea class="form-control" id="cd-deliverables" rows="3" placeholder="Discovery and wireframes&#10;High-fidelity mockups&#10;Developer handoff"></textarea></div><div class="form-group"><label class="form-label">Wheel</label><select class="form-control" id="cd-wheel"><option value="">None (direct deal)</option></select></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-deal-btn">Propose Deal</button></div></div></div>'+
-  '<div class="modal-overlay" id="modal-create-post"><div class="modal"><div class="modal-header"><span class="modal-title">New Post</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Type</label><select class="form-control" id="cp-type"><option value="post">Post</option><option value="announcement">Announcement</option><option value="referral">Referral</option></select></div><div class="form-group"><label class="form-label">Message</label><textarea class="form-control" id="cp-body" rows="3" placeholder="Share something with your Wheel... Use @name to mention someone"></textarea></div><div class="form-group"><label class="form-label">Link <span>(optional)</span></label><input class="form-control" id="cp-link" placeholder="https://..."></div><div class="form-group"><label class="form-label">Photo <span>(optional)</span></label><input type="file" id="cp-photo" accept="image/*" class="form-control" style="padding:.375rem"><div id="cp-photo-preview" style="margin-top:.5rem"></div></div><div class="form-group"><label class="form-label">Video <span>(optional)</span></label><input type="file" id="cp-video" accept="video/*" class="form-control" style="padding:.375rem"><div id="cp-video-preview" style="margin-top:.5rem"></div></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-post-btn">Publish</button></div></div></div>'+
+  '<div class="modal-overlay" id="modal-create-post"><div class="modal"><div class="modal-header"><span class="modal-title">New Post</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Type</label><select class="form-control" id="cp-type"><option value="post">Post</option><option value="announcement">Announcement</option><option value="referral">Referral</option></select></div><div class="form-group"><label class="form-label">Message</label><textarea class="form-control" id="cp-body" rows="3" placeholder="Share something with your Wheel... Use @name to mention someone"></textarea></div><div class="form-group"><label class="form-label">Link <span>(optional)</span></label><input class="form-control" id="cp-link" placeholder="https://..."></div><div class="form-group"><label class="form-label">Photo <span>(optional)</span></label><input type="file" id="cp-photo" accept="image/*" class="form-control" style="padding:.375rem" onchange="previewPostPhoto(event)"><div id="cp-photo-preview" style="margin-top:.5rem"></div></div><div class="form-group"><label class="form-label">Video <span>(optional)</span></label><input type="file" id="cp-video" accept="video/*" class="form-control" style="padding:.375rem" onchange="previewPostVideo(event)"><div id="cp-video-preview" style="margin-top:.5rem"></div></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-post-btn">Publish</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-event"><div class="modal"><div class="modal-header"><span class="modal-title">Create Event</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Event Title *</label><input class="form-control" id="ev-title" placeholder="Founders Dinner - Toronto"></div><div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="ev-desc" rows="3" placeholder="What is this event about?"></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Date *</label><input class="form-control" id="ev-date" type="date"></div><div class="form-group"><label class="form-label">Time</label><input class="form-control" id="ev-time" type="time"></div></div><div class="form-group"><label class="form-label">Location *</label><input class="form-control" id="ev-location" placeholder="Toronto, ON or Virtual"></div><div class="form-row"><div class="form-group"><label class="form-label">Ticket Price ($) <span>0 = Free</span></label><input class="form-control" id="ev-price" type="number" min="0" placeholder="75"></div><div class="form-group"><label class="form-label">Total Tickets *</label><input class="form-control" id="ev-count" type="number" min="1" placeholder="50"></div></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-event-btn">Create Event</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-opp-detail"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title" id="modal-opp-title">Opportunity</span><button class="modal-close">x</button></div><div class="modal-body" id="modal-opp-body"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Close</button><button class="btn btn-teal" onclick="toast(\'Application submitted!\',\'success\');closeAllModals()">Apply Now</button></div></div></div>';
 }
@@ -705,25 +706,7 @@ function bindModalForms() {
       // don't reset if already open
     }, 50);
   });
-  // photo/video preview
-  document.getElementById('cp-photo')?.addEventListener('change', e => {
-    const file = e.target.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const preview = document.getElementById('cp-photo-preview');
-      if (preview) preview.innerHTML = '<img src="' + ev.target.result + '" style="max-width:100%;max-height:200px;border-radius:var(--radius-sm);object-fit:cover">';
-    };
-    reader.readAsDataURL(file);
-  });
-  document.getElementById('cp-video')?.addEventListener('change', e => {
-    const file = e.target.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const preview = document.getElementById('cp-video-preview');
-      if (preview) preview.innerHTML = '<video src="' + ev.target.result + '" controls style="max-width:100%;max-height:180px;border-radius:var(--radius-sm)"></video>';
-    };
-    reader.readAsDataURL(file);
-  });
+
 
   $('#create-post-btn')?.addEventListener('click', () => {
     const body = $('#cp-body')?.value.trim() || '';
@@ -782,5 +765,26 @@ window.store=store; window.toast=toast;
 window.renderHome=renderHome; window.renderProfile=renderProfile;
 window.renderWheelDetail=renderWheelDetail; window.renderDealDetail=renderDealDetail;
 window.renderOppDetail=renderOppDetail;
+
+
+window.previewPostPhoto = (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const p = document.getElementById('cp-photo-preview');
+    if (p) p.innerHTML = '<img src="' + ev.target.result + '" style="max-width:100%;max-height:200px;border-radius:var(--radius-sm);object-fit:cover;display:block">';
+  };
+  reader.readAsDataURL(file);
+};
+
+window.previewPostVideo = (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const p = document.getElementById('cp-video-preview');
+    if (p) p.innerHTML = '<video src="' + ev.target.result + '" controls style="max-width:100%;max-height:180px;border-radius:var(--radius-sm);display:block"></video>';
+  };
+  reader.readAsDataURL(file);
+};
 
 document.addEventListener('DOMContentLoaded',()=>{ renderPage(); });
