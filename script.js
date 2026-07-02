@@ -593,24 +593,64 @@ function renderAnalytics(){
 window.openInviteModal=wheelId=>{
   openModal('modal-invite-wheel');
   const wheel=store.get('wheels').find(w=>w.id===wheelId);
+  if(!wheel)return;
   const memberIds=store.getWheelMembers(wheelId).map(u=>u.id);
-  const nonMembers=store.get('users').filter(u=>!memberIds.includes(u.id));
-  const list=document.getElementById('invite-member-list');
-  if(!list)return;
-  list.innerHTML=nonMembers.length?nonMembers.map(u=>
-    '<label style="display:flex;align-items:center;gap:.75rem;padding:.75rem;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;margin-bottom:.5rem">'+
-    '<input type="checkbox" value="'+u.id+'" style="width:18px;height:18px;accent-color:var(--teal);flex-shrink:0">'+
-    avatarHtml(u,'md')+
-    '<div><div style="font-size:.875rem;font-weight:600;color:var(--navy)">'+escHtml(u.name)+'</div>'+
-    '<div style="font-size:.75rem;color:var(--text-3)">'+escHtml(u.jobTitle||u.userType||u.role)+(u.location?' - '+escHtml(u.location):'')+'</div></div></label>'
-  ).join(''):'<div class="empty-state" style="padding:1.5rem">Everyone is already a member!</div>';
+  let nonMembers=store.get('users').filter(u=>!memberIds.includes(u.id)&&u.id!==store.getMe()?.id);
+
+  // Store wheelId on modal for search use
+  const modal=document.getElementById('modal-invite-wheel');
+  if(modal)modal.dataset.wheelId=wheelId;
+
+  function renderInviteList(filtered){
+    const list=document.getElementById('invite-member-list');
+    if(!list)return;
+    list.innerHTML=filtered.length?filtered.map(u=>
+      '<label style="display:flex;align-items:center;gap:.75rem;padding:.875rem;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;margin-bottom:.5rem;transition:background .15s">'+
+      '<input type="checkbox" class="invite-checkbox" value="'+u.id+'" style="width:18px;height:18px;accent-color:var(--teal);flex-shrink:0">'+
+      avatarHtml(u,'md')+
+      '<div style="flex:1;min-width:0">'+
+      '<div style="font-size:.875rem;font-weight:600;color:var(--navy)">'+escHtml(u.name)+'</div>'+
+      '<div style="font-size:.75rem;color:var(--text-3)">'+escHtml(u.jobTitle||u.userType||u.role)+(u.location?' &mdash; '+escHtml(u.location):'')+'</div>'+
+      (u.skills&&u.skills.length?'<div style="display:flex;gap:.25rem;flex-wrap:wrap;margin-top:.25rem">'+u.skills.slice(0,3).map(s=>'<span style="font-size:.6875rem;background:var(--surface-2);border-radius:99px;padding:.1rem .4rem;color:var(--text-3)">'+escHtml(s)+'</span>').join('')+'</div>':'')+
+      '</div>'+
+      '<span class="avail-badge '+(u.availability||'unavailable')+'" style="font-size:.6875rem;flex-shrink:0">'+(u.availability==='available'?'Available':u.availability==='limited'?'Limited':'Busy')+'</span>'+
+      '</label>'
+    ).join(''):
+    '<div class="empty-state" style="padding:1.5rem"><div class="empty-icon">&#x1F50D;</div><div class="empty-title">No results</div><div class="empty-desc">Try a different name or skill</div></div>';
+  }
+
+  // Initial render
+  renderInviteList(nonMembers);
+
+  // Search handler
+  const searchInput=document.getElementById('invite-search');
+  if(searchInput){
+    searchInput.value='';
+    searchInput.oninput=e=>{
+      const q=e.target.value.toLowerCase().trim();
+      const filtered=q?nonMembers.filter(u=>
+        u.name.toLowerCase().includes(q)||
+        (u.jobTitle||'').toLowerCase().includes(q)||
+        (u.skills||[]).some(s=>s.toLowerCase().includes(q))||
+        (u.location||'').toLowerCase().includes(q)||
+        (u.userType||'').toLowerCase().includes(q)
+      ):nonMembers;
+      renderInviteList(filtered);
+    };
+  }
+
+  // Send handler
   const sendBtn=document.getElementById('send-invites-btn');
   if(sendBtn)sendBtn.onclick=()=>{
-    const selected=[...list.querySelectorAll('input:checked')].map(i=>i.value);
-    if(!selected.length){toast('Select at least one person','error');return;}
+    const selected=[...document.querySelectorAll('.invite-checkbox:checked')].map(i=>i.value);
+    if(!selected.length){toast('Select at least one person to invite','error');return;}
+    const me=store.getMe();
     selected.forEach(userId=>{
-      store.addNotif(userId,'wheel_invite','<strong>'+escHtml(store.getMe().name)+'</strong> invited you to join <strong>'+escHtml(wheel.name)+'</strong>');
+      store.addNotif(userId,'wheel_invite',
+        '<strong>'+escHtml(me.name)+'</strong> invited you to join <strong>'+escHtml(wheel.name)+'</strong> &mdash; <span class="notif-accept-btn" data-wid="'+wheelId+'" style="color:var(--teal);cursor:pointer;font-weight:600" onclick="acceptWheelInvite(this)">Accept</span>'
+      );
     });
+    updateShellDynamic(store.getMe());
     toast('Invite sent to '+selected.length+' member'+(selected.length>1?'s':'')+'!','success');
     closeAllModals();
   };
@@ -650,7 +690,14 @@ function buildModals(){
   '<div class="modal-overlay" id="modal-create-deal"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Create a Deal</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Deal Title *</label><input class="form-control" id="cd-title" placeholder="Website Redesign Project"></div><div class="form-group"><label class="form-label">Counterparty (Seller) *</label><select class="form-control" id="cd-seller"><option value="">Select member...</option></select></div><div class="form-group"><label class="form-label">Scope *</label><textarea class="form-control" id="cd-scope" rows="3" placeholder="Describe what you are buying..."></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Price ($) *</label><input class="form-control" id="cd-price" type="number" min="1" placeholder="5000"></div><div class="form-group"><label class="form-label">Payment Type</label><select class="form-control" id="cd-payment-type"><option value="lump_sum">Lump Sum</option><option value="milestones">Milestones</option></select></div></div><div class="form-row"><div class="form-group"><label class="form-label">Start Date</label><input class="form-control" id="cd-start" type="date"></div><div class="form-group"><label class="form-label">End Date</label><input class="form-control" id="cd-end" type="date"></div></div><div class="form-group"><label class="form-label">Deliverables <span>one per line</span></label><textarea class="form-control" id="cd-deliverables" rows="3" placeholder="Discovery and wireframes&#10;High-fidelity mockups&#10;Developer handoff"></textarea></div><div class="form-group"><label class="form-label">Wheel</label><select class="form-control" id="cd-wheel"><option value="">None (direct deal)</option></select></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-deal-btn">Propose Deal</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-post"><div class="modal"><div class="modal-header"><span class="modal-title">New Post</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Type</label><select class="form-control" id="cp-type"><option value="post">Post</option><option value="announcement">Announcement</option><option value="referral">Referral</option></select></div><div class="form-group"><label class="form-label">Message</label><textarea class="form-control" id="cp-body" rows="3" placeholder="Share something with your Wheel... Use @name to mention someone"></textarea></div><div class="form-group"><label class="form-label">Link <span>(optional)</span></label><input class="form-control" id="cp-link" placeholder="https://..."></div><div class="form-group"><label class="form-label">Photo <span>(optional)</span></label><input type="file" id="cp-photo" accept="image/*" class="form-control" style="padding:.375rem" onchange="previewPostPhoto(event)"><div id="cp-photo-preview" style="margin-top:.5rem"></div></div><div class="form-group"><label class="form-label">Video <span>(optional)</span></label><input type="file" id="cp-video" accept="video/*" class="form-control" style="padding:.375rem" onchange="previewPostVideo(event)"><div id="cp-video-preview" style="margin-top:.5rem"></div></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-post-btn">Publish</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-event"><div class="modal"><div class="modal-header"><span class="modal-title">Create Event</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Event Title *</label><input class="form-control" id="ev-title" placeholder="Founders Dinner - Toronto"></div><div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="ev-desc" rows="3" placeholder="What is this event about?"></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Date *</label><input class="form-control" id="ev-date" type="date"></div><div class="form-group"><label class="form-label">Time</label><input class="form-control" id="ev-time" type="time"></div></div><div class="form-group"><label class="form-label">Location *</label><input class="form-control" id="ev-location" placeholder="Toronto, ON or Virtual"></div><div class="form-row"><div class="form-group"><label class="form-label">Ticket Price ($) <span>0 = Free</span></label><input class="form-control" id="ev-price" type="number" min="0" placeholder="75"></div><div class="form-group"><label class="form-label">Total Tickets *</label><input class="form-control" id="ev-count" type="number" min="1" placeholder="50"></div></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-event-btn">Create Event</button></div></div></div>'+
-  '<div class="modal-overlay" id="modal-invite-wheel"><div class="modal"><div class="modal-header"><span class="modal-title">Invite to Wheel</span><button class="modal-close">x</button></div><div class="modal-body"><p class="t-small c-text3 mb-3">Select members to invite. They will get a notification.</p><div id="invite-member-list" style="max-height:320px;overflow-y:auto"></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="send-invites-btn">Send Invites</button></div></div></div>'+
+  '<div class="modal-overlay" id="modal-invite-wheel"><div class="modal"><div class="modal-header"><span class="modal-title">Invite to Wheel</span><button class="modal-close">x</button></div><div class="modal-body">'+
+    '<div style="position:relative;margin-bottom:1rem">'+
+    '<svg style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--text-4);pointer-events:none" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'+
+    '<input class="form-control" id="invite-search" placeholder="Search by name, skill, location..." style="padding-left:2.25rem">'+
+    '</div>'+
+    '<p class="t-small c-text3 mb-2">Select people to invite. They will receive a notification.</p>'+
+    '<div id="invite-member-list" style="max-height:360px;overflow-y:auto"></div>'+
+    '</div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="send-invites-btn">Send Invites</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-opp-detail"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title" id="modal-opp-title">Opportunity</span><button class="modal-close">x</button></div><div class="modal-body" id="modal-opp-body"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Close</button><button class="btn btn-teal" onclick="toast(\'Application submitted!\',\'success\');closeAllModals()">Apply Now</button></div></div></div>'
   );
 }
@@ -719,6 +766,20 @@ function bindModalForms(){
 }
 
 // ── Boot ────────────────────────────────────────────────────────────────────
+
+window.acceptWheelInvite = el => {
+  const wid = el.dataset.wid;
+  if (!wid) return;
+  store.joinWheel(wid);
+  const w = store.get('wheels').find(x => x.id === wid);
+  toast('Joined ' + (w ? w.name : 'Wheel') + '!', 'success');
+  updateShellDynamic(store.getMe());
+  el.textContent = 'Joined!';
+  el.style.color = 'var(--green)';
+  el.style.cursor = 'default';
+  el.onclick = null;
+};
+
 window.navigate=navigate;window.openModal=openModal;window.closeAllModals=closeAllModals;
 window.store=store;window.toast=toast;window.renderHome=renderHome;
 window.renderProfile=renderProfile;window.renderWheelDetail=renderWheelDetail;
