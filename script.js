@@ -595,40 +595,44 @@ window.openInviteModal=wheelId=>{
   const wheel=store.get('wheels').find(w=>w.id===wheelId);
   if(!wheel)return;
   const memberIds=store.getWheelMembers(wheelId).map(u=>u.id);
-  let nonMembers=store.get('users').filter(u=>!memberIds.includes(u.id)&&u.id!==store.getMe()?.id);
-
-  // Store wheelId on modal for search use
-  const modal=document.getElementById('modal-invite-wheel');
-  if(modal)modal.dataset.wheelId=wheelId;
+  // Show ALL users on platform (except current user), mark existing members
+  const allUsers=store.get('users').filter(u=>u.id!==store.getMe()?.id);
 
   function renderInviteList(filtered){
     const list=document.getElementById('invite-member-list');
     if(!list)return;
-    list.innerHTML=filtered.length?filtered.map(u=>
-      '<label style="display:flex;align-items:center;gap:.75rem;padding:.875rem;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;margin-bottom:.5rem;transition:background .15s">'+
-      '<input type="checkbox" class="invite-checkbox" value="'+u.id+'" style="width:18px;height:18px;accent-color:var(--teal);flex-shrink:0">'+
+    if(!filtered.length){
+      list.innerHTML='<div class="empty-state" style="padding:1.5rem"><div class="empty-icon">&#x1F50D;</div><div class="empty-title">No results</div><div class="empty-desc">Try a different name, country, or skill</div></div>';
+      return;
+    }
+    list.innerHTML=filtered.map(u=>{
+      const isMember=memberIds.includes(u.id);
+      return '<label style="display:flex;align-items:center;gap:.75rem;padding:.875rem;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.5rem;background:'+(isMember?'var(--surface)':'var(--white)')+';opacity:'+(isMember?'.7':'1')+';cursor:'+(isMember?'default':'pointer')+'">'+
+      '<input type="checkbox" class="invite-checkbox" value="'+u.id+'" style="width:18px;height:18px;accent-color:var(--teal);flex-shrink:0" '+(isMember?'disabled':'')+'>'+
       avatarHtml(u,'md')+
       '<div style="flex:1;min-width:0">'+
       '<div style="font-size:.875rem;font-weight:600;color:var(--navy)">'+escHtml(u.name)+'</div>'+
       '<div style="font-size:.75rem;color:var(--text-3)">'+escHtml(u.jobTitle||u.userType||u.role)+(u.location?' &mdash; '+escHtml(u.location):'')+'</div>'+
       (u.skills&&u.skills.length?'<div style="display:flex;gap:.25rem;flex-wrap:wrap;margin-top:.25rem">'+u.skills.slice(0,3).map(s=>'<span style="font-size:.6875rem;background:var(--surface-2);border-radius:99px;padding:.1rem .4rem;color:var(--text-3)">'+escHtml(s)+'</span>').join('')+'</div>':'')+
       '</div>'+
-      '<span class="avail-badge '+(u.availability||'unavailable')+'" style="font-size:.6875rem;flex-shrink:0">'+(u.availability==='available'?'Available':u.availability==='limited'?'Limited':'Busy')+'</span>'+
-      '</label>'
-    ).join(''):
-    '<div class="empty-state" style="padding:1.5rem"><div class="empty-icon">&#x1F50D;</div><div class="empty-title">No results</div><div class="empty-desc">Try a different name or skill</div></div>';
+      (isMember
+        ? '<span style="font-size:.6875rem;font-weight:700;color:var(--green);background:var(--green-bg);padding:.2rem .625rem;border-radius:99px;flex-shrink:0">In Wheel</span>'
+        : '<span class="avail-badge '+(u.availability||'unavailable')+'" style="font-size:.6875rem;flex-shrink:0">'+(u.availability==='available'?'Available':u.availability==='limited'?'Limited':'Busy')+'</span>'
+      )+
+      '</label>';
+    }).join('');
   }
 
-  // Initial render
-  renderInviteList(nonMembers);
+  // Initial render - show all users
+  renderInviteList(allUsers);
 
-  // Search handler
+  // Search
   const searchInput=document.getElementById('invite-search');
   if(searchInput){
     searchInput.value='';
     searchInput.oninput=e=>{
       const q=e.target.value.toLowerCase().trim();
-      const filtered=q?nonMembers.filter(u=>
+      const filtered=q?allUsers.filter(u=>
         u.name.toLowerCase().includes(q)||
         (u.jobTitle||'').toLowerCase().includes(q)||
         (u.company||'').toLowerCase().includes(q)||
@@ -636,12 +640,12 @@ window.openInviteModal=wheelId=>{
         (u.location||'').toLowerCase().includes(q)||
         (u.userType||'').toLowerCase().includes(q)||
         (u.bio||'').toLowerCase().includes(q)
-      ):nonMembers;
+      ):allUsers;
       renderInviteList(filtered);
     };
   }
 
-  // Send handler
+  // Send
   const sendBtn=document.getElementById('send-invites-btn');
   if(sendBtn)sendBtn.onclick=()=>{
     const selected=[...document.querySelectorAll('.invite-checkbox:checked')].map(i=>i.value);
