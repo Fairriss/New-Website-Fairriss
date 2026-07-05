@@ -12,7 +12,7 @@ const timeAgo = iso => {
 const initials = n => n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
 const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-const STORE_KEY='fairriss_mvp_v3';
+const STORE_KEY='fairriss_mvp_v4';
 const SUGGESTED_WHEELS=[
   {name:'SaaS Founders',category:'Startup',emoji:'S',hex:'#0F1F3D',desc:'A private community for SaaS founders to share playbooks, deals, and referrals.'},
   {name:'AI Startups',category:'Technology',emoji:'A',hex:'#6D28D9',desc:'Founders and builders working on AI products. Share resources, intros, and opportunities.'},
@@ -812,4 +812,8 @@ window.renderProfile=renderProfile;window.renderWheelDetail=renderWheelDetail;
 window.renderDealDetail=renderDealDetail;window.renderOppDetail=renderOppDetail;
 window.createFromTemplate=createFromTemplate;
 
-document.addEventListener('DOMContentLoaded',()=>renderPage());
+document.addEventListener('DOMContentLoaded',()=>{
+  // Clear old cache versions so fresh data loads
+  ['fairriss_mvp_v1','fairriss_mvp_v2','fairriss_mvp_v3'].forEach(k=>localStorage.removeItem(k));
+  renderPage();
+});
