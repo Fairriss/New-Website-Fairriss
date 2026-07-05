@@ -346,7 +346,7 @@ function renderWheelDetail(){
   const isCreator=wheel.creatorId===store.getMe()?.id;
   const el=document.getElementById('page-wheel-detail');
   el.innerHTML=
-    '<div class="page-head"><div class="flex gap-3 items-center">'+hexBadge(wheel,44)+'<div><h1 class="page-title" style="margin-bottom:0">'+escHtml(wheel.name)+'</h1><p class="page-sub">'+escHtml(wheel.description)+'</p></div></div><div class="page-actions">'+(isCreator?'<button class="btn btn-outline btn-sm" onclick="openInviteModal(\''+wheel.id+'\')">'+icon('users')+' Invite</button><button class="btn btn-outline btn-sm" onclick="openModal(\'modal-create-event\')">+ Event</button>':'')+'<button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-post\')">+ Post</button></div></div>'+
+    '<div class="page-head"><div class="flex gap-3 items-center">'+hexBadge(wheel,44)+'<div><h1 class="page-title" style="margin-bottom:0">'+escHtml(wheel.name)+'</h1><p class="page-sub">'+escHtml(wheel.description)+'</p></div></div><div class="page-actions">'+(isCreator?'<button class="btn btn-outline btn-sm" onclick="openInviteModal(\''+wheel.id+'\')">'+icon('users')+' Invite</button><button class="btn btn-outline btn-sm" onclick="openModal(\'modal-create-event\')">+ Event</button>':'')+'<button class="btn btn-teal btn-sm" onclick="handlePostClick(\''+wheel.id+'\')">'+ icon('plus') +' Post</button></div></div>'+
     '<div class="stats-grid" style="grid-template-columns:repeat(4,1fr)"><div class="stat-card"><span class="stat-label">Members</span><span class="stat-value">'+fmt(wheel.memberCount)+'</span></div><div class="stat-card"><span class="stat-label">Opportunities</span><span class="stat-value">'+opps.length+'</span></div><div class="stat-card"><span class="stat-label">Events</span><span class="stat-value">'+events.length+'</span></div><div class="stat-card"><span class="stat-label">Commission</span><span class="stat-value">'+wheel.dealCommission+'%</span></div></div>'+
     '<div class="tabs"><div class="tab-item active" data-tab="feed">Feed</div><div class="tab-item" data-tab="members">Members ('+members.length+')</div><div class="tab-item" data-tab="opportunities">Opportunities ('+opps.length+')</div><div class="tab-item" data-tab="events">Events ('+events.length+')</div></div>'+
     '<div class="tab-panel active" id="tab-feed">'+(posts.length?posts.map(renderFeedPost).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F4DD;</div><div class="empty-title">No posts yet</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-post\')">Post Something</button></div>')+'</div>'+
@@ -631,9 +631,11 @@ window.openInviteModal=wheelId=>{
       const filtered=q?nonMembers.filter(u=>
         u.name.toLowerCase().includes(q)||
         (u.jobTitle||'').toLowerCase().includes(q)||
+        (u.company||'').toLowerCase().includes(q)||
         (u.skills||[]).some(s=>s.toLowerCase().includes(q))||
         (u.location||'').toLowerCase().includes(q)||
-        (u.userType||'').toLowerCase().includes(q)
+        (u.userType||'').toLowerCase().includes(q)||
+        (u.bio||'').toLowerCase().includes(q)
       ):nonMembers;
       renderInviteList(filtered);
     };
@@ -693,7 +695,7 @@ function buildModals(){
   '<div class="modal-overlay" id="modal-invite-wheel"><div class="modal"><div class="modal-header"><span class="modal-title">Invite to Wheel</span><button class="modal-close">x</button></div><div class="modal-body">'+
     '<div style="position:relative;margin-bottom:1rem">'+
     '<svg style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--text-4);pointer-events:none" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'+
-    '<input class="form-control" id="invite-search" placeholder="Search by name, skill, location..." style="padding-left:2.25rem">'+
+    '<input class="form-control" id="invite-search" placeholder="Search by name, country, city, job title, skill..." style="padding-left:2.25rem">'+
     '</div>'+
     '<p class="t-small c-text3 mb-2">Select people to invite. They will receive a notification.</p>'+
     '<div id="invite-member-list" style="max-height:360px;overflow-y:auto"></div>'+
@@ -766,6 +768,26 @@ function bindModalForms(){
 }
 
 // ── Boot ────────────────────────────────────────────────────────────────────
+
+
+window.handlePostClick = wheelId => {
+  const me = store.getMe();
+  if (!me) return;
+  // Check if user is a member
+  const isMember = store.isMember(wheelId);
+  if (!isMember) {
+    // Show join prompt instead of post modal
+    const wheel = store.get('wheels').find(w => w.id === wheelId);
+    if (confirm('You need to join "' + (wheel ? wheel.name : 'this Wheel') + '" before you can post. Join now?')) {
+      store.joinWheel(wheelId);
+      toast('Joined! You can now post in this Wheel.', 'success');
+      updateShellDynamic(me);
+      renderWheelDetail();
+    }
+    return;
+  }
+  openModal('modal-create-post');
+};
 
 window.acceptWheelInvite = el => {
   const wid = el.dataset.wid;
