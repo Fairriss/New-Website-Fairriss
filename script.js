@@ -193,18 +193,115 @@ function renderPostBody(text){return escHtml(text).replace(/@(\w[\w ]*)/g,'<span
 
 // ── Auth ───────────────────────────────────────────────────────────────────
 function renderAuth(){
-  document.body.innerHTML='<div class="auth-screen"><div class="auth-brand"><div class="auth-brand-logo"><svg width="38" height="38" viewBox="0 0 38 38" fill="none"><circle cx="19" cy="19" r="19" fill="currentColor"/><circle cx="19" cy="19" r="12" fill="#0F1F3D" opacity=".5"/><text x="19" y="24" text-anchor="middle" font-size="14" font-weight="900" fill="currentColor">F</text></svg><span class="auth-brand-logo-text">Fairriss</span></div><div class="auth-hex-grid"><div class="auth-hex-row"><div class="auth-hex-item">&#x1F91D;</div><div class="auth-hex-item lit">&#x1F4A1;</div></div><div class="auth-hex-row"><div class="auth-hex-item lit">&#x26A1;</div><div class="auth-hex-item">&#x1F3AF;</div><div class="auth-hex-item lit">&#x1F4B0;</div></div><div class="auth-hex-row"><div class="auth-hex-item">&#x1F517;</div><div class="auth-hex-item lit">&#x1F680;</div></div></div><p class="auth-brand-tagline">The platform where professional networks become commerce engines.</p></div><div class="auth-form-side"><h1>Welcome to Fairriss</h1><p class="auth-sub">Join the network where deals get done.</p><div class="auth-tabs"><div class="auth-tab active" data-tab="login">Sign In</div><div class="auth-tab" data-tab="signup">Create Account</div></div><div id="auth-login-form"><p class="t-body c-text3 mb-4">Demo: click any user to sign in</p><div id="demo-users" style="display:flex;flex-direction:column;gap:.5rem"></div></div><div id="auth-signup-form" class="hidden"><div class="form-stack"><div class="form-row"><div class="form-group"><label class="form-label">Full Name *</label><input class="form-control" id="su-name" placeholder="Alex Chen"></div><div class="form-group"><label class="form-label">Username *</label><input class="form-control" id="su-username" placeholder="alexchen"></div></div><div class="form-group"><label class="form-label">Email *</label><input class="form-control" id="su-email" type="email" placeholder="alex@example.com"></div><button class="btn btn-primary w-full" id="create-account-btn" style="justify-content:center;margin-top:.5rem">Create Account</button></div></div></div></div>';
-  store.get('users').forEach(u=>{
-    const btn=document.createElement('button');btn.className='btn btn-outline w-full';btn.style.cssText='justify-content:flex-start;gap:.75rem';
-    btn.innerHTML=avatarHtml(u,'md')+'<div style="text-align:left"><div class="t-body" style="font-weight:600">'+escHtml(u.name)+'</div><div class="t-small c-text3">'+(u.userType||u.role)+' - Trust '+u.trustScore+'</div></div>';
-    btn.onclick=()=>{store.login(u.id);renderPage();};$('#demo-users').appendChild(btn);
-  });
+  document.body.innerHTML='<div class="auth-screen"><div class="auth-brand"><div class="auth-brand-logo"><svg width="38" height="38" viewBox="0 0 38 38" fill="none"><circle cx="19" cy="19" r="19" fill="currentColor"/><circle cx="19" cy="19" r="12" fill="#0F1F3D" opacity=".5"/><text x="19" y="24" text-anchor="middle" font-size="14" font-weight="900" fill="currentColor">F</text></svg><span class="auth-brand-logo-text">Fairriss</span></div><div class="auth-hex-grid"><div class="auth-hex-row"><div class="auth-hex-item">&#x1F91D;</div><div class="auth-hex-item lit">&#x1F4A1;</div></div><div class="auth-hex-row"><div class="auth-hex-item lit">&#x26A1;</div><div class="auth-hex-item">&#x1F3AF;</div><div class="auth-hex-item lit">&#x1F4B0;</div></div><div class="auth-hex-row"><div class="auth-hex-item">&#x1F517;</div><div class="auth-hex-item lit">&#x1F680;</div></div></div><p class="auth-brand-tagline">The platform where professional networks become commerce engines.</p></div><div class="auth-form-side"><h1>Welcome to Fairriss</h1><p class="auth-sub">Join the network where deals get done.</p><div class="auth-tabs"><div class="auth-tab active" data-tab="login">Sign In</div><div class="auth-tab" data-tab="signup">Create Account</div></div>'+
+  '<div id="auth-login-form">'+
+  '<div class="form-stack">'+
+  '<div class="form-group"><label class="form-label">Email</label><input class="form-control" id="li-email" type="email" placeholder="you@example.com"></div>'+
+  '<div class="form-group"><label class="form-label">Password</label><input class="form-control" id="li-password" type="password" placeholder="Your password"></div>'+
+  '<div id="auth-error" style="color:var(--red);font-size:.875rem;display:none;margin-top:.5rem"></div>'+
+  '<button class="btn btn-primary w-full" id="signin-btn" style="justify-content:center;margin-top:.5rem">Sign In</button>'+
+  '<div style="text-align:center;margin-top:1rem"><button class="btn btn-ghost btn-sm" id="magic-link-btn">Send magic link instead</button></div>'+
+  '</div></div>'+
+  '<div id="auth-signup-form" class="hidden"><div class="form-stack">'+
+  '<div class="form-row"><div class="form-group"><label class="form-label">Full Name *</label><input class="form-control" id="su-name" placeholder="Alex Chen"></div><div class="form-group"><label class="form-label">Username *</label><input class="form-control" id="su-username" placeholder="alexchen"></div></div>'+
+  '<div class="form-group"><label class="form-label">Email *</label><input class="form-control" id="su-email" type="email" placeholder="alex@example.com"></div>'+
+  '<div class="form-group"><label class="form-label">Password *</label><input class="form-control" id="su-password" type="password" placeholder="Min 6 characters"></div>'+
+  '<div id="signup-error" style="color:var(--red);font-size:.875rem;display:none;margin-top:.5rem"></div>'+
+  '<button class="btn btn-primary w-full" id="create-account-btn" style="justify-content:center;margin-top:.5rem">Create Account</button>'+
+  '</div></div>'+
+  '</div></div>';
+
+  // Tab switching
   $$('.auth-tab').forEach(tab=>{tab.onclick=()=>{$$('.auth-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');$('#auth-login-form').classList.toggle('hidden',tab.dataset.tab!=='login');$('#auth-signup-form').classList.toggle('hidden',tab.dataset.tab!=='signup');};});
-  $('#create-account-btn').onclick=()=>{
-    const name=$('#su-name').value.trim(),username=$('#su-username').value.trim(),email=$('#su-email').value.trim();
-    if(!name||!username||!email){toast('Please fill in all fields','error');return;}
-    const u=store.createUser({name,username,email,role:'member',bio:'',skills:[],location:'',availability:'available'});
-    store.login(u.id);renderOnboarding();
+
+  // Sign In with Supabase
+  $('#signin-btn').onclick=async()=>{
+    const email=$('#li-email').value.trim(), password=$('#li-password').value.trim();
+    if(!email||!password){showAuthError('auth-error','Please enter your email and password.');return;}
+    $('#signin-btn').textContent='Signing in...';$('#signin-btn').disabled=true;
+    try {
+      if(window.SupabaseStore){
+        const profile = await window.SupabaseStore.login(email, password);
+        store.data.currentUser = profile.id;
+        // Sync profile into local store
+        const existing = store.data.users.find(u=>u.id===profile.id);
+        if(!existing) store.data.users.push(sbToLocal(profile));
+        else Object.assign(existing, sbToLocal(profile));
+        store._save();
+        if(!profile.user_type) renderOnboarding();
+        else renderPage();
+      } else {
+        showAuthError('auth-error','Supabase not loaded. Please refresh.');
+      }
+    } catch(e){
+      showAuthError('auth-error', e.message||'Sign in failed. Check your email and password.');
+      $('#signin-btn').textContent='Sign In';$('#signin-btn').disabled=false;
+    }
+  };
+
+  // Allow Enter key on password field
+  $('#li-password')?.addEventListener('keydown', e=>{ if(e.key==='Enter') $('#signin-btn').click(); });
+
+  // Magic link
+  $('#magic-link-btn').onclick=async()=>{
+    const email=$('#li-email').value.trim();
+    if(!email){showAuthError('auth-error','Enter your email first.');return;}
+    try {
+      await window.Auth.sendMagicLink(email);
+      showAuthError('auth-error','Magic link sent! Check your email.');
+      document.getElementById('auth-error').style.color='var(--green)';
+    } catch(e){ showAuthError('auth-error', e.message); }
+  };
+
+  // Sign Up with Supabase
+  $('#create-account-btn').onclick=async()=>{
+    const name=$('#su-name').value.trim(), username=$('#su-username').value.trim();
+    const email=$('#su-email').value.trim(), password=$('#su-password').value.trim();
+    if(!name||!username||!email||!password){showAuthError('signup-error','Please fill in all fields.');return;}
+    if(password.length<6){showAuthError('signup-error','Password must be at least 6 characters.');return;}
+    $('#create-account-btn').textContent='Creating account...';$('#create-account-btn').disabled=true;
+    try {
+      if(window.Auth){
+        const user = await window.Auth.signUp(email, password, name, username);
+        if(user){
+          // Create local profile entry
+          const newUser = store.createUser({id:user.id, name, username, email, role:'member', bio:'', skills:[], location:'', availability:'available'});
+          store.data.currentUser = user.id;
+          store._save();
+          toast('Account created! Check your email to verify.', 'success');
+          renderOnboarding();
+        }
+      }
+    } catch(e){
+      showAuthError('signup-error', e.message||'Sign up failed. Try a different email.');
+      $('#create-account-btn').textContent='Create Account';$('#create-account-btn').disabled=false;
+    }
+  };
+
+  // Allow Enter on signup password
+  $('#su-password')?.addEventListener('keydown', e=>{ if(e.key==='Enter') $('#create-account-btn').click(); });
+}
+
+function showAuthError(id, msg){
+  const el=document.getElementById(id);
+  if(el){el.textContent=msg;el.style.display='block';}
+}
+
+// Convert Supabase snake_case profile to local camelCase
+function sbToLocal(p){
+  return {
+    id:p.id, name:p.name, username:p.username, email:p.email,
+    bio:p.bio||'', jobTitle:p.job_title||'', company:p.company||'',
+    location:p.location||'', website:p.website||'',
+    userType:p.user_type, role:p.role||'member',
+    availability:p.availability||'available',
+    skills:p.skills||[], links:p.links||[], wantTo:p.want_to||[],
+    profilePics:p.profile_pics||[], introVideo:p.intro_video||'',
+    resume:p.resume||'', trustScore:p.trust_score||0,
+    deals:p.deals_count||0, revenue:p.revenue||0,
+    referralsSent:p.referrals_sent||0, referralsConverted:p.referrals_converted||0,
+    reviewAvg:p.review_avg||0, workHistory:p.work_history||[],
+    joinedAt:p.created_at
   };
 }
 
@@ -230,7 +327,7 @@ window.ob2Finish=()=>{const wantTo=[...$$('label input[type=checkbox]:checked')]
 // ── Shell ──────────────────────────────────────────────────────────────────
 function renderShell(me){
   if($('.shell')){updateShellDynamic(me);return;}
-  document.body.innerHTML='<div class="shell"><header class="header"><div class="header-logo"><div class="header-logo-mark" onclick="navigate(\'home\')" style="cursor:pointer">F</div><span class="header-logo-text" onclick="navigate(\'home\')" style="cursor:pointer">Fairriss</span></div><div class="header-search"><svg class="header-search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search members, deals, opportunities..." id="global-search"></div><div class="header-actions"><div style="position:relative"><button class="header-btn" id="notif-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-dot" id="notif-dot" style="display:none"></span></button><div class="notif-panel" id="notif-panel"></div></div><div class="header-avatar" id="header-avatar" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+initials(me.name)+'</div></div></header><aside class="sidebar"><div class="sidebar-section"><div class="sidebar-label">Navigation</div><nav><div class="nav-item" data-page="home" onclick="navigate(\'home\')">'+icon('home')+' Home</div><div class="nav-item" data-page="wheels" onclick="navigate(\'wheels\')">'+icon('wheel')+' My Wheels</div><div class="nav-item" data-page="opportunities" onclick="navigate(\'opportunities\')">'+icon('opp')+' Opportunities</div><div class="nav-item" data-page="deals" onclick="navigate(\'deals\')">'+icon('deal')+' Deals <span class="nav-badge" id="deal-badge" style="display:none"></span></div><div class="nav-item" data-page="members" onclick="navigate(\'members\')">'+icon('members')+' Find People</div><div class="nav-item" data-page="analytics" onclick="navigate(\'analytics\')">'+icon('analytics')+' Analytics</div></nav></div><div class="sidebar-section"><div class="sidebar-label">My Wheels</div><div class="sidebar-wheels" id="sidebar-wheels"></div></div><div class="sidebar-bottom"><div class="sidebar-user" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+avatarHtml(me,'sm')+'<div class="sidebar-user-info"><div class="sidebar-user-name">'+escHtml(me.name)+'</div><div class="sidebar-user-role">'+(me.userType||me.role)+' - Trust '+me.trustScore+'</div></div><button class="btn-ghost btn-xs" onclick="event.stopPropagation();store.logout();renderPage()">exit</button></div></div></aside><main class="main" id="main-content">'+PAGES.map(p=>'<div class="page fade-in" id="page-'+p+'"></div>').join('')+'</main></div><div id="toast-container" class="toast-container"></div>'+buildModals();
+  document.body.innerHTML='<div class="shell"><header class="header"><div class="header-logo"><div class="header-logo-mark" onclick="navigate(\'home\')" style="cursor:pointer">F</div><span class="header-logo-text" onclick="navigate(\'home\')" style="cursor:pointer">Fairriss</span></div><div class="header-search"><svg class="header-search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search members, deals, opportunities..." id="global-search"></div><div class="header-actions"><div style="position:relative"><button class="header-btn" id="notif-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-dot" id="notif-dot" style="display:none"></span></button><div class="notif-panel" id="notif-panel"></div></div><div class="header-avatar" id="header-avatar" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+initials(me.name)+'</div></div></header><aside class="sidebar"><div class="sidebar-section"><div class="sidebar-label">Navigation</div><nav><div class="nav-item" data-page="home" onclick="navigate(\'home\')">'+icon('home')+' Home</div><div class="nav-item" data-page="wheels" onclick="navigate(\'wheels\')">'+icon('wheel')+' My Wheels</div><div class="nav-item" data-page="opportunities" onclick="navigate(\'opportunities\')">'+icon('opp')+' Opportunities</div><div class="nav-item" data-page="deals" onclick="navigate(\'deals\')">'+icon('deal')+' Deals <span class="nav-badge" id="deal-badge" style="display:none"></span></div><div class="nav-item" data-page="members" onclick="navigate(\'members\')">'+icon('members')+' Find People</div><div class="nav-item" data-page="analytics" onclick="navigate(\'analytics\')">'+icon('analytics')+' Analytics</div></nav></div><div class="sidebar-section"><div class="sidebar-label">My Wheels</div><div class="sidebar-wheels" id="sidebar-wheels"></div></div><div class="sidebar-bottom"><div class="sidebar-user" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+avatarHtml(me,'sm')+'<div class="sidebar-user-info"><div class="sidebar-user-name">'+escHtml(me.name)+'</div><div class="sidebar-user-role">'+(me.userType||me.role)+' - Trust '+me.trustScore+'</div></div><button class="btn-ghost btn-xs" onclick="event.stopPropagation();handleLogout()">exit</button></div></div></aside><main class="main" id="main-content">'+PAGES.map(p=>'<div class="page fade-in" id="page-'+p+'"></div>').join('')+'</main></div><div id="toast-container" class="toast-container"></div>'+buildModals();
   updateShellDynamic(me);
   $('#notif-btn').onclick=()=>{const p=$('#notif-panel');p.classList.toggle('open');if(p.classList.contains('open')){renderNotifPanel();store.markNotifsRead();}};
   document.addEventListener('click',e=>{if(!e.target.closest('#notif-btn')&&!e.target.closest('#notif-panel'))$('#notif-panel')?.classList.remove('open');});
@@ -561,9 +658,15 @@ function renderProfile(){
   '</div></div></div>';
 }
 
-window.saveProfileInfo=()=>{
+window.saveProfileInfo=async()=>{
   const links=[...$$('.profile-link-input')].map(i=>i.value.trim()).filter(Boolean);
-  store.updateMe({bio:$('#profile-bio').value.trim(),jobTitle:$('#profile-title').value.trim(),company:$('#profile-company').value.trim(),website:$('#profile-website')?.value.trim()||'',links});
+  const fields={bio:$('#profile-bio').value.trim(),jobTitle:$('#profile-title').value.trim(),company:$('#profile-company').value.trim(),website:$('#profile-website')?.value.trim()||'',links};
+  // Save to local store
+  store.updateMe(fields);
+  // Save to Supabase if connected
+  if(window.SupabaseStore && store.data.currentUser){
+    try { await window.SupabaseStore.updateMe(fields); } catch(e){ console.warn('Supabase profile save failed:',e.message); }
+  }
   toast('Profile updated','success');renderProfile();
 };
 window.saveSkills=()=>{store.updateMe({skills:$('#profile-skills').value.split(',').map(s=>s.trim()).filter(Boolean)});toast('Skills updated','success');renderProfile();};
@@ -806,14 +909,75 @@ window.acceptWheelInvite = el => {
   el.onclick = null;
 };
 
+
+window.handleLogout = async () => {
+  try {
+    if(window.Auth) await window.Auth.signOut();
+    Realtime.unsubscribeAll();
+  } catch(e){ console.warn('Signout error:', e); }
+  store.logout();
+  renderPage();
+};
+
 window.navigate=navigate;window.openModal=openModal;window.closeAllModals=closeAllModals;
 window.store=store;window.toast=toast;window.renderHome=renderHome;
 window.renderProfile=renderProfile;window.renderWheelDetail=renderWheelDetail;
 window.renderDealDetail=renderDealDetail;window.renderOppDetail=renderOppDetail;
 window.createFromTemplate=createFromTemplate;
 
-document.addEventListener('DOMContentLoaded',()=>{
-  // Clear old cache versions so fresh data loads
+document.addEventListener('DOMContentLoaded', async ()=>{
+  // Clear old cache versions
   ['fairriss_mvp_v1','fairriss_mvp_v2','fairriss_mvp_v3'].forEach(k=>localStorage.removeItem(k));
+
+  // Check if user has an active Supabase session
+  if(window.SupabaseStore){
+    try {
+      const profile = await window.SupabaseStore.init();
+      if(profile){
+        // User is logged in via Supabase - sync into local store
+        store.data.currentUser = profile.id;
+        const existing = store.data.users.find(u=>u.id===profile.id);
+        if(!existing) store.data.users.push(sbToLocal(profile));
+        else Object.assign(existing, sbToLocal(profile));
+        store._save();
+
+        // Start real-time notifications
+        Realtime.subscribeToNotifications(profile.id, (notif)=>{
+          // Add to local store and update bell
+          if(!store.data.notifications) store.data.notifications=[];
+          store.data.notifications.unshift({
+            id: notif.id, userId: notif.user_id, type: notif.type,
+            text: notif.text, read: false, createdAt: notif.created_at
+          });
+          store._save();
+          updateShellDynamic(store.getMe());
+        });
+      }
+    } catch(e){ console.warn('Supabase session check failed:', e.message); }
+  }
+
   renderPage();
+
+  // Listen for auth state changes (e.g. after magic link click)
+  if(window.Auth){
+    Auth.onAuthChange(async (user)=>{
+      if(user && !store.data.currentUser){
+        try {
+          const profile = await Users.getById(user.id);
+          if(profile){
+            store.data.currentUser = profile.id;
+            const existing = store.data.users.find(u=>u.id===profile.id);
+            if(!existing) store.data.users.push(sbToLocal(profile));
+            else Object.assign(existing, sbToLocal(profile));
+            store._save();
+            renderPage();
+          }
+        } catch(e){ console.warn('Profile load failed:', e.message); }
+      } else if(!user && store.data.currentUser){
+        store.data.currentUser = null;
+        store._save();
+        renderPage();
+      }
+    });
+  }
 });
