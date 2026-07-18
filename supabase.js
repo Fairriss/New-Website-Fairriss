@@ -7,7 +7,7 @@
    ================================================================ */
 
 // ── 1. CONFIG — replace with your project values ───────────────
-const SUPABASE_URL  = 'https://kpzrvpokasqwmfeuypxv.supabase.co/rest/v1/';
+const SUPABASE_URL  = 'https://kpzrvpokasqwmfeuypxv.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwenJ2cG9rYXNxd21mZXV5cHh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2NTY0OTQsImV4cCI6MjA5NzIzMjQ5NH0.cpmbzWVF8elpFBI6DfbblGTRnJVDalMqz5_rQtiLjDU';
 
 // Both values are in: Supabase Dashboard → Project Settings → API
