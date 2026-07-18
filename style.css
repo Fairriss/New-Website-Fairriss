@@ -950,23 +950,139 @@ select.form-control { cursor: pointer; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-4); }
 
 /* ── Responsive ───────────────────────────────────────────── */
+/* ── Tablet (1100px) ──────────────────────────────────────── */
 @media (max-width: 1100px) {
   .stats-grid { grid-template-columns: repeat(2,1fr); }
   .wheel-grid { grid-template-columns: repeat(2,1fr); }
   .member-grid { grid-template-columns: repeat(2,1fr); }
   .two-col { grid-template-columns: 1fr; }
   .three-col { grid-template-columns: 1fr 1fr; }
+  .two-col-equal { grid-template-columns: 1fr; }
 }
+
+/* ── Mobile (768px) ───────────────────────────────────────── */
 @media (max-width: 768px) {
-  :root { --sidebar-w: 0px; }
+  :root {
+    --sidebar-w: 0px;
+    --header-h: 56px;
+  }
+
+  /* Shell: full width single column, no sidebar */
+  .shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: var(--header-h) 1fr auto;
+  }
+
+  /* Hide sidebar on mobile */
   .sidebar { display: none; }
-  .auth-screen { grid-template-columns: 1fr; }
-  .auth-brand { display: none; }
-  .stats-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Header */
+  .header { padding: 0 1rem; }
+  .header-logo { border-right: none; width: auto; padding: 0; }
+  .header-logo-text { display: none; }
+  .header-search { display: none; }
+
+  /* Main content */
+  .main { padding: .875rem; overflow-x: hidden; }
+
+  /* Mobile bottom nav */
+  .mobile-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    z-index: 100;
+    padding: .5rem 0 calc(.5rem + env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 12px rgba(15,31,61,.06);
+  }
+  .mobile-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .2rem;
+    padding: .375rem .25rem;
+    font-size: .625rem;
+    font-weight: 600;
+    color: var(--text-4);
+    cursor: pointer;
+    transition: color .15s;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .mobile-nav-item.active { color: var(--navy); }
+  .mobile-nav-item svg { flex-shrink: 0; }
+
+  /* Add bottom padding so content isn't hidden behind nav */
+  .main { padding-bottom: 5rem; }
+
+  /* Grids */
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: .625rem; }
   .wheel-grid { grid-template-columns: 1fr; }
   .member-grid { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
-  .main { padding: 1rem; }
+  .two-col-equal { grid-template-columns: 1fr; }
+  .reputation-grid { grid-template-columns: repeat(3,1fr); gap: .5rem; }
+
+  /* Auth */
+  .auth-screen { grid-template-columns: 1fr; min-height: 100vh; }
+  .auth-brand { display: none; }
+  .auth-form-side { padding: 2rem 1.5rem; max-width: 100%; }
+
+  /* Page head */
+  .page-head { flex-direction: column; gap: .875rem; }
+  .page-head .page-actions { width: 100%; display: flex; gap: .5rem; flex-wrap: wrap; }
+  .page-head .page-actions .btn { flex: 1; justify-content: center; }
+
+  /* Cards */
+  .card-lg { padding: 1.25rem; }
+  .stat-card { padding: 1rem; }
+  .stat-value { font-size: 1.5rem; }
+
+  /* Deal detail */
+  .two-col { grid-template-columns: 1fr; }
+
+  /* Profile header */
+  .profile-header { padding: 1.25rem !important; }
+
+  /* Opp cards */
+  .opp-card { flex-direction: column; gap: .75rem; }
+  .opp-right { text-align: left; display: flex; align-items: center; gap: 1rem; }
+
+  /* Filter bar */
+  .filter-bar { overflow-x: auto; flex-wrap: nowrap; padding-bottom: .5rem; }
+  .filter-bar::-webkit-scrollbar { display: none; }
+
+  /* Modals */
+  .modal { max-width: 100%; margin: 0; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal-lg { max-width: 100%; }
+
+  /* Deal workspace */
+  .deal-stages { gap: .125rem; }
+  .deal-detail-amount { font-size: 1.5rem; }
+
+  /* Tabs */
+  .tabs { overflow-x: auto; flex-wrap: nowrap; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-item { white-space: nowrap; padding: .625rem 1rem; }
+
+  /* Message thread */
+  .message-thread { max-height: 280px; }
+
+  /* Trust score circle on profile */
+  .trust-score-circle { width: 60px !important; height: 60px !important; }
+  .trust-score-inner { width: 44px !important; height: 44px !important; }
+  .trust-score-num-lg { font-size: 1rem !important; }
+}
+
+/* ── Small phones (380px) ─────────────────────────────────── */
+@media (max-width: 380px) {
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .stat-value { font-size: 1.25rem; }
+  .main { padding: .75rem; }
+  .auth-form-side { padding: 1.5rem 1.25rem; }
 }
 
 /* ── Animations ────────────────────────────────────────────── */
