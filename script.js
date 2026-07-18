@@ -354,11 +354,18 @@ function renderNotifPanel(){
 }
 
 // ── Home ───────────────────────────────────────────────────────────────────
-function renderHome(){
-  const me=store.getMe(),myDeals=store.getMyDeals(),wheels=store.getMyWheels();
-  const activeDeals=myDeals.filter(d=>['in_progress','accepted'].includes(d.status));
-  const allPosts=wheels.flatMap(w=>store.getPosts(w.id)).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,6);
-  const opps=store.getOpportunities().slice(0,3);
+async function renderHome(){
+  const me=store.getMe();
+  if(!me)return;
+  const [myDeals, wheels, opps] = await Promise.all([
+    store.getMyDeals(),
+    store.getMyWheels(),
+    store.getOpportunities ? store.getOpportunities({}) : Promise.resolve([])
+  ]);
+  const activeDeals=(myDeals||[]).filter(d=>['in_progress','accepted'].includes(d.status));
+  const postArrays = await Promise.all((wheels||[]).map(w=>store.getPosts(w.id)));
+  const allPosts = postArrays.flat().sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,6);
+  const topOpps=(opps||[]).slice(0,3);
   const el=document.getElementById('page-home');
   el.innerHTML=
     '<div class="page-head"><div class="page-head-left"><h1 class="page-title">Good to see you, '+escHtml(me.name.split(' ')[0])+' &#x1F44B;</h1><p class="page-sub">Here is what is happening in your network.</p></div><div class="page-actions"><button class="btn btn-outline btn-sm" onclick="openModal(\'modal-create-wheel\')">'+icon('plus')+' New Wheel</button><button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-opp\')">'+icon('plus')+' Post Opportunity</button></div></div>'+
@@ -368,7 +375,7 @@ function renderHome(){
     '</div><div><div class="flex justify-between items-center mb-3"><h2 class="t-h2">Active Deals</h2><button class="btn btn-ghost btn-sm" onclick="navigate(\'deals\')">All</button></div>'+
     (activeDeals.length?activeDeals.map(renderDealCardCompact).join(''):'<div class="card"><div class="empty-state" style="padding:1.5rem"><div class="empty-icon">&#x1F91D;</div><div class="empty-title">No active deals</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-deal\')">Create Deal</button></div></div>')+
     '<div class="flex justify-between items-center mt-4 mb-3"><h2 class="t-h2">Fresh Opportunities</h2><button class="btn btn-ghost btn-sm" onclick="navigate(\'opportunities\')">All</button></div>'+
-    opps.map(o=>'<div class="card card-sm mb-2" style="cursor:pointer" onclick="openModal(\'modal-opp-detail\');renderOppDetail(\''+o.id+'\')"><div class="flex gap-3 items-start"><div class="flex-1"><div class="t-h3 mb-1">'+escHtml(o.title)+'</div><div class="flex gap-2 items-center"><span class="type-badge type-'+o.type+'">'+o.type.replace('_',' ')+'</span><span class="t-micro c-text4">'+timeAgo(o.createdAt)+'</span></div></div><button class="btn btn-teal btn-xs" onclick="event.stopPropagation();toast(\'Application submitted!\',\'success\');this.textContent=\'Applied\';this.disabled=true">Apply</button></div></div>').join('')+
+    topOpps.map(o=>'<div class="card card-sm mb-2" style="cursor:pointer" onclick="openModal(\'modal-opp-detail\');renderOppDetail(\''+o.id+'\')"><div class="flex gap-3 items-start"><div class="flex-1"><div class="t-h3 mb-1">'+escHtml(o.title)+'</div><div class="flex gap-2 items-center"><span class="type-badge type-'+o.type+'">'+o.type.replace('_',' ')+'</span><span class="t-micro c-text4">'+timeAgo(o.createdAt)+'</span></div></div><button class="btn btn-teal btn-xs" onclick="event.stopPropagation();toast(\'Application submitted!\',\'success\');this.textContent=\'Applied\';this.disabled=true">Apply</button></div></div>').join('')+
     '</div></div>';
   $$('.post-like-btn',el).forEach(btn=>btn.onclick=()=>{store.likePost(btn.dataset.postId);renderHome();});
 }
@@ -391,10 +398,14 @@ function renderDealCardCompact(d){
 }
 
 // ── Wheels ─────────────────────────────────────────────────────────────────
-function renderWheels(){
-  const myWheels=store.getMyWheels();
-  const discoverWheels=store.get('wheels').filter(w=>!store.isMember(w.id));
-  const existingNames=store.get('wheels').map(w=>w.name.toLowerCase());
+async function renderWheels(){
+  const [myWheels, allWheels] = await Promise.all([
+    store.getMyWheels ? store.getMyWheels() : Promise.resolve([]),
+    store.getAllWheels ? store.getAllWheels() : Promise.resolve(store.get('wheels')||[])
+  ]);
+  const myWheelIds = (myWheels||[]).map(w=>w.id);
+  const discoverWheels = (allWheels||[]).filter(w=>!myWheelIds.includes(w.id));
+  const existingNames = (allWheels||[]).map(w=>w.name.toLowerCase());
   const popular=SUGGESTED_WHEELS.filter(s=>!existingNames.includes(s.name.toLowerCase())).slice(0,4);
   const el=document.getElementById('page-wheels');
   let html='<div class="page-head"><div class="page-head-left"><h1 class="page-title">My Wheels</h1><p class="page-sub">Your private network communities</p></div><div class="page-actions"><button class="btn btn-primary" onclick="openModal(\'modal-create-wheel\')">'+icon('plus')+' Create Wheel</button></div></div>';
@@ -435,11 +446,16 @@ function renderWheelCard(w,discover=false){
 }
 
 // ── Wheel Detail ───────────────────────────────────────────────────────────
-function renderWheelDetail(){
-  const wheel=store.get('wheels').find(w=>w.id===pageParams.wheelId);
+async function renderWheelDetail(){
+  const allWheels = store.getAllWheels ? await store.getAllWheels() : (store.get('wheels')||[]);
+  const wheel = allWheels.find(w=>w.id===pageParams.wheelId);
   if(!wheel){navigate('wheels');return;}
-  const members=store.getWheelMembers(wheel.id),posts=store.getPosts(wheel.id);
-  const opps=store.getOpportunities({wheelId:wheel.id}),events=store.getEvents(wheel.id);
+  const [members, posts, opps, events] = await Promise.all([
+    store.getWheelMembers ? store.getWheelMembers(wheel.id) : Promise.resolve([]),
+    store.getPosts ? store.getPosts(wheel.id) : Promise.resolve([]),
+    store.getOpportunities ? store.getOpportunities({wheelId:wheel.id}) : Promise.resolve([]),
+    store.getEvents ? store.getEvents(wheel.id) : Promise.resolve([]),
+  ]);
   const isCreator=wheel.creatorId===store.getMe()?.id;
   const el=document.getElementById('page-wheel-detail');
   el.innerHTML=
@@ -468,11 +484,23 @@ function renderEventCard(ev){
 window.buyTicketAction=eid=>{if(store.buyTicket(eid)){toast('Ticket purchased!','success');renderWheelDetail();}else toast('Sold out','error');};
 
 // ── Members / Find People ──────────────────────────────────────────────────
-function renderMembers(){
+async function renderMembers(){
   const q=(pageParams.q||'').toLowerCase();
   const filterAvail=pageParams.avail||'all';
   const filterLoc=(pageParams.loc||'').toLowerCase();
-  let members=[...store.get('users')].filter(u=>u.id!==store.getMe()?.id);
+  let members;
+  try {
+    if(window.LiveStore && window.LiveStore.isReady()){
+      members = await window.LiveStore.searchUsers(q, filterLoc);
+      members = members.filter(u=>u.id!==store.getMe()?.id);
+      if(filterAvail!=='all') members=members.filter(u=>u.availability===filterAvail);
+    } else {
+      members=[...store.get('users')].filter(u=>u.id!==store.getMe()?.id);
+      if(q) members=members.filter(u=>u.name.toLowerCase().includes(q)||(u.bio||'').toLowerCase().includes(q)||(u.skills||[]).some(s=>s.toLowerCase().includes(q))||(u.jobTitle||'').toLowerCase().includes(q));
+      if(filterAvail!=='all') members=members.filter(u=>u.availability===filterAvail);
+      if(filterLoc) members=members.filter(u=>(u.location||'').toLowerCase().includes(filterLoc));
+    }
+  } catch(e){ members=[...store.get('users')].filter(u=>u.id!==store.getMe()?.id); }
   if(q)members=members.filter(u=>
     u.name.toLowerCase().includes(q)||
     (u.bio||'').toLowerCase().includes(q)||
@@ -516,8 +544,10 @@ function renderMemberCard(u){
 }
 
 // ── Opportunities ──────────────────────────────────────────────────────────
-function renderOpportunities(){
-  const filter=pageParams.type||'all',q=pageParams.q||'',opps=store.getOpportunities({type:filter,q});
+async function renderOpportunities(){
+  const filter=pageParams.type||'all',q=pageParams.q||'';
+  let opps=[];
+  try { opps=await store.getOpportunities({type:filter,q}); } catch(e){ opps=[]; }
   const el=document.getElementById('page-opportunities');
   el.innerHTML='<div class="page-head"><div class="page-head-left"><h1 class="page-title">Opportunities</h1><p class="page-sub">'+opps.length+' open across your Wheels</p></div><div class="page-actions"><button class="btn btn-teal" onclick="openModal(\'modal-create-opp\')">'+icon('plus')+' Post Opportunity</button></div></div>'+
   '<div class="filter-bar">'+['all','job','partnership','collaboration','investment','referral','service'].map(t=>'<button class="filter-pill opp-filter-btn '+(filter===t?'active':'')+'" data-type="'+t+'"><span class="type-badge type-'+t+'" style="'+(t==='all'?'background:none;color:inherit;font-size:.8125rem;font-weight:500;padding:0':'')+'">'+t.replace('_',' ')+'</span></button>').join('')+'<div style="position:relative;margin-left:auto"><svg style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--text-4);pointer-events:none" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input class="form-control" id="opp-search" placeholder="Search..." value="'+escHtml(q)+'" style="padding-left:2.25rem;width:180px"></div></div>'+
@@ -541,8 +571,10 @@ function renderOppDetail(oppId){
 }
 
 // ── Deals ──────────────────────────────────────────────────────────────────
-function renderDeals(){
-  const deals=store.getMyDeals(),me=store.getMe(),filter=pageParams.status||'all';
+async function renderDeals(){
+  let deals=[];
+  try { deals=await store.getMyDeals(); } catch(e){ deals=[]; }
+  const me=store.getMe(),filter=pageParams.status||'all';
   const filtered=filter==='all'?deals:deals.filter(d=>d.status===filter);
   const STAGES=['proposed','negotiating','accepted','in_progress','completed','paid'];
   const el=document.getElementById('page-deals');
@@ -555,8 +587,10 @@ function renderDeals(){
   $$('.deal-filter-btn',el).forEach(btn=>btn.addEventListener('click',()=>navigate('deals',{status:btn.dataset.status})));
 }
 
-function renderDealDetail(){
-  const deal=store.getDeal(pageParams.dealId);if(!deal){navigate('deals');return;}
+async function renderDealDetail(){
+  let deal;
+  try { deal=await store.getDeal(pageParams.dealId); } catch(e){ deal=null; }
+  if(!deal){navigate('deals');return;}
   const me=store.getMe(),buyer=store.getUser(deal.buyerId),seller=store.getUser(deal.sellerId),isBuyer=deal.buyerId===me.id;
   const STAGES=['proposed','negotiating','accepted','in_progress','completed','paid'],si=STAGES.indexOf(deal.status);
   const fees=(deal.platformFeePct+deal.creatorCommissionPct)/100*deal.priceCents/100,sellerGets=deal.priceCents/100-fees;
@@ -609,8 +643,10 @@ function renderAboutCard(u,isMe){
   h+='</div>';return h;
 }
 
-function renderProfile(){
-  const userId=pageParams.userId||store.getMe()?.id,u=store.getUser(userId);
+async function renderProfile(){
+  const userId=pageParams.userId||store.getMe()?.id;
+  let u;
+  try { u=await store.getUser(userId); } catch(e){ u=null; }
   if(!u){navigate('home');return;}
   const me=store.getMe(),isMe=u.id===me?.id;
   const myDeals=store.get('deals').filter(d=>d.sellerId===u.id||d.buyerId===u.id);
@@ -681,7 +717,7 @@ window.previewPostPhoto=e=>{const file=e.target.files[0];if(!file)return;const r
 window.previewPostVideo=e=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{const p=document.getElementById('cp-video-preview');if(p)p.innerHTML='<video src="'+ev.target.result+'" controls style="max-width:100%;max-height:180px;border-radius:var(--radius-sm);display:block"></video>';};r.readAsDataURL(file);};
 
 // ── Analytics ──────────────────────────────────────────────────────────────
-function renderAnalytics(){
+async function renderAnalytics(){
   const myWheels=store.getMyWheels(),allDeals=store.get('deals').filter(d=>myWheels.some(w=>w.id===d.wheelId));
   const paid=allDeals.filter(d=>d.status==='paid'),gmv=paid.reduce((s,d)=>s+d.priceCents/100,0),fees=paid.reduce((s,d)=>s+d.priceCents/100*(d.creatorCommissionPct/100),0);
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul'],rev=[1200,2100,1800,3400,2800,4200,5100],maxRev=Math.max(...rev);
