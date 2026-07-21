@@ -191,6 +191,67 @@ function hexBadge(w,size=48){
 function dealStatusBadge(s){return '<span class="status-badge status-'+s+'"><span class="status-dot"></span>'+s.replace('_',' ')+'</span>';}
 function renderPostBody(text){return escHtml(text).replace(/@(\w[\w ]*)/g,'<span style="color:var(--teal);font-weight:600">@$1</span>');}
 
+
+// ── Reset Password Page ───────────────────────────────────────
+function renderResetPassword(){
+  document.body.innerHTML =
+  '<div style="min-height:100vh;background:var(--surface);display:flex;align-items:center;justify-content:center;padding:1.5rem">'+
+  '<div style="background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:100%;max-width:420px;overflow:hidden">'+
+  '<div style="background:var(--navy);padding:1.5rem 2rem;text-align:center">'+
+  '<h1 style="color:var(--teal);font-size:1.75rem;margin:0;letter-spacing:-.03em">Fairriss</h1>'+
+  '<p style="color:rgba(255,255,255,.6);margin:.375rem 0 0;font-size:.875rem">Set a new password</p>'+
+  '</div>'+
+  '<div style="padding:2rem">'+
+  '<div class="form-stack">'+
+  '<div class="form-group"><label class="form-label">New Password</label><input class="form-control" id="rp-password" type="password" placeholder="Min 6 characters"></div>'+
+  '<div class="form-group"><label class="form-label">Confirm Password</label><input class="form-control" id="rp-confirm" type="password" placeholder="Repeat your password"></div>'+
+  '<div id="rp-error" style="color:var(--red);font-size:.875rem;display:none"></div>'+
+  '<button class="btn btn-primary w-full" id="rp-btn" style="justify-content:center;margin-top:.5rem">Set New Password</button>'+
+  '</div></div></div></div>';
+
+  $('#rp-btn').onclick = async () => {
+    const password = $('#rp-password').value.trim();
+    const confirm  = $('#rp-confirm').value.trim();
+    const errEl    = document.getElementById('rp-error');
+
+    if(!password || password.length < 6){
+      errEl.textContent = 'Password must be at least 6 characters.';
+      errEl.style.display = 'block'; return;
+    }
+    if(password !== confirm){
+      errEl.textContent = 'Passwords do not match.';
+      errEl.style.display = 'block'; return;
+    }
+
+    $('#rp-btn').textContent = 'Updating...';
+    $('#rp-btn').disabled = true;
+
+    try {
+      const { error } = await window._supabase.auth.updateUser({ password });
+      if(error) throw error;
+      // Clear hash from URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      // Show success then redirect to login
+      document.body.innerHTML =
+        '<div style="min-height:100vh;background:var(--surface);display:flex;align-items:center;justify-content:center;padding:1.5rem">'+
+        '<div style="background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:100%;max-width:420px;padding:2rem;text-align:center">'+
+        '<div style="font-size:3rem;margin-bottom:1rem">&#x2705;</div>'+
+        '<h2 style="color:var(--navy);margin:0 0 .75rem">Password updated!</h2>'+
+        '<p style="color:var(--text-3);margin:0 0 1.5rem">Your password has been changed successfully.</p>'+
+        '<button class="btn btn-primary" onclick="renderPage()" style="justify-content:center;width:100%">Sign In</button>'+
+        '</div></div>';
+    } catch(e){
+      errEl.textContent = e.message || 'Failed to update password. Please try again.';
+      errEl.style.display = 'block';
+      $('#rp-btn').textContent = 'Set New Password';
+      $('#rp-btn').disabled = false;
+    }
+  };
+
+  // Allow Enter key
+  $('#rp-confirm')?.addEventListener('keydown', e => { if(e.key==='Enter') $('#rp-btn').click(); });
+}
+
 // ── Auth ───────────────────────────────────────────────────────────────────
 function renderAuth(){
   document.body.innerHTML='<div class="auth-screen"><div class="auth-brand"><div class="auth-brand-logo"><svg width="38" height="38" viewBox="0 0 38 38" fill="none"><circle cx="19" cy="19" r="19" fill="currentColor"/><circle cx="19" cy="19" r="12" fill="#0F1F3D" opacity=".5"/><text x="19" y="24" text-anchor="middle" font-size="14" font-weight="900" fill="currentColor">F</text></svg><span class="auth-brand-logo-text">Fairriss</span></div><div class="auth-hex-grid"><div class="auth-hex-row"><div class="auth-hex-item">&#x1F91D;</div><div class="auth-hex-item lit">&#x1F4A1;</div></div><div class="auth-hex-row"><div class="auth-hex-item lit">&#x26A1;</div><div class="auth-hex-item">&#x1F3AF;</div><div class="auth-hex-item lit">&#x1F4B0;</div></div><div class="auth-hex-row"><div class="auth-hex-item">&#x1F517;</div><div class="auth-hex-item lit">&#x1F680;</div></div></div><p class="auth-brand-tagline">The platform where professional networks become commerce engines.</p></div><div class="auth-form-side"><h1>Welcome to Fairriss</h1><p class="auth-sub">Join the network where deals get done.</p><div class="auth-tabs"><div class="auth-tab active" data-tab="login">Sign In</div><div class="auth-tab" data-tab="signup">Create Account</div></div>'+
@@ -200,7 +261,10 @@ function renderAuth(){
   '<div class="form-group"><label class="form-label">Password</label><input class="form-control" id="li-password" type="password" placeholder="Your password"></div>'+
   '<div id="auth-error" style="color:var(--red);font-size:.875rem;display:none;margin-top:.5rem"></div>'+
   '<button class="btn btn-primary w-full" id="signin-btn" style="justify-content:center;margin-top:.5rem">Sign In</button>'+
-  '<div style="text-align:center;margin-top:1rem"><button class="btn btn-ghost btn-sm" id="magic-link-btn">Send magic link instead</button></div>'+
+  '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">'+
+  '<button class="btn btn-ghost btn-sm" id="magic-link-btn">Send magic link</button>'+
+  '<a href="#" id="forgot-password-link" style="font-size:.875rem;color:var(--teal);text-decoration:none;font-weight:500">Forgot password?</a>'+
+  '</div>'+
   '</div></div>'+
   '<div id="auth-signup-form" class="hidden"><div class="form-stack">'+
   '<div class="form-row"><div class="form-group"><label class="form-label">Full Name *</label><input class="form-control" id="su-name" placeholder="Alex Chen"></div><div class="form-group"><label class="form-label">Username *</label><input class="form-control" id="su-username" placeholder="alexchen"></div></div>'+
@@ -241,6 +305,20 @@ function renderAuth(){
 
   // Allow Enter key on password field
   $('#li-password')?.addEventListener('keydown', e=>{ if(e.key==='Enter') $('#signin-btn').click(); });
+
+  // Forgot password link
+  $('#forgot-password-link').onclick = async e => {
+    e.preventDefault();
+    const email = $('#li-email').value.trim();
+    if(!email){ showAuthError('auth-error','Enter your email address first.'); return; }
+    try {
+      await window._supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://fairriss.com/reset-password'
+      });
+      showAuthError('auth-error', 'Password reset email sent! Check your inbox.');
+      document.getElementById('auth-error').style.color = 'var(--green)';
+    } catch(e){ showAuthError('auth-error', e.message); }
+  };
 
   // Magic link
   $('#magic-link-btn').onclick=async()=>{
@@ -1006,6 +1084,18 @@ document.addEventListener('DOMContentLoaded', async ()=>{
         });
       }
     } catch(e){ console.warn('Supabase session check failed:', e.message); }
+  }
+
+  // Handle password reset redirect from email link
+  const hashParams = new URLSearchParams(window.location.hash.replace('#',''));
+  const queryParams = new URLSearchParams(window.location.search);
+  const type = hashParams.get('type') || queryParams.get('type');
+  const accessToken = hashParams.get('access_token');
+
+  if(type === 'recovery' && accessToken){
+    // User clicked password reset link in email
+    renderResetPassword();
+    return;
   }
 
   renderPage();
