@@ -429,15 +429,17 @@ function renderShell(me){
   bindModalForms();
 }
 
-function updateShellDynamic(me){
+async function updateShellDynamic(me){
   const sw=$('#sidebar-wheels');
   if(sw){
-    const wheels=store.getMyWheels();
+    const wheels=await store.getMyWheels();
     sw.innerHTML=wheels.map(w=>'<div class="sidebar-wheel-item '+(pageParams.wheelId===w.id?'active':'')+'" onclick="navigate(\'wheel-detail\',{wheelId:\''+w.id+'\'})">'+hexBadge(w,24)+'<span class="sidebar-wheel-name">'+escHtml(w.name)+'</span><span class="sidebar-wheel-count">'+w.memberCount+'</span></div>').join('')+
     '<div class="sidebar-wheel-item" onclick="openModal(\'modal-create-wheel\')" style="color:var(--teal);font-weight:600;font-size:.8125rem"><span style="font-size:1.125rem">+</span> Create Wheel</div>';
   }
-  const dot=$('#notif-dot');if(dot)dot.style.display=store.getMyNotifs().some(n=>!n.read)?'block':'none';
-  const db=$('#deal-badge');if(db){const a=store.getMyDeals().filter(d=>['proposed','negotiating','in_progress'].includes(d.status));db.textContent=a.length||'';db.style.display=a.length?'inline-flex':'none';}
+  const dot=$('#notif-dot');
+  if(dot){try{const notifs=await store.getMyNotifs();dot.style.display=notifs.some(n=>!n.read)?'block':'none';}catch(e){}}
+  const db=$('#deal-badge');
+  if(db){try{const deals=await store.getMyDeals();const a=deals.filter(d=>['proposed','negotiating','in_progress'].includes(d.status));db.textContent=a.length||'';db.style.display=a.length?'inline-flex':'none';}catch(e){}}
 }
 
 function renderNotifPanel(){
