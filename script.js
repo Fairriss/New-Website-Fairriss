@@ -712,7 +712,7 @@ async function renderDealDetail(){
   $('#deal-msg-send').onclick=sendMsg;$('#deal-msg-input').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}};
   const t=$('#deal-messages');if(t)t.scrollTop=t.scrollHeight;
 }
-window.updateDealStatus=(id,status)=>{store.updateDeal(id,{status});toast('Deal moved to '+status.replace('_',' '),'success');updateShellDynamic(store.getMe());renderDealDetail();};
+window.updateDealStatus=async(id,status)=>{await store.updateDeal(id,{status});toast('Deal moved to '+status.replace('_',' '),'success');updateShellDynamic(store.getMe());renderDealDetail();};
 
 // ── Profile ────────────────────────────────────────────────────────────────
 function renderAboutCard(u,isMe){
@@ -799,7 +799,7 @@ window.saveProfileInfo=async()=>{
   }
   toast('Profile updated','success');renderProfile();
 };
-window.saveSkills=()=>{store.updateMe({skills:$('#profile-skills').value.split(',').map(s=>s.trim()).filter(Boolean)});toast('Skills updated','success');renderProfile();};
+window.saveSkills=async()=>{await store.updateMe({skills:$('#profile-skills').value.split(',').map(s=>s.trim()).filter(Boolean)});toast('Skills updated','success');renderProfile();};
 window.addLinkField=()=>{const list=document.getElementById('profile-links-list');if(!list)return;const div=document.createElement('div');div.style.cssText='display:flex;gap:.5rem;align-items:center';div.innerHTML='<input class="form-control profile-link-input" placeholder="https://..." style="flex:1"><button class="btn btn-ghost btn-xs" onclick="this.parentElement.remove()" style="color:var(--red)">Remove</button>';list.appendChild(div);};
 window.removeLink=(i)=>{const me=store.getMe(),links=[...(me.links||[])];links.splice(i,1);store.updateMe({links});toast('Link removed','success');renderProfile();};
 window.addJob=()=>{const title=$('#job-title').value.trim(),company=$('#job-company').value.trim();if(!title||!company){toast('Title and company required','error');return;}const me=store.getMe();const history=[...(me.workHistory||[]),{id:uid(),title,company,from:$('#job-from').value.trim()||'',to:$('#job-to').value.trim()||'Present',desc:$('#job-desc').value.trim()}];store.updateMe({workHistory:history});toast('Position added','success');renderProfile();};
@@ -937,6 +937,7 @@ function buildModals(){
     '<p class="t-small c-text3 mb-2">Select people to invite. They will receive a notification.</p>'+
     '<div id="invite-member-list" style="max-height:360px;overflow-y:auto"></div>'+
     '</div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="send-invites-btn">Send Invites</button></div></div></div>'+
+  '<div class="modal-overlay" id="modal-payment"><div class="modal"><div class="modal-header"><span class="modal-title">Complete Payment</span><button class="modal-close">x</button></div><div class="modal-body" id="payment-modal-body"><div style="text-align:center;padding:2rem;color:var(--text-3)">Loading payment...</div></div></div></div>'+
   '<div class="modal-overlay" id="modal-opp-detail"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title" id="modal-opp-title">Opportunity</span><button class="modal-close">x</button></div><div class="modal-body" id="modal-opp-body"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Close</button><button class="btn btn-teal" onclick="toast(\'Application submitted!\',\'success\');closeAllModals()">Apply Now</button></div></div></div>'
   );
 }
@@ -1048,6 +1049,120 @@ window.handleLogout = async () => {
   store.logout();
   renderPage();
 };
+
+
+// ================================================================
+// STRIPE PAYMENTS
+// ================================================================
+const STRIPE_PK = 'pk_test_51TwRBCBcFQ7cg5YhnfyYN61re3AVzbuN8aFJIGieFaxESfSjx61zCLCasYXG7RaOyDfDtXcqC5Y57iBYQFlrdAwg00dX4e24yw'; // Replace with your pk_test_ key
+let _stripe = null;
+
+function getStripe(){
+  if(!_stripe && window.Stripe) _stripe = window.Stripe(STRIPE_PK);
+  return _stripe;
+}
+
+// Call Supabase Edge Function
+async function callStripeFunction(action, params){
+  const { data: { session } } = await window._supabase.auth.getSession();
+  const res = await fetch('https://kpzrvpokasqwmfeuypxv.supabase.co/functions/v1/stripe-payment', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + session?.access_token,
+    },
+    body: JSON.stringify({ action, ...params }),
+  });
+  const data = await res.json();
+  if(data.error) throw new Error(data.error);
+  return data;
+}
+
+// Open payment modal for a deal
+window.openPaymentModal = async (dealId) => {
+  const deal = await store.getDeal(dealId);
+  if(!deal){ toast('Deal not found', 'error'); return; }
+
+  const me = store.getMe();
+  if(!me || me.id !== deal.buyerId){ toast('Only the buyer can make payment', 'error'); return; }
+
+  // Show payment modal
+  openModal('modal-payment');
+  const body = document.getElementById('payment-modal-body');
+  if(body) body.innerHTML = '<div style="text-align:center;padding:2rem"><div style="font-size:2rem;margin-bottom:1rem">&#x1F4B3;</div><div class="t-h3 mb-2">'+escHtml(deal.title)+'</div><div style="font-size:1.75rem;font-weight:900;color:var(--navy);margin-bottom:.5rem">'+fmtMoney(deal.priceCents/100)+'</div><div class="t-small c-text3 mb-4">Fairriss holds payment in escrow until you approve the work</div><div id="payment-element-container" style="margin-bottom:1rem"></div><div id="payment-error" style="color:var(--red);font-size:.875rem;margin-bottom:.75rem;display:none"></div><button class="btn btn-teal w-full" id="pay-now-btn" style="justify-content:center">Pay '+fmtMoney(deal.priceCents/100)+'</button><div style="display:flex;align-items:center;justify-content:center;gap:.5rem;margin-top:1rem;color:var(--text-4);font-size:.75rem"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Secured by Stripe</div></div>';
+
+  try {
+    const { clientSecret } = await callStripeFunction('create_payment_intent', {
+      dealId,
+      amount: deal.priceCents,
+      currency: deal.currency?.toLowerCase() || 'usd',
+      sellerId: deal.sellerId,
+      buyerEmail: me.email,
+    });
+
+    const stripe = getStripe();
+    if(!stripe){ toast('Stripe not loaded', 'error'); return; }
+
+    const elements = stripe.elements({ clientSecret, appearance: { theme: 'stripe' } });
+    const paymentElement = elements.create('payment');
+    paymentElement.mount('#payment-element-container');
+
+    document.getElementById('pay-now-btn').onclick = async () => {
+      const btn = document.getElementById('pay-now-btn');
+      btn.textContent = 'Processing...'; btn.disabled = true;
+      const errEl = document.getElementById('payment-error');
+
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: { return_url: 'https://fairriss.com?payment=success&deal='+dealId },
+        redirect: 'if_required',
+      });
+
+      if(error){
+        errEl.textContent = error.message; errEl.style.display = 'block';
+        btn.textContent = 'Pay '+fmtMoney(deal.priceCents/100); btn.disabled = false;
+      } else {
+        closeAllModals();
+        toast('Payment successful! Funds held in escrow.', 'success');
+        store.updateDeal(dealId, { status: 'in_progress', stripeStatus: 'succeeded' });
+        navigate('deal-detail', { dealId });
+      }
+    };
+  } catch(e){
+    const body = document.getElementById('payment-modal-body');
+    if(body) body.innerHTML = '<div class="empty-state" style="padding:2rem"><div class="empty-icon">&#x26A0;</div><div class="empty-title">'+escHtml(e.message)+'</div><div class="empty-desc">Make sure the seller has connected their bank account first.</div></div>';
+  }
+};
+
+// Seller: connect bank account
+window.connectBankAccount = async () => {
+  const me = store.getMe();
+  if(!me){ toast('Please sign in first', 'error'); return; }
+  try {
+    toast('Setting up your payout account...', 'default');
+    const { url } = await callStripeFunction('create_connect_account', {
+      userId: me.id,
+      email: me.email,
+      name: me.name,
+    });
+    window.open(url, '_blank');
+  } catch(e){ toast(e.message, 'error'); }
+};
+
+// Check if payment success on page load
+window.addEventListener('load', () => {
+  const params = new URLSearchParams(window.location.search);
+  if(params.get('payment') === 'success'){
+    const dealId = params.get('deal');
+    toast('Payment successful! Funds held in escrow.', 'success');
+    window.history.replaceState({}, '', window.location.pathname);
+    if(dealId) navigate('deal-detail', { dealId });
+  }
+  if(params.get('stripe') === 'success'){
+    toast('Bank account connected! You can now receive payments.', 'success');
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+});
 
 window.goProfile=()=>{const me=store.getMe();if(me)navigate('profile',{userId:me.id});};window.navigate=navigate;window.openModal=openModal;window.closeAllModals=closeAllModals;
 window.store=store;window.toast=toast;window.renderHome=renderHome;
