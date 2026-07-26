@@ -958,6 +958,31 @@ select.form-control { cursor: pointer; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-4); }
 
 /* ── Responsive ───────────────────────────────────────────── */
+
+/* ── Auth Page ────────────────────────────────────────────── */
+.auth-page-wrap {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .auth-page-wrap {
+    grid-template-columns: 1fr;
+    grid-template-rows: 280px 1fr;
+  }
+  .auth-page-wrap > div:first-child {
+    min-height: 280px !important;
+    height: 280px !important;
+  }
+  .auth-page-wrap > div:last-child {
+    height: auto !important;
+    padding: 2rem 1.5rem !important;
+    overflow-y: auto;
+  }
+}
+
 /* ── Tablet (1100px) ──────────────────────────────────────── */
 @media (max-width: 1100px) {
   .stats-grid { grid-template-columns: repeat(2,1fr); }
@@ -1060,7 +1085,6 @@ select.form-control { cursor: pointer; }
 
   /* Auth */
   .auth-screen { grid-template-columns: 1fr; min-height: 100vh; }
-  .auth-brand { display: none; }
   .auth-form-side { padding: 2rem 1.5rem; max-width: 100%; }
 
   /* Page head */
