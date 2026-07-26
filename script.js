@@ -12,7 +12,7 @@ const timeAgo = iso => {
 const initials = n => n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
 const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-const STORE_KEY='fairriss_mvp_v4';
+const STORE_KEY='fairriss_mvp_v5';
 const SUGGESTED_WHEELS=[
   {name:'SaaS Founders',category:'Startup',emoji:'S',hex:'#0F1F3D',desc:'A private community for SaaS founders to share playbooks, deals, and referrals.'},
   {name:'AI Startups',category:'Technology',emoji:'A',hex:'#6D28D9',desc:'Founders and builders working on AI products. Share resources, intros, and opportunities.'},
@@ -333,7 +333,7 @@ function renderPrivacy(){
 // ── Auth ───────────────────────────────────────────────────────────────────
 function renderAuth(){
   document.body.innerHTML = `
-    <div style="min-height:100vh;display:grid;grid-template-columns:1fr 1fr;overflow:hidden">
+    <div style="min-height:100vh;display:grid;grid-template-columns:1fr 1fr;overflow:hidden" class="auth-page-wrap">
 
       <!-- LEFT: Image -->
       <div style="position:relative;min-height:100vh;overflow:hidden">
