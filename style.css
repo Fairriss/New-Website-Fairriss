@@ -100,6 +100,7 @@ ul, ol { list-style: none; }
   min-height: 100vh;
   display: grid;
   grid-template-columns: 1fr 1fr;
+  overflow: hidden;
 }
 .auth-brand {
   background: var(--navy);
@@ -110,6 +111,7 @@ ul, ol { list-style: none; }
   padding: 0;
   position: relative;
   overflow: hidden;
+  height: 100vh;
   min-height: 100vh;
 }
 .auth-brand::before {
@@ -145,12 +147,16 @@ ul, ol { list-style: none; }
 
 .auth-form-side {
   background: var(--white);
-  display: flex; flex-direction: column;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   padding: 4rem 3rem;
-  max-width: 480px;
+  max-width: 520px;
   margin: 0 auto;
   width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 .auth-form-side h1 { font-size: 1.75rem; font-weight: 800; letter-spacing: -.025em; margin-bottom: .5rem; }
 .auth-form-side p.auth-sub { color: var(--text-3); font-size: .9375rem; margin-bottom: 2rem; }
