@@ -53,7 +53,8 @@ const DEFAULT_DATA={
     {wheelId:'w3',userId:'u3',status:'active',joinedAt:'2024-03-15T00:00:00Z'},
   ],
   opportunities:[
-    {id:'o1',creatorId:'u5',wheelIds:['w1'],type:'job',title:'Head of Product',description:'We are looking for a seasoned product leader to own the entire roadmap for Nova SaaS. Remote-first culture.',skills:['Product Management','SaaS','Analytics'],location:'Remote',remoteOk:true,status:'open',metadata:{salaryMin:140000,salaryMax:180000,type:'full-time'},viewCount:48,applicationCount:7,expiresAt:'2025-09-01T00:00:00Z',createdAt:'2025-07-01T10:00:00Z'},
+    {id:'o1',creatorId:'u5',wheelIds:['w1'],type:'job',title:'Head of Product — Nova SaaS',description:'We are looking for a seasoned product leader to own the entire roadmap for Nova SaaS. Remote-first, great team, strong equity package.',skills:['Product Management','SaaS','Analytics','Roadmapping'],location:'Remote',remoteOk:true,status:'open',metadata:{salaryMin:140000,salaryMax:180000,type:'full-time'},viewCount:48,applicationCount:7,expiresAt:'2026-09-01T00:00:00Z',createdAt:'2026-07-01T10:00:00Z'},
+    {id:'o1b',creatorId:'u5',wheelIds:['w1'],type:'job',title:'Head of Product',description:'We are looking for a seasoned product leader to own the entire roadmap for Nova SaaS. Remote-first culture.',skills:['Product Management','SaaS','Analytics'],location:'Remote',remoteOk:true,status:'open',metadata:{salaryMin:140000,salaryMax:180000,type:'full-time'},viewCount:48,applicationCount:7,expiresAt:'2025-09-01T00:00:00Z',createdAt:'2025-07-01T10:00:00Z'},
     {id:'o2',creatorId:'u2',wheelIds:['w1','w2'],type:'referral',title:'Senior iOS Engineer at Relay',description:'Relay is building the next generation of B2B payments. Great team, solid equity, full remote.',skills:['iOS','Swift','SwiftUI'],location:'Remote',remoteOk:true,status:'open',metadata:{bonus:500},viewCount:31,applicationCount:4,expiresAt:'2025-08-15T00:00:00Z',createdAt:'2025-07-03T14:30:00Z'},
     {id:'o3',creatorId:'u3',wheelIds:['w1'],type:'collaboration',title:'CTO Co-Founder for EdTech Startup',description:'I have a working prototype and an LOI from a school district. Looking for a technical co-founder.',skills:['React Native','Node.js','EdTech'],location:'Remote',remoteOk:true,status:'open',metadata:{equity:'25-35%'},viewCount:19,applicationCount:2,expiresAt:'2025-09-30T00:00:00Z',createdAt:'2025-07-04T09:00:00Z'},
     {id:'o4',creatorId:'u1',wheelIds:['w1'],type:'service',title:'Brand Identity Package for Q3 Launch',description:'Looking for a brand designer to create a complete identity: wordmark, icon, color system, type system.',skills:['Brand Design','Logo Design','Typography'],location:'Remote',remoteOk:true,status:'open',metadata:{budgetMin:2000,budgetMax:4000},viewCount:22,applicationCount:5,expiresAt:'2025-07-31T00:00:00Z',createdAt:'2025-07-05T11:00:00Z'},
@@ -252,6 +253,83 @@ function renderResetPassword(){
   $('#rp-confirm')?.addEventListener('keydown', e => { if(e.key==='Enter') $('#rp-btn').click(); });
 }
 
+
+// ── Terms of Service ──────────────────────────────────────────
+function renderTerms(){
+  document.body.innerHTML='<div style="max-width:800px;margin:0 auto;padding:2rem;font-family:Arial,sans-serif">'+
+  '<div style="background:#0F1F3D;border-radius:12px;padding:1.5rem 2rem;margin-bottom:2rem;display:flex;align-items:center;gap:1rem">'+
+  '<span style="color:#00C9A7;font-size:1.5rem;font-weight:900;cursor:pointer" onclick="renderPage()">Fairriss</span>'+
+  '<span style="color:rgba(255,255,255,.4)">|</span>'+
+  '<span style="color:rgba(255,255,255,.7);font-size:.9375rem">Terms of Service</span>'+
+  '<button onclick="renderPage()" style="margin-left:auto;background:rgba(255,255,255,.1);border:none;color:#fff;padding:.5rem 1rem;border-radius:6px;cursor:pointer">Back to Fairriss</button>'+
+  '</div>'+
+  '<h1 style="color:#0F1F3D;margin-bottom:.5rem">Terms of Service</h1>'+
+  '<p style="color:#64748B;margin-bottom:2rem">Last updated: '+new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+'</p>'+
+  '<div style="line-height:1.8;color:#374151">'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">1. Acceptance of Terms</h2>'+
+  '<p>By accessing or using Fairriss ("the Platform"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Platform.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">2. Description of Service</h2>'+
+  '<p>Fairriss is a network-commerce platform that enables professionals to create private communities called "Wheels," post opportunities, and transact with each other through our escrow-based deal system.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">3. User Accounts</h2>'+
+  '<p>You must provide accurate information when creating an account. You are responsible for maintaining the confidentiality of your account credentials and for all activity under your account.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">4. Payments and Fees</h2>'+
+  '<p>Fairriss charges a 10% platform fee on all completed deals. Payments are processed through Stripe and held in escrow until the buyer approves the completed work. All fees are non-refundable except in cases of dispute resolution in your favour.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">5. Prohibited Conduct</h2>'+
+  '<p>You may not use the Platform to: (a) violate any law or regulation; (b) post false or misleading content; (c) harass or harm other users; (d) circumvent the platform fee by transacting off-platform; (e) create multiple accounts to abuse the system.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">6. Disputes</h2>'+
+  '<p>In the event of a dispute between buyer and seller, Fairriss will review the evidence provided by both parties and make a final determination. Fairriss reserves the right to issue refunds or release funds at its sole discretion.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">7. Intellectual Property</h2>'+
+  '<p>You retain ownership of content you post. By posting, you grant Fairriss a non-exclusive license to display your content on the Platform.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">8. Termination</h2>'+
+  '<p>Fairriss reserves the right to suspend or terminate any account that violates these terms, with or without notice.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">9. Limitation of Liability</h2>'+
+  '<p>Fairriss is not liable for any indirect, incidental, or consequential damages arising from your use of the Platform. Our total liability shall not exceed the fees paid by you in the 12 months preceding the claim.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">10. Contact</h2>'+
+  '<p>For questions about these terms, contact us at <a href="mailto:hello@fairriss.com" style="color:#00C9A7">hello@fairriss.com</a></p>'+
+  '</div>'+
+  '<div style="margin-top:3rem;padding-top:1.5rem;border-top:1px solid #E2E8F0;text-align:center;color:#94A3B8;font-size:.875rem">'+
+  '&copy; '+new Date().getFullYear()+' Fairriss. All rights reserved. &nbsp;|&nbsp; <a href="#" onclick="renderPrivacy()" style="color:#00C9A7">Privacy Policy</a>'+
+  '</div></div>';
+}
+
+// ── Privacy Policy ────────────────────────────────────────────
+function renderPrivacy(){
+  document.body.innerHTML='<div style="max-width:800px;margin:0 auto;padding:2rem;font-family:Arial,sans-serif">'+
+  '<div style="background:#0F1F3D;border-radius:12px;padding:1.5rem 2rem;margin-bottom:2rem;display:flex;align-items:center;gap:1rem">'+
+  '<span style="color:#00C9A7;font-size:1.5rem;font-weight:900;cursor:pointer" onclick="renderPage()">Fairriss</span>'+
+  '<span style="color:rgba(255,255,255,.4)">|</span>'+
+  '<span style="color:rgba(255,255,255,.7);font-size:.9375rem">Privacy Policy</span>'+
+  '<button onclick="renderPage()" style="margin-left:auto;background:rgba(255,255,255,.1);border:none;color:#fff;padding:.5rem 1rem;border-radius:6px;cursor:pointer">Back to Fairriss</button>'+
+  '</div>'+
+  '<h1 style="color:#0F1F3D;margin-bottom:.5rem">Privacy Policy</h1>'+
+  '<p style="color:#64748B;margin-bottom:2rem">Last updated: '+new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+'</p>'+
+  '<div style="line-height:1.8;color:#374151">'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">1. Information We Collect</h2>'+
+  '<p>We collect information you provide directly: name, email, profile details, skills, and location. We also collect usage data such as pages visited, deals created, and interactions on the Platform.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">2. How We Use Your Information</h2>'+
+  '<p>We use your information to: operate and improve the Platform; process payments; send transactional emails (confirmations, deal updates, password resets); and show your profile to other members.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">3. Information Sharing</h2>'+
+  '<p>We do not sell your personal data. We share information with: Stripe (payment processing); Supabase (database hosting); Resend (email delivery). All third parties are bound by their own privacy policies.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">4. Profile Visibility</h2>'+
+  '<p>Your name, profile photo, job title, skills, and location are visible to other Fairriss members. Your email address and revenue are never shown to other users.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">5. Data Security</h2>'+
+  '<p>We use industry-standard security including encrypted connections (HTTPS), Row Level Security on our database, and secure payment processing through Stripe. We never store payment card details.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">6. Data Retention</h2>'+
+  '<p>We retain your data for as long as your account is active. You may request deletion of your account and data by emailing hello@fairriss.com.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">7. Cookies</h2>'+
+  '<p>We use essential cookies for authentication. We do not use advertising or tracking cookies.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">8. Your Rights</h2>'+
+  '<p>You have the right to access, correct, or delete your personal data. Contact us at <a href="mailto:hello@fairriss.com" style="color:#00C9A7">hello@fairriss.com</a> to exercise these rights.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">9. Changes to This Policy</h2>'+
+  '<p>We may update this policy from time to time. We will notify you of significant changes by email.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">10. Contact</h2>'+
+  '<p>For privacy questions, contact us at <a href="mailto:hello@fairriss.com" style="color:#00C9A7">hello@fairriss.com</a></p>'+
+  '</div>'+
+  '<div style="margin-top:3rem;padding-top:1.5rem;border-top:1px solid #E2E8F0;text-align:center;color:#94A3B8;font-size:.875rem">'+
+  '&copy; '+new Date().getFullYear()+' Fairriss. All rights reserved. &nbsp;|&nbsp; <a href="#" onclick="renderTerms()" style="color:#00C9A7">Terms of Service</a>'+
+  '</div></div>';
+}
+
 // ── Auth ───────────────────────────────────────────────────────────────────
 function renderAuth(){
   document.body.innerHTML='<div class="auth-screen"><div class="auth-brand"><div class="auth-brand-logo"><svg width="38" height="38" viewBox="0 0 38 38" fill="none"><circle cx="19" cy="19" r="19" fill="currentColor"/><circle cx="19" cy="19" r="12" fill="#0F1F3D" opacity=".5"/><text x="19" y="24" text-anchor="middle" font-size="14" font-weight="900" fill="currentColor">F</text></svg><span class="auth-brand-logo-text">Fairriss</span></div><div class="auth-hex-grid"><div class="auth-hex-row"><div class="auth-hex-item">&#x1F91D;</div><div class="auth-hex-item lit">&#x1F4A1;</div></div><div class="auth-hex-row"><div class="auth-hex-item lit">&#x26A1;</div><div class="auth-hex-item">&#x1F3AF;</div><div class="auth-hex-item lit">&#x1F4B0;</div></div><div class="auth-hex-row"><div class="auth-hex-item">&#x1F517;</div><div class="auth-hex-item lit">&#x1F680;</div></div></div><p class="auth-brand-tagline">The platform where professional networks become commerce engines.</p></div><div class="auth-form-side"><h1>Welcome to Fairriss</h1><p class="auth-sub">Join the network where deals get done.</p><div class="auth-tabs"><div class="auth-tab active" data-tab="login">Sign In</div><div class="auth-tab" data-tab="signup">Create Account</div></div>'+
@@ -272,6 +350,7 @@ function renderAuth(){
   '<div class="form-group"><label class="form-label">Password *</label><input class="form-control" id="su-password" type="password" placeholder="Min 6 characters"></div>'+
   '<div id="signup-error" style="color:var(--red);font-size:.875rem;display:none;margin-top:.5rem"></div>'+
   '<button class="btn btn-primary w-full" id="create-account-btn" style="justify-content:center;margin-top:.5rem">Create Account</button>'+
+  '<p style="font-size:.75rem;color:var(--text-4);text-align:center;margin-top:1rem">By signing up you agree to our <a href="#" onclick="renderTerms()" style="color:var(--teal)">Terms of Service</a> and <a href="#" onclick="renderPrivacy()" style="color:var(--teal)">Privacy Policy</a></p>'+
   '</div></div>'+
   '</div></div>';
 
@@ -405,7 +484,7 @@ window.ob2Finish=()=>{const wantTo=[...$$('label input[type=checkbox]:checked')]
 // ── Shell ──────────────────────────────────────────────────────────────────
 function renderShell(me){
   if($('.shell')){updateShellDynamic(me);return;}
-  document.body.innerHTML='<div class="shell"><header class="header"><div class="header-logo"><div class="header-logo-mark" onclick="navigate(\'home\')" style="cursor:pointer">F</div><span class="header-logo-text" onclick="navigate(\'home\')" style="cursor:pointer">Fairriss</span></div><div class="header-search"><svg class="header-search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search members, deals, opportunities..." id="global-search"></div><div class="header-actions"><div style="position:relative"><button class="header-btn" id="notif-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-dot" id="notif-dot" style="display:none"></span></button><div class="notif-panel" id="notif-panel"></div></div><div class="header-avatar" id="header-avatar" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+initials(me.name)+'</div></div></header><aside class="sidebar"><div class="sidebar-section"><div class="sidebar-label">Navigation</div><nav><div class="nav-item" data-page="home" onclick="navigate(\'home\')">'+icon('home')+' Home</div><div class="nav-item" data-page="wheels" onclick="navigate(\'wheels\')">'+icon('wheel')+' My Wheels</div><div class="nav-item" data-page="opportunities" onclick="navigate(\'opportunities\')">'+icon('opp')+' Opportunities</div><div class="nav-item" data-page="deals" onclick="navigate(\'deals\')">'+icon('deal')+' Deals <span class="nav-badge" id="deal-badge" style="display:none"></span></div><div class="nav-item" data-page="members" onclick="navigate(\'members\')">'+icon('members')+' Find People</div><div class="nav-item" data-page="analytics" onclick="navigate(\'analytics\')">'+icon('analytics')+' Analytics</div></nav></div><div class="sidebar-section"><div class="sidebar-label">My Wheels</div><div class="sidebar-wheels" id="sidebar-wheels"></div></div><div class="sidebar-bottom"><div class="sidebar-user" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+avatarHtml(me,'sm')+'<div class="sidebar-user-info"><div class="sidebar-user-name">'+escHtml(me.name)+'</div><div class="sidebar-user-role">'+(me.userType||me.role)+' - Trust '+me.trustScore+'</div></div><button class="btn-ghost btn-xs" onclick="event.stopPropagation();handleLogout()">exit</button></div></div></aside><main class="main" id="main-content">'+PAGES.map(p=>'<div class="page fade-in" id="page-'+p+'"></div>').join('')+'</main>'+
+  document.body.innerHTML='<div class="shell"><header class="header"><div class="header-logo"><div class="header-logo-mark" onclick="navigate(\'home\')" style="cursor:pointer">F</div><span class="header-logo-text" onclick="navigate(\'home\')" style="cursor:pointer">Fairriss</span></div><div class="header-search"><svg class="header-search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search members, deals, opportunities..." id="global-search"></div><div class="header-actions"><div style="position:relative"><button class="header-btn" id="notif-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-dot" id="notif-dot" style="display:none"></span></button><div class="notif-panel" id="notif-panel"></div></div><div class="header-avatar" id="header-avatar" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+initials(me.name)+'</div></div></header><aside class="sidebar"><div class="sidebar-section"><div class="sidebar-label">Navigation</div><nav><div class="nav-item" data-page="home" onclick="navigate(\'home\')">'+icon('home')+' Home</div><div class="nav-item" data-page="wheels" onclick="navigate(\'wheels\')">'+icon('wheel')+' My Wheels</div><div class="nav-item" data-page="opportunities" onclick="navigate(\'opportunities\')">'+icon('opp')+' Opportunities</div><div class="nav-item" data-page="deals" onclick="navigate(\'deals\')">'+icon('deal')+' Deals <span class="nav-badge" id="deal-badge" style="display:none"></span></div><div class="nav-item" data-page="members" onclick="navigate(\'members\')">'+icon('members')+' Find People</div><div class="nav-item" data-page="analytics" onclick="navigate(\'analytics\')">'+icon('analytics')+' Analytics</div></nav></div><div class="sidebar-section"><div class="sidebar-label">My Wheels</div><div class="sidebar-wheels" id="sidebar-wheels"></div></div><div class="sidebar-bottom"><div class="sidebar-user" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+avatarHtml(me,'sm')+'<div class="sidebar-user-info"><div class="sidebar-user-name">'+escHtml(me.name)+'</div><div class="sidebar-user-role">'+(me.userType||me.role)+' - Trust '+me.trustScore+'</div></div><button class="btn-ghost btn-xs" onclick="event.stopPropagation();handleLogout()">exit</button></div><div style="padding:.625rem 1.25rem;border-top:1px solid var(--border);display:flex;gap:1rem"><a href="#" onclick="renderTerms()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Terms</a><a href="#" onclick="renderPrivacy()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Privacy</a></div></div></aside><main class="main" id="main-content">'+PAGES.map(p=>'<div class="page fade-in" id="page-'+p+'"></div>').join('')+'</main>'+
   // Mobile bottom navigation
   '<nav class="mobile-nav" style="display:none" id="mobile-nav">'+
   '<div class="mobile-nav-item '+(currentPage==='home'?'active':'')+'" onclick="navigate(\'home\')">'+
@@ -785,7 +864,15 @@ async function renderProfile(){
   '</div><div>'+
   '<div class="card mb-4"><h2 class="t-h2 mb-3">Reputation</h2><div class="reputation-grid"><div class="rep-item"><div class="rep-value">'+(u.deals||0)+'</div><div class="rep-label">Deals Done</div></div>'+(isMe?'<div class="rep-item"><div class="rep-value">'+fmtMoney(u.revenue||0)+'</div><div class="rep-label">Revenue</div></div>':'')+
   '<div class="rep-item"><div class="rep-value">'+(u.referralsSent||0)+'</div><div class="rep-label">Referrals</div></div><div class="rep-item"><div class="rep-value">'+(u.referralsConverted||0)+'</div><div class="rep-label">Converted</div></div><div class="rep-item"><div class="rep-value">'+(u.reviewAvg?u.reviewAvg+'*':'-')+'</div><div class="rep-label">Avg Review</div></div><div class="rep-item"><div class="rep-value">'+u.trustScore+'</div><div class="rep-label">Trust Score</div></div></div></div>'+
-  '<div class="card mb-4"><h2 class="t-h2 mb-3">Skills</h2><div class="skill-tags">'+(u.skills||[]).map(s=>'<span class="skill-tag primary">'+escHtml(s)+'</span>').join('')+'</div>'+(isMe?'<input class="form-control mt-3" id="profile-skills" placeholder="Skills comma-separated" value="'+escHtml((u.skills||[]).join(', '))+'" style="margin-top:.75rem"><button class="btn btn-outline btn-sm mt-2" onclick="saveSkills()">Update Skills</button>':'')+
+  (isMe?'<div class="card mb-4"><h2 class="t-h2 mb-3">Payouts</h2>'+
+  '<p class="t-small c-text3 mb-3">Connect your bank account to receive payments when deals are completed.</p>'+
+  (me.stripeAccountId?
+    '<div class="flex items-center gap-2 mb-3"><span style="color:var(--green);font-weight:600">&#x2705; Bank account connected</span></div>'+
+    '<button class="btn btn-outline btn-sm" onclick="connectBankAccount()">Update Bank Account</button>':
+    '<button class="btn btn-teal" onclick="connectBankAccount()">&#x1F3E6; Connect Bank Account</button>'+
+    '<div class="t-micro c-text4 mt-2">Secured by Stripe. Takes 2 minutes.</div>'
+  )+'</div>':'')+
+'<div class="card mb-4"><h2 class="t-h2 mb-3">Skills</h2><div class="skill-tags">'+(u.skills||[]).map(s=>'<span class="skill-tag primary">'+escHtml(s)+'</span>').join('')+'</div>'+(isMe?'<input class="form-control mt-3" id="profile-skills" placeholder="Skills comma-separated" value="'+escHtml((u.skills||[]).join(', '))+'" style="margin-top:.75rem"><button class="btn btn-outline btn-sm mt-2" onclick="saveSkills()">Update Skills</button>':'')+
   '</div><div class="card"><h2 class="t-h2 mb-3">Recent Deals</h2>'+(myDeals.slice(0,3).length?myDeals.slice(0,3).map(d=>{const other=store.getUser(d.buyerId===u.id?d.sellerId:d.buyerId);return '<div class="flex justify-between items-center mb-3">'+avatarHtml(other,'sm')+'<div class="flex-1" style="margin-left:.5rem"><div class="t-small" style="font-weight:600">'+escHtml(d.title)+'</div><div class="t-micro c-text4">'+timeAgo(d.createdAt)+'</div></div>'+dealStatusBadge(d.status)+'</div>';}).join(''):'<div class="t-body c-text3">No deals yet</div>')+
   '</div></div></div>';
 }
@@ -1166,6 +1253,7 @@ window.addEventListener('load', () => {
   }
 });
 
+window.renderTerms=renderTerms;window.renderPrivacy=renderPrivacy;
 window.goProfile=()=>{const me=store.getMe();if(me)navigate('profile',{userId:me.id});};window.navigate=navigate;window.openModal=openModal;window.closeAllModals=closeAllModals;
 window.store=store;window.toast=toast;window.renderHome=renderHome;
 window.renderProfile=renderProfile;window.renderWheelDetail=renderWheelDetail;
