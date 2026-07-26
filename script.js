@@ -338,12 +338,11 @@ function renderAuth(){
       <!-- LEFT: Image -->
       <div style="position:relative;min-height:100vh;overflow:hidden">
         <img src="fairriss-art.png" alt="Fairriss" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:center">
-        <div style="position:absolute;bottom:0;left:0;right:0;padding:2rem;background:linear-gradient(to top,rgba(15,31,61,.95) 0%,rgba(15,31,61,.3) 60%,transparent 100%)">
-          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
-            <div style="width:36px;height:36px;border-radius:50%;background:#00C9A7;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;color:#0F1F3D">F</div>
-            <span style="color:#fff;font-weight:800;font-size:1.25rem">Fairriss</span>
+        <div style="position:absolute;bottom:0;left:0;right:0;padding:1.5rem;background:linear-gradient(to top,rgba(15,31,61,.9) 0%,transparent 100%)">
+          <div style="display:flex;align-items:center;gap:.625rem">
+            <div style="width:32px;height:32px;border-radius:50%;background:#00C9A7;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.875rem;color:#0F1F3D;flex-shrink:0">F</div>
+            <span style="color:#fff;font-weight:800;font-size:1.125rem">Fairriss</span>
           </div>
-          <p style="color:rgba(255,255,255,.85);font-size:1.0625rem;font-weight:600;margin:0">Your Journey. Your Community. Your Future.</p>
         </div>
       </div>
 
