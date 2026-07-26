@@ -967,19 +967,27 @@ select.form-control { cursor: pointer; }
   overflow: hidden;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .auth-page-wrap {
-    grid-template-columns: 1fr;
-    grid-template-rows: 280px 1fr;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 260px auto !important;
+    display: grid !important;
   }
   .auth-page-wrap > div:first-child {
-    min-height: 280px !important;
-    height: 280px !important;
+    min-height: 260px !important;
+    height: 260px !important;
+    width: 100% !important;
   }
   .auth-page-wrap > div:last-child {
+    width: 100% !important;
     height: auto !important;
+    min-height: auto !important;
     padding: 2rem 1.5rem !important;
-    overflow-y: auto;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+  }
+  .auth-page-wrap h1 {
+    font-size: 1.5rem !important;
   }
 }
 
