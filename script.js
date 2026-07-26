@@ -175,12 +175,12 @@ function icon(n){
 
 // ── Avatars & Badges ───────────────────────────────────────────────────────
 const PALETTE=['#0F1F3D','#6D28D9','#047857','#C2410C','#0369A1','#BE185D','#374151'];
-function getColor(id){return PALETTE[(parseInt(id.replace(/\D/g,'')||'0')%PALETTE.length)];}
+function getColor(id){if(!id)return PALETTE[0];return PALETTE[(parseInt((id+'').replace(/\D/g,'')||'0'))%PALETTE.length];}
 function avatarHtml(u,size='md'){
   const px={sm:32,md:44,lg:64,xl:80}[size]||44;
-  if(!u)return '<div class="avatar avatar-'+size+'" style="background:#ddd;width:'+px+'px;height:'+px+'px"></div>';
+  if(!u||!u.id)return '<div class="avatar avatar-'+size+'" style="background:#ddd;width:'+px+'px;height:'+px+'px"></div>';
   if(u.profilePics&&u.profilePics[0])return '<img src="'+u.profilePics[0]+'" style="width:'+px+'px;height:'+px+'px;border-radius:50%;object-fit:cover;display:block;flex-shrink:0">';
-  return '<div class="avatar avatar-'+size+'" style="background:'+getColor(u.id)+';color:#fff;width:'+px+'px;height:'+px+'px">'+initials(u.name)+'</div>';
+  return '<div class="avatar avatar-'+size+'" style="background:'+getColor(u.id)+';color:#fff;width:'+px+'px;height:'+px+'px">'+initials(u.name||'?')+'</div>';
 }
 function profilePhotoHtml(u){
   if(u.profilePics&&u.profilePics[0])return '<img src="'+u.profilePics[0]+'" style="width:130px;height:130px;min-width:130px;border-radius:50%;object-fit:cover;border:4px solid rgba(255,255,255,.3);box-shadow:0 6px 24px rgba(0,0,0,.4);display:block">';
@@ -820,8 +820,15 @@ function renderAboutCard(u,isMe){
 
 async function renderProfile(){
   const userId=pageParams.userId||store.getMe()?.id;
+  if(!userId){navigate('home');return;}
   let u;
-  try { u=await store.getUser(userId); } catch(e){ u=null; }
+  try {
+    u=await store.getUser(userId);
+    // If not found in Supabase, try local store as fallback
+    if(!u) u=store.data.users.find(x=>x.id===userId);
+  } catch(e){
+    u=store.data.users.find(x=>x.id===userId)||null;
+  }
   if(!u){navigate('home');return;}
   const me=store.getMe(),isMe=u.id===me?.id;
   const myDeals=store.get('deals').filter(d=>d.sellerId===u.id||d.buyerId===u.id);
