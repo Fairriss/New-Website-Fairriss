@@ -332,134 +332,182 @@ function renderPrivacy(){
 
 // ── Auth ───────────────────────────────────────────────────────────────────
 function renderAuth(){
-  document.body.innerHTML='<div class="auth-screen"><div class="auth-brand"><img src="fairriss-art.png" alt="Fairriss" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0"><div style="position:absolute;bottom:0;left:0;right:0;padding:2rem;background:linear-gradient(to top,rgba(15,31,61,.95) 0%,rgba(15,31,61,.4) 60%,transparent 100%);z-index:1"><div class="auth-brand-logo" style="margin-bottom:.75rem"><svg width="34" height="34" viewBox="0 0 38 38" fill="none"><circle cx="19" cy="19" r="19" fill="currentColor"/><circle cx="19" cy="19" r="12" fill="#0F1F3D" opacity=".5"/><text x="19" y="24" text-anchor="middle" font-size="14" font-weight="900" fill="currentColor">F</text></svg><span class="auth-brand-logo-text">Fairriss</span></div><p class="auth-brand-tagline" style="font-size:1.0625rem;font-weight:600">Your Journey. Your Community. Your Future.</p></div></div></div><div class="auth-form-side"><h1>Welcome to Fairriss</h1><p class="auth-sub">Join the network where deals get done.</p><div class="auth-tabs"><div class="auth-tab active" data-tab="login">Sign In</div><div class="auth-tab" data-tab="signup">Create Account</div></div>'+
-  '<div id="auth-login-form">'+
-  '<div class="form-stack">'+
-  '<div class="form-group"><label class="form-label">Email</label><input class="form-control" id="li-email" type="email" placeholder="you@example.com"></div>'+
-  '<div class="form-group"><label class="form-label">Password</label><input class="form-control" id="li-password" type="password" placeholder="Your password"></div>'+
-  '<div id="auth-error" style="color:var(--red);font-size:.875rem;display:none;margin-top:.5rem"></div>'+
-  '<button class="btn btn-primary w-full" id="signin-btn" style="justify-content:center;margin-top:.5rem">Sign In</button>'+
-  '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">'+
-  '<button class="btn btn-ghost btn-sm" id="magic-link-btn">Sign in without a password</button>'+
-  '<a href="#" id="forgot-password-link" style="font-size:.875rem;color:var(--teal);text-decoration:none;font-weight:500">Forgot password?</a>'+
-  '</div>'+
-  '</div></div>'+
-  '<div id="auth-signup-form" class="hidden"><div class="form-stack">'+
-  '<div class="form-row"><div class="form-group"><label class="form-label">Full Name *</label><input class="form-control" id="su-name" placeholder="Alex Chen"></div><div class="form-group"><label class="form-label">Username *</label><input class="form-control" id="su-username" placeholder="alexchen"></div></div>'+
-  '<div class="form-group"><label class="form-label">Email *</label><input class="form-control" id="su-email" type="email" placeholder="alex@example.com"></div>'+
-  '<div class="form-group"><label class="form-label">Password *</label><input class="form-control" id="su-password" type="password" placeholder="Min 6 characters"></div>'+
-  '<div id="signup-error" style="color:var(--red);font-size:.875rem;display:none;margin-top:.5rem"></div>'+
-  '<button class="btn btn-primary w-full" id="create-account-btn" style="justify-content:center;margin-top:.5rem">Create Account</button>'+
-  '<p style="font-size:.75rem;color:var(--text-4);text-align:center;margin-top:1rem">By signing up you agree to our <a href="#" onclick="renderTerms()" style="color:var(--teal)">Terms of Service</a> and <a href="#" onclick="renderPrivacy()" style="color:var(--teal)">Privacy Policy</a></p>'+
-  '</div></div>'+
-  '</div></div>';
+  document.body.innerHTML = `
+    <div style="min-height:100vh;display:grid;grid-template-columns:1fr 1fr;overflow:hidden">
+
+      <!-- LEFT: Image -->
+      <div style="position:relative;min-height:100vh;overflow:hidden">
+        <img src="fairriss-art.png" alt="Fairriss" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:center">
+        <div style="position:absolute;bottom:0;left:0;right:0;padding:2rem;background:linear-gradient(to top,rgba(15,31,61,.95) 0%,rgba(15,31,61,.3) 60%,transparent 100%)">
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
+            <div style="width:36px;height:36px;border-radius:50%;background:#00C9A7;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;color:#0F1F3D">F</div>
+            <span style="color:#fff;font-weight:800;font-size:1.25rem">Fairriss</span>
+          </div>
+          <p style="color:rgba(255,255,255,.85);font-size:1.0625rem;font-weight:600;margin:0">Your Journey. Your Community. Your Future.</p>
+        </div>
+      </div>
+
+      <!-- RIGHT: Form -->
+      <div style="background:#fff;display:flex;flex-direction:column;justify-content:center;padding:4rem 3rem;overflow-y:auto">
+        <h1 style="color:#0F1F3D;font-size:1.875rem;font-weight:800;margin:0 0 .5rem">Welcome to Fairriss</h1>
+        <p style="color:#64748B;margin:0 0 2rem;font-size:.9375rem">Join the network where deals get done.</p>
+
+        <!-- Tabs -->
+        <div style="display:flex;border:1.5px solid #E2E8F0;border-radius:8px;margin-bottom:1.5rem;overflow:hidden">
+          <button id="tab-login" onclick="authTab('login')" style="flex:1;padding:.75rem;border:none;background:#0F1F3D;color:#fff;font-weight:700;font-size:.9375rem;cursor:pointer">Sign In</button>
+          <button id="tab-signup" onclick="authTab('signup')" style="flex:1;padding:.75rem;border:none;background:#fff;color:#64748B;font-weight:700;font-size:.9375rem;cursor:pointer">Create Account</button>
+        </div>
+
+        <!-- Sign In Form -->
+        <div id="auth-login-form">
+          <div style="margin-bottom:1rem">
+            <label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Email</label>
+            <input id="li-email" type="email" placeholder="you@example.com" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none">
+          </div>
+          <div style="margin-bottom:1rem">
+            <label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Password</label>
+            <input id="li-password" type="password" placeholder="Your password" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none">
+          </div>
+          <div id="auth-error" style="color:#EF4444;font-size:.875rem;margin-bottom:.75rem;display:none"></div>
+          <button id="signin-btn" style="width:100%;padding:.875rem;background:#0F1F3D;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:1rem">Sign In</button>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <button id="magic-link-btn" style="background:none;border:none;color:#64748B;font-size:.875rem;cursor:pointer;padding:0">Sign in without a password</button>
+            <a href="#" id="forgot-password-link" style="color:#00C9A7;font-size:.875rem;font-weight:600;text-decoration:none">Forgot password?</a>
+          </div>
+        </div>
+
+        <!-- Sign Up Form -->
+        <div id="auth-signup-form" style="display:none">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
+            <div>
+              <label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Full Name *</label>
+              <input id="su-name" placeholder="Alex Chen" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none">
+            </div>
+            <div>
+              <label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Username *</label>
+              <input id="su-username" placeholder="alexchen" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none">
+            </div>
+          </div>
+          <div style="margin-bottom:1rem">
+            <label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Email *</label>
+            <input id="su-email" type="email" placeholder="alex@example.com" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none">
+          </div>
+          <div style="margin-bottom:1rem">
+            <label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Password *</label>
+            <input id="su-password" type="password" placeholder="Min 6 characters" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none">
+          </div>
+          <div id="signup-error" style="color:#EF4444;font-size:.875rem;margin-bottom:.75rem;display:none"></div>
+          <button id="create-account-btn" style="width:100%;padding:.875rem;background:#0F1F3D;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:1rem">Create Account</button>
+          <p style="font-size:.75rem;color:#94A3B8;text-align:center;margin:0">By signing up you agree to our <a href="#" onclick="renderTerms()" style="color:#00C9A7">Terms</a> and <a href="#" onclick="renderPrivacy()" style="color:#00C9A7">Privacy Policy</a></p>
+        </div>
+      </div>
+    </div>
+  `;
 
   // Tab switching
-  $$('.auth-tab').forEach(tab=>{tab.onclick=()=>{$$('.auth-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');$('#auth-login-form').classList.toggle('hidden',tab.dataset.tab!=='login');$('#auth-signup-form').classList.toggle('hidden',tab.dataset.tab!=='signup');};});
+  window.authTab = (tab) => {
+    const loginForm = document.getElementById('auth-login-form');
+    const signupForm = document.getElementById('auth-signup-form');
+    const loginBtn = document.getElementById('tab-login');
+    const signupBtn = document.getElementById('tab-signup');
+    if(tab === 'login'){
+      loginForm.style.display = 'block';
+      signupForm.style.display = 'none';
+      loginBtn.style.background = '#0F1F3D'; loginBtn.style.color = '#fff';
+      signupBtn.style.background = '#fff'; signupBtn.style.color = '#64748B';
+    } else {
+      loginForm.style.display = 'none';
+      signupForm.style.display = 'block';
+      signupBtn.style.background = '#0F1F3D'; signupBtn.style.color = '#fff';
+      loginBtn.style.background = '#fff'; loginBtn.style.color = '#64748B';
+    }
+  };
 
-  // Sign In with Supabase
-  $('#signin-btn').onclick=async()=>{
-    const email=$('#li-email').value.trim(), password=$('#li-password').value.trim();
+  // Sign In
+  document.getElementById('signin-btn').onclick = async () => {
+    const email = document.getElementById('li-email').value.trim();
+    const password = document.getElementById('li-password').value.trim();
     if(!email||!password){showAuthError('auth-error','Please enter your email and password.');return;}
-    $('#signin-btn').textContent='Signing in...';$('#signin-btn').disabled=true;
+    const btn = document.getElementById('signin-btn');
+    btn.textContent = 'Signing in...'; btn.disabled = true;
     try {
       if(window.SupabaseStore){
         const profile = await window.SupabaseStore.login(email, password);
         store.data.currentUser = profile.id;
-        // Sync profile into local store
         const existing = store.data.users.find(u=>u.id===profile.id);
         if(!existing) store.data.users.push(sbToLocal(profile));
         else Object.assign(existing, sbToLocal(profile));
         store._save();
         if(!profile.user_type) renderOnboarding();
         else renderPage();
-      } else {
-        showAuthError('auth-error','Supabase not loaded. Please refresh.');
       }
     } catch(e){
       showAuthError('auth-error', e.message||'Sign in failed. Check your email and password.');
-      $('#signin-btn').textContent='Sign In';$('#signin-btn').disabled=false;
+      btn.textContent = 'Sign In'; btn.disabled = false;
     }
   };
 
-  // Allow Enter key on password field
-  $('#li-password')?.addEventListener('keydown', e=>{ if(e.key==='Enter') $('#signin-btn').click(); });
-
-  // Forgot password link
-  $('#forgot-password-link').onclick = async e => {
-    e.preventDefault();
-    const email = $('#li-email').value.trim();
-    if(!email){ showAuthError('auth-error','Enter your email address first.'); return; }
-    try {
-      await window._supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://fairriss.com/reset-password'
-      });
-      showAuthError('auth-error', 'Password reset email sent! Check your inbox.');
-      document.getElementById('auth-error').style.color = 'var(--green)';
-    } catch(e){ showAuthError('auth-error', e.message); }
-  };
+  // Enter key on password
+  document.getElementById('li-password').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('signin-btn').click(); });
 
   // Magic link
-  $('#magic-link-btn').onclick=async()=>{
-    const email=$('#li-email').value.trim();
+  document.getElementById('magic-link-btn').onclick = async () => {
+    const email = document.getElementById('li-email').value.trim();
     if(!email){showAuthError('auth-error','Enter your email first.');return;}
     try {
       await window.Auth.sendMagicLink(email);
-      showAuthError('auth-error','Magic link sent! Check your email.');
-      document.getElementById('auth-error').style.color='var(--green)';
+      const el = document.getElementById('auth-error');
+      el.textContent = 'Magic link sent! Check your email.';
+      el.style.color = '#10B981'; el.style.display = 'block';
     } catch(e){ showAuthError('auth-error', e.message); }
   };
 
-  // Sign Up with Supabase
-  $('#create-account-btn').onclick=async()=>{
-    const name=$('#su-name').value.trim(), username=$('#su-username').value.trim();
-    const email=$('#su-email').value.trim(), password=$('#su-password').value.trim();
+  // Forgot password
+  document.getElementById('forgot-password-link').onclick = async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('li-email').value.trim();
+    if(!email){showAuthError('auth-error','Enter your email address first.');return;}
+    try {
+      await window._supabase.auth.resetPasswordForEmail(email, { redirectTo: 'https://fairriss.com' });
+      const el = document.getElementById('auth-error');
+      el.textContent = 'Password reset email sent! Check your inbox.';
+      el.style.color = '#10B981'; el.style.display = 'block';
+    } catch(e){ showAuthError('auth-error', e.message); }
+  };
+
+  // Sign Up
+  document.getElementById('create-account-btn').onclick = async () => {
+    const name = document.getElementById('su-name').value.trim();
+    const username = document.getElementById('su-username').value.trim();
+    const email = document.getElementById('su-email').value.trim();
+    const password = document.getElementById('su-password').value.trim();
     if(!name||!username||!email||!password){showAuthError('signup-error','Please fill in all fields.');return;}
     if(password.length<6){showAuthError('signup-error','Password must be at least 6 characters.');return;}
-    $('#create-account-btn').textContent='Creating account...';$('#create-account-btn').disabled=true;
+    const btn = document.getElementById('create-account-btn');
+    btn.textContent = 'Creating account...'; btn.disabled = true;
     try {
       if(window.Auth){
         const user = await window.Auth.signUp(email, password, name, username);
         if(user){
-          // Create local profile entry
-          const newUser = store.createUser({id:user.id, name, username, email, role:'member', bio:'', skills:[], location:'', availability:'available'});
+          const newUser = store.createUser({id:user.id,name,username,email,role:'member',bio:'',skills:[],location:'',availability:'available'});
           store.data.currentUser = user.id;
           store._save();
+          if(window._supabase){
+            setTimeout(async()=>{
+              try{ await window._supabase.from('notifications').insert({user_id:user.id,type:'welcome',text:'Welcome to Fairriss, '+escHtml(name)+'! Start by creating or joining a Wheel.'}); }catch(e){}
+            },2000);
+          }
           toast('Account created! Check your email to verify.', 'success');
           renderOnboarding();
         }
       }
     } catch(e){
       showAuthError('signup-error', e.message||'Sign up failed. Try a different email.');
-      $('#create-account-btn').textContent='Create Account';$('#create-account-btn').disabled=false;
+      btn.textContent = 'Create Account'; btn.disabled = false;
     }
   };
 
-  // Allow Enter on signup password
-  $('#su-password')?.addEventListener('keydown', e=>{ if(e.key==='Enter') $('#create-account-btn').click(); });
-}
-
-function showAuthError(id, msg){
-  const el=document.getElementById(id);
-  if(el){el.textContent=msg;el.style.display='block';}
-}
-
-// Convert Supabase snake_case profile to local camelCase
-function sbToLocal(p){
-  return {
-    id:p.id, name:p.name, username:p.username, email:p.email,
-    bio:p.bio||'', jobTitle:p.job_title||'', company:p.company||'',
-    location:p.location||'', website:p.website||'',
-    userType:p.user_type, role:p.role||'member',
-    availability:p.availability||'available',
-    skills:p.skills||[], links:p.links||[], wantTo:p.want_to||[],
-    profilePics:p.profile_pics||[], introVideo:p.intro_video||'',
-    resume:p.resume||'', trustScore:p.trust_score||0,
-    deals:p.deals_count||0, revenue:p.revenue||0,
-    referralsSent:p.referrals_sent||0, referralsConverted:p.referrals_converted||0,
-    reviewAvg:p.review_avg||0, workHistory:p.work_history||[],
-    joinedAt:p.created_at
-  };
+  document.getElementById('su-password').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('create-account-btn').click(); });
 }
 
 // ── Onboarding ─────────────────────────────────────────────────────────────
