@@ -431,27 +431,27 @@ function renderAuth(){
           </div>
           <div class="lp-grid-6">
             <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
-              <img src="https://images.unsplash.com/photo-1531545514256-b1400bc00f31?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <img src="https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
               <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Private Wheels</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Create invite-only communities for your network. Control who gets in.</p></div>
             </div>
             <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
-              <img src="https://images.unsplash.com/photo-1556157382-97eda2f9e2bf?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
               <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Deal Pipeline</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Propose, negotiate, and close deals with built-in escrow protection.</p></div>
             </div>
             <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
-              <img src="https://images.unsplash.com/photo-1589156280159-27698a70f29e?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <img src="https://images.unsplash.com/photo-1548142813-c348350df52b?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
               <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Secure Payments</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Card, Apple Pay, and Google Pay. Money held in escrow until work is approved.</p></div>
             </div>
             <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
-              <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
               <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Opportunities</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Post jobs, partnerships, referrals, and collaborations to your Wheel.</p></div>
             </div>
             <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
-              <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <img src="https://images.unsplash.com/photo-1548142813-c348350df52b?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
               <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Find People</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Search professionals by skill, location, and availability across the platform.</p></div>
             </div>
             <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
-              <img src="https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <img src="https://images.unsplash.com/photo-1548142813-c348350df52b?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
               <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Trust Score</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Build your reputation with every completed deal. Trust Score grows with you.</p></div>
             </div>
           </div>
