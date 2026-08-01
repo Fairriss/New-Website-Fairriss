@@ -430,12 +430,30 @@ function renderAuth(){
             <h2 style="color:#0F1F3D;font-size:2.5rem;font-weight:900;margin:0;letter-spacing:-.02em">Built for serious professionals</h2>
           </div>
           <div class="lp-grid-6">
-            <div style="padding:1.75rem;border:1.5px solid #e8e8e8;border-radius:12px"><div style="font-size:2rem;margin-bottom:1rem">&#x1F91D;</div><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Private Wheels</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Create invite-only communities for your network. Control who gets in.</p></div>
-            <div style="padding:1.75rem;border:1.5px solid #e8e8e8;border-radius:12px"><div style="font-size:2rem;margin-bottom:1rem">&#x1F4BC;</div><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Deal Pipeline</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Propose, negotiate, and close deals with built-in escrow protection.</p></div>
-            <div style="padding:1.75rem;border:1.5px solid #e8e8e8;border-radius:12px"><div style="font-size:2rem;margin-bottom:1rem">&#x1F4B3;</div><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Secure Payments</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Card, Apple Pay, and Google Pay. Money held in escrow until work is approved.</p></div>
-            <div style="padding:1.75rem;border:1.5px solid #e8e8e8;border-radius:12px"><div style="font-size:2rem;margin-bottom:1rem">&#x1F3AF;</div><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Opportunities</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Post jobs, partnerships, referrals, and collaborations to your Wheel.</p></div>
-            <div style="padding:1.75rem;border:1.5px solid #e8e8e8;border-radius:12px"><div style="font-size:2rem;margin-bottom:1rem">&#x1F514;</div><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Real-time Notifications</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Get notified instantly when someone sends a deal or invites you.</p></div>
-            <div style="padding:1.75rem;border:1.5px solid #e8e8e8;border-radius:12px"><div style="font-size:2rem;margin-bottom:1rem">&#x2B50;</div><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Trust Score</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Build your reputation with every completed deal.</p></div>
+            <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
+              <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Private Wheels</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Create invite-only communities for your network. Control who gets in.</p></div>
+            </div>
+            <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
+              <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Deal Pipeline</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Propose, negotiate, and close deals with built-in escrow protection.</p></div>
+            </div>
+            <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
+              <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Secure Payments</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Card, Apple Pay, and Google Pay. Money held in escrow until work is approved.</p></div>
+            </div>
+            <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
+              <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Opportunities</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Post jobs, partnerships, referrals, and collaborations to your Wheel.</p></div>
+            </div>
+            <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
+              <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Find People</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Search professionals by skill, location, and availability across the platform.</p></div>
+            </div>
+            <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
+              <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Trust Score</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Build your reputation with every completed deal. Trust Score grows with you.</p></div>
+            </div>
           </div>
         </div>
       </section>
