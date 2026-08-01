@@ -435,7 +435,7 @@ function renderAuth(){
               <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Private Wheels</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Create invite-only communities for your network. Control who gets in.</p></div>
             </div>
             <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
-              <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
               <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Deal Pipeline</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Propose, negotiate, and close deals with built-in escrow protection.</p></div>
             </div>
             <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
@@ -447,11 +447,11 @@ function renderAuth(){
               <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Opportunities</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Post jobs, partnerships, referrals, and collaborations to your Wheel.</p></div>
             </div>
             <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
-              <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
               <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Find People</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Search professionals by skill, location, and availability across the platform.</p></div>
             </div>
             <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
-              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
               <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Trust Score</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Build your reputation with every completed deal. Trust Score grows with you.</p></div>
             </div>
           </div>
