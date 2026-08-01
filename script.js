@@ -330,179 +330,283 @@ function renderPrivacy(){
   '</div></div>';
 }
 
-// ── Auth ───────────────────────────────────────────────────────────────────
+// ── Auth / Landing Page ──────────────────────────────────────────────────────
 function renderAuth(){
   document.body.innerHTML = `
-    <div style="min-height:100vh;display:grid;grid-template-columns:1fr 1fr;overflow:hidden" class="auth-page-wrap">
+    <style>
+      .lp-nav { position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-bottom:1px solid #e8e8e8;padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between; }
+      .lp-hero { min-height:100vh;position:relative;display:flex;align-items:center;overflow:hidden;padding-top:64px; }
+      .lp-hero-content { position:relative;z-index:1;max-width:680px;padding:4rem 3rem; }
+      .lp-hero h1 { color:#fff;font-size:3.5rem;font-weight:900;line-height:1.1;margin:0 0 1.25rem;letter-spacing:-.03em; }
+      .lp-grid-3 { display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;max-width:960px;margin:0 auto; }
+      .lp-grid-6 { display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem; }
+      .lp-grid-4 { display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem; }
+      .lp-stats { display:flex;gap:2.5rem;margin-top:2.5rem;flex-wrap:wrap; }
+      .lp-btns { display:flex;gap:1rem;flex-wrap:wrap; }
+      .lp-section { padding:6rem 2rem; }
+      .lp-modal-grid { display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem; }
+      @media(max-width:768px){
+        .lp-nav { padding:0 1rem; }
+        .lp-nav .nav-links span { display:none; }
+        .lp-hero-content { padding:2rem 1.5rem; }
+        .lp-hero h1 { font-size:2.25rem; }
+        .lp-grid-3 { grid-template-columns:1fr; }
+        .lp-grid-6 { grid-template-columns:1fr 1fr; }
+        .lp-grid-4 { grid-template-columns:1fr 1fr; }
+        .lp-stats { gap:1.5rem; }
+        .lp-btns { flex-direction:column; }
+        .lp-btns button { width:100%;text-align:center; }
+        .lp-section { padding:3.5rem 1.25rem; }
+        .lp-section h2 { font-size:1.875rem !important; }
+        .lp-modal-grid { grid-template-columns:1fr; }
+        .lp-cta h2 { font-size:2rem !important; }
+      }
+    </style>
+    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;background:#fff;overflow-x:hidden">
 
-      <!-- LEFT: Image -->
-      <div style="position:relative;min-height:100vh;overflow:hidden">
-        <img src="fairriss-art.png" alt="Fairriss" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:center">
-
-      </div>
-
-      <!-- RIGHT: Form -->
-      <div style="background:#fff;display:flex;flex-direction:column;justify-content:center;padding:4rem 3rem;overflow-y:auto">
-        <h1 style="color:#0F1F3D;font-size:1.875rem;font-weight:800;margin:0 0 .5rem">Welcome to Fairriss</h1>
-        <p style="color:#64748B;margin:0 0 2rem;font-size:.9375rem">Join the network where deals get done.</p>
-
-        <!-- Tabs -->
-        <div style="display:flex;border:1.5px solid #E2E8F0;border-radius:8px;margin-bottom:1.5rem;overflow:hidden">
-          <button id="tab-login" onclick="authTab('login')" style="flex:1;padding:.75rem;border:none;background:#0F1F3D;color:#fff;font-weight:700;font-size:.9375rem;cursor:pointer">Sign In</button>
-          <button id="tab-signup" onclick="authTab('signup')" style="flex:1;padding:.75rem;border:none;background:#fff;color:#64748B;font-weight:700;font-size:.9375rem;cursor:pointer">Create Account</button>
+      <nav class="lp-nav">
+        <div style="display:flex;align-items:center;gap:.625rem">
+          <div style="width:34px;height:34px;border-radius:50%;background:#0F1F3D;display:flex;align-items:center;justify-content:center;color:#00C9A7;font-weight:900;font-size:1rem">F</div>
+          <span style="font-weight:800;font-size:1.25rem;color:#0F1F3D">Fairriss</span>
         </div>
+        <div style="display:flex;align-items:center;gap:1rem">
+          <button onclick="showAuthModal('login')" style="background:none;border:none;font-size:.9375rem;font-weight:600;color:#0F1F3D;cursor:pointer;padding:.5rem 1rem">Sign In</button>
+          <button onclick="showAuthModal('signup')" style="background:#0F1F3D;color:#fff;border:none;border-radius:8px;padding:.625rem 1.25rem;font-size:.9375rem;font-weight:700;cursor:pointer">Join Free</button>
+        </div>
+      </nav>
 
-        <!-- Sign In Form -->
-        <div id="auth-login-form">
-          <div style="margin-bottom:1rem">
-            <label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Email</label>
-            <input id="li-email" type="email" placeholder="you@example.com" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none">
+      <section class="lp-hero">
+        <img src="fairriss-art.png?v=2" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center">
+        <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(15,31,61,.92) 0%,rgba(15,31,61,.75) 50%,rgba(15,31,61,.4) 100%)"></div>
+        <div class="lp-hero-content">
+          <div style="display:inline-flex;align-items:center;gap:.5rem;background:rgba(0,201,167,.15);border:1px solid rgba(0,201,167,.4);border-radius:99px;padding:.375rem 1rem;margin-bottom:1.5rem">
+            <span style="width:8px;height:8px;border-radius:50%;background:#00C9A7;display:inline-block"></span>
+            <span style="color:#00C9A7;font-size:.8125rem;font-weight:600">The Network-Commerce Platform</span>
           </div>
-          <div style="margin-bottom:1rem">
-            <label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Password</label>
-            <input id="li-password" type="password" placeholder="Your password" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none">
+          <h1>Your Network.<br>Your Community.<br><span style="color:#00C9A7">Your Income.</span></h1>
+          <p style="color:rgba(255,255,255,.8);font-size:1.1875rem;line-height:1.65;margin:0 0 2.5rem;max-width:520px">Build private Wheels where your network becomes your net worth. Post opportunities, close deals, and get paid all in one place.</p>
+          <div class="lp-btns">
+            <button onclick="showAuthModal('signup')" style="background:#00C9A7;color:#0F1F3D;border:none;border-radius:10px;padding:1rem 2rem;font-size:1.0625rem;font-weight:800;cursor:pointer">Get Started Free</button>
+            <button onclick="showAuthModal('login')" style="background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:10px;padding:1rem 2rem;font-size:1.0625rem;font-weight:700;cursor:pointer">Sign In</button>
           </div>
-          <div id="auth-error" style="color:#EF4444;font-size:.875rem;margin-bottom:.75rem;display:none"></div>
-          <button id="signin-btn" style="width:100%;padding:.875rem;background:#0F1F3D;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:1rem">Sign In</button>
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <button id="magic-link-btn" style="background:none;border:none;color:#64748B;font-size:.875rem;cursor:pointer;padding:0">Sign in without a password</button>
-            <a href="#" id="forgot-password-link" style="color:#00C9A7;font-size:.875rem;font-weight:600;text-decoration:none">Forgot password?</a>
+          <div class="lp-stats">
+            <div><div style="color:#00C9A7;font-size:1.75rem;font-weight:900">10K+</div><div style="color:rgba(255,255,255,.6);font-size:.8125rem">Professionals</div></div>
+            <div><div style="color:#00C9A7;font-size:1.75rem;font-weight:900">$2M+</div><div style="color:rgba(255,255,255,.6);font-size:.8125rem">Deals Closed</div></div>
+            <div><div style="color:#00C9A7;font-size:1.75rem;font-weight:900">500+</div><div style="color:rgba(255,255,255,.6);font-size:.8125rem">Active Wheels</div></div>
           </div>
         </div>
+      </section>
 
-        <!-- Sign Up Form -->
-        <div id="auth-signup-form" style="display:none">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
-            <div>
-              <label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Full Name *</label>
-              <input id="su-name" placeholder="Alex Chen" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none">
+      <section class="lp-section" style="background:#f8f9fc;text-align:center">
+        <p style="color:#00C9A7;font-weight:700;font-size:.875rem;letter-spacing:.08em;text-transform:uppercase;margin:0 0 .75rem">How It Works</p>
+        <h2 style="color:#0F1F3D;font-size:2.5rem;font-weight:900;margin:0 0 1rem;letter-spacing:-.02em">Three steps to get paid</h2>
+        <p style="color:#64748B;font-size:1.0625rem;max-width:520px;margin:0 auto 4rem;line-height:1.6">Fairriss combines community, opportunities, and payments in one seamless platform.</p>
+        <div class="lp-grid-3">
+          <div style="background:#fff;border-radius:16px;padding:2.5rem 2rem;box-shadow:0 4px 24px rgba(15,31,61,.06);text-align:left;position:relative">
+            <div style="width:48px;height:48px;border-radius:12px;background:#0F1F3D;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1.25rem">&#x2B22;</div>
+            <div style="position:absolute;top:1.5rem;right:1.5rem;font-size:3rem;font-weight:900;color:rgba(15,31,61,.06);line-height:1">1</div>
+            <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Create or Join a Wheel</h3>
+            <p style="color:#64748B;line-height:1.6;margin:0;font-size:.9375rem">Build your private community or join an existing one. Wheels are spaces where real deals happen.</p>
+          </div>
+          <div style="background:#fff;border-radius:16px;padding:2.5rem 2rem;box-shadow:0 4px 24px rgba(15,31,61,.06);text-align:left;position:relative">
+            <div style="width:48px;height:48px;border-radius:12px;background:#6D28D9;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1.25rem">&#x1F3AF;</div>
+            <div style="position:absolute;top:1.5rem;right:1.5rem;font-size:3rem;font-weight:900;color:rgba(15,31,61,.06);line-height:1">2</div>
+            <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Post Opportunities</h3>
+            <p style="color:#64748B;line-height:1.6;margin:0;font-size:.9375rem">Share jobs, partnerships, referrals, and collaboration requests. Your network sees it first.</p>
+          </div>
+          <div style="background:#fff;border-radius:16px;padding:2.5rem 2rem;box-shadow:0 4px 24px rgba(15,31,61,.06);text-align:left;position:relative">
+            <div style="width:48px;height:48px;border-radius:12px;background:#00C9A7;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1.25rem">&#x1F4B0;</div>
+            <div style="position:absolute;top:1.5rem;right:1.5rem;font-size:3rem;font-weight:900;color:rgba(15,31,61,.06);line-height:1">3</div>
+            <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Close Deals and Get Paid</h3>
+            <p style="color:#64748B;line-height:1.6;margin:0;font-size:.9375rem">Propose deals, agree on terms, and get paid through secure escrow. Fairriss takes just 10%.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section" style="background:#fff">
+        <div style="max-width:1100px;margin:0 auto">
+          <div style="text-align:center;margin-bottom:4rem">
+            <p style="color:#00C9A7;font-weight:700;font-size:.875rem;letter-spacing:.08em;text-transform:uppercase;margin:0 0 .75rem">Everything You Need</p>
+            <h2 style="color:#0F1F3D;font-size:2.5rem;font-weight:900;margin:0;letter-spacing:-.02em">Built for serious professionals</h2>
+          </div>
+          <div class="lp-grid-6">
+            <div style="padding:1.75rem;border:1.5px solid #e8e8e8;border-radius:12px"><div style="font-size:2rem;margin-bottom:1rem">&#x1F91D;</div><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Private Wheels</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Create invite-only communities for your network. Control who gets in.</p></div>
+            <div style="padding:1.75rem;border:1.5px solid #e8e8e8;border-radius:12px"><div style="font-size:2rem;margin-bottom:1rem">&#x1F4BC;</div><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Deal Pipeline</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Propose, negotiate, and close deals with built-in escrow protection.</p></div>
+            <div style="padding:1.75rem;border:1.5px solid #e8e8e8;border-radius:12px"><div style="font-size:2rem;margin-bottom:1rem">&#x1F4B3;</div><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Secure Payments</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Card, Apple Pay, and Google Pay. Money held in escrow until work is approved.</p></div>
+            <div style="padding:1.75rem;border:1.5px solid #e8e8e8;border-radius:12px"><div style="font-size:2rem;margin-bottom:1rem">&#x1F3AF;</div><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Opportunities</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Post jobs, partnerships, referrals, and collaborations to your Wheel.</p></div>
+            <div style="padding:1.75rem;border:1.5px solid #e8e8e8;border-radius:12px"><div style="font-size:2rem;margin-bottom:1rem">&#x1F514;</div><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Real-time Notifications</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Get notified instantly when someone sends a deal or invites you.</p></div>
+            <div style="padding:1.75rem;border:1.5px solid #e8e8e8;border-radius:12px"><div style="font-size:2rem;margin-bottom:1rem">&#x2B50;</div><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Trust Score</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Build your reputation with every completed deal.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section" style="background:#0F1F3D">
+        <div style="max-width:1100px;margin:0 auto;text-align:center">
+          <p style="color:#00C9A7;font-weight:700;font-size:.875rem;letter-spacing:.08em;text-transform:uppercase;margin:0 0 .75rem">Who It Is For</p>
+          <h2 style="color:#fff;font-size:2.5rem;font-weight:900;margin:0 0 3rem;letter-spacing:-.02em">Built for every professional</h2>
+          <div class="lp-grid-4">
+            <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:2rem 1.5rem"><div style="font-size:2.5rem;margin-bottom:1rem">&#x1F680;</div><h3 style="color:#fff;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Founders</h3><p style="color:rgba(255,255,255,.6);font-size:.875rem;line-height:1.6;margin:0">Share deal flow, co-invest, and find your next hire.</p></div>
+            <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:2rem 1.5rem"><div style="font-size:2.5rem;margin-bottom:1rem">&#x1F4BB;</div><h3 style="color:#fff;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Freelancers</h3><p style="color:rgba(255,255,255,.6);font-size:.875rem;line-height:1.6;margin:0">Get hired, get paid, build your reputation.</p></div>
+            <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:2rem 1.5rem"><div style="font-size:2.5rem;margin-bottom:1rem">&#x1F3E2;</div><h3 style="color:#fff;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Business Owners</h3><p style="color:rgba(255,255,255,.6);font-size:.875rem;line-height:1.6;margin:0">Find partners, contractors, and opportunities.</p></div>
+            <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:2rem 1.5rem"><div style="font-size:2.5rem;margin-bottom:1rem">&#x1F4B0;</div><h3 style="color:#fff;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Investors</h3><p style="color:rgba(255,255,255,.6);font-size:.875rem;line-height:1.6;margin:0">Access curated deal flow from trusted networks.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section lp-cta" style="background:linear-gradient(135deg,#00C9A7 0%,#0F1F3D 100%);text-align:center">
+        <h2 style="color:#fff;font-size:3rem;font-weight:900;margin:0 0 1rem;letter-spacing:-.03em">Ready to grow your network?</h2>
+        <p style="color:rgba(255,255,255,.8);font-size:1.125rem;margin:0 0 2.5rem">Join thousands of professionals already on Fairriss. Free to join.</p>
+        <button onclick="showAuthModal('signup')" style="background:#fff;color:#0F1F3D;border:none;border-radius:10px;padding:1.125rem 2.5rem;font-size:1.125rem;font-weight:800;cursor:pointer">Get Started Free</button>
+      </section>
+
+      <footer style="background:#0F1F3D;padding:2rem;text-align:center">
+        <div style="display:flex;align-items:center;justify-content:center;gap:.625rem;margin-bottom:1rem">
+          <div style="width:28px;height:28px;border-radius:50%;background:#00C9A7;display:flex;align-items:center;justify-content:center;color:#0F1F3D;font-weight:900;font-size:.875rem">F</div>
+          <span style="color:#fff;font-weight:800">Fairriss</span>
+        </div>
+        <div style="display:flex;gap:2rem;justify-content:center;margin-bottom:1rem">
+          <a href="#" onclick="renderTerms()" style="color:rgba(255,255,255,.5);font-size:.875rem;text-decoration:none">Terms</a>
+          <a href="#" onclick="renderPrivacy()" style="color:rgba(255,255,255,.5);font-size:.875rem;text-decoration:none">Privacy</a>
+          <a href="mailto:hello@fairriss.com" style="color:rgba(255,255,255,.5);font-size:.875rem;text-decoration:none">Contact</a>
+        </div>
+        <p style="color:rgba(255,255,255,.3);font-size:.8125rem;margin:0">&copy; 2026 Fairriss. All rights reserved.</p>
+      </footer>
+
+      <div id="auth-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(15,31,61,.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:1rem">
+        <div style="background:#fff;border-radius:16px;width:100%;max-width:440px;padding:2.5rem;position:relative;box-shadow:0 24px 64px rgba(15,31,61,.25);max-height:90vh;overflow-y:auto">
+          <button onclick="closeAuthModal()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.25rem;cursor:pointer;color:#94A3B8;line-height:1">&#x2715;</button>
+          <div style="display:flex;align-items:center;gap:.625rem;margin-bottom:1.5rem">
+            <div style="width:32px;height:32px;border-radius:50%;background:#0F1F3D;display:flex;align-items:center;justify-content:center;color:#00C9A7;font-weight:900;font-size:.875rem">F</div>
+            <span style="font-weight:800;font-size:1.125rem;color:#0F1F3D">Fairriss</span>
+          </div>
+          <div style="display:flex;border:1.5px solid #E2E8F0;border-radius:8px;margin-bottom:1.5rem;overflow:hidden">
+            <button id="modal-tab-login" onclick="authTab('login')" style="flex:1;padding:.75rem;border:none;background:#0F1F3D;color:#fff;font-weight:700;font-size:.9375rem;cursor:pointer">Sign In</button>
+            <button id="modal-tab-signup" onclick="authTab('signup')" style="flex:1;padding:.75rem;border:none;background:#fff;color:#64748B;font-weight:700;font-size:.9375rem;cursor:pointer">Create Account</button>
+          </div>
+          <div id="auth-login-form">
+            <div style="margin-bottom:1rem"><label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Email</label><input id="li-email" type="email" placeholder="you@example.com" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none"></div>
+            <div style="margin-bottom:1rem"><label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Password</label><input id="li-password" type="password" placeholder="Your password" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none"></div>
+            <div id="auth-error" style="color:#EF4444;font-size:.875rem;margin-bottom:.75rem;display:none"></div>
+            <button id="signin-btn" style="width:100%;padding:.875rem;background:#0F1F3D;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:1rem">Sign In</button>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <button id="magic-link-btn" style="background:none;border:none;color:#64748B;font-size:.875rem;cursor:pointer;padding:0">Sign in without a password</button>
+              <a href="#" id="forgot-password-link" style="color:#00C9A7;font-size:.875rem;font-weight:600;text-decoration:none">Forgot password?</a>
             </div>
-            <div>
-              <label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Username *</label>
-              <input id="su-username" placeholder="alexchen" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none">
+          </div>
+          <div id="auth-signup-form" style="display:none">
+            <div class="lp-modal-grid">
+              <div><label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Full Name *</label><input id="su-name" placeholder="Alex Chen" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none"></div>
+              <div><label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Username *</label><input id="su-username" placeholder="alexchen" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none"></div>
             </div>
+            <div style="margin-bottom:1rem"><label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Email *</label><input id="su-email" type="email" placeholder="alex@example.com" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none"></div>
+            <div style="margin-bottom:1rem"><label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Password *</label><input id="su-password" type="password" placeholder="Min 6 characters" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none"></div>
+            <div id="signup-error" style="color:#EF4444;font-size:.875rem;margin-bottom:.75rem;display:none"></div>
+            <button id="create-account-btn" style="width:100%;padding:.875rem;background:#0F1F3D;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:1rem">Create Account</button>
+            <p style="font-size:.75rem;color:#94A3B8;text-align:center;margin:0">By signing up you agree to our <a href="#" onclick="renderTerms()" style="color:#00C9A7">Terms</a> and <a href="#" onclick="renderPrivacy()" style="color:#00C9A7">Privacy Policy</a></p>
           </div>
-          <div style="margin-bottom:1rem">
-            <label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Email *</label>
-            <input id="su-email" type="email" placeholder="alex@example.com" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none">
-          </div>
-          <div style="margin-bottom:1rem">
-            <label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Password *</label>
-            <input id="su-password" type="password" placeholder="Min 6 characters" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none">
-          </div>
-          <div id="signup-error" style="color:#EF4444;font-size:.875rem;margin-bottom:.75rem;display:none"></div>
-          <button id="create-account-btn" style="width:100%;padding:.875rem;background:#0F1F3D;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:1rem">Create Account</button>
-          <p style="font-size:.75rem;color:#94A3B8;text-align:center;margin:0">By signing up you agree to our <a href="#" onclick="renderTerms()" style="color:#00C9A7">Terms</a> and <a href="#" onclick="renderPrivacy()" style="color:#00C9A7">Privacy Policy</a></p>
         </div>
       </div>
     </div>
   `;
 
-  // Tab switching
+  window.showAuthModal = (tab) => {
+    const modal = document.getElementById('auth-modal');
+    modal.style.display = 'flex';
+    authTab(tab);
+  };
+  window.closeAuthModal = () => {
+    document.getElementById('auth-modal').style.display = 'none';
+  };
+  document.getElementById('auth-modal').onclick = (e) => {
+    if(e.target === document.getElementById('auth-modal')) closeAuthModal();
+  };
+
   window.authTab = (tab) => {
-    const loginForm = document.getElementById('auth-login-form');
-    const signupForm = document.getElementById('auth-signup-form');
-    const loginBtn = document.getElementById('tab-login');
-    const signupBtn = document.getElementById('tab-signup');
+    const lf = document.getElementById('auth-login-form');
+    const sf = document.getElementById('auth-signup-form');
+    const lb = document.getElementById('modal-tab-login');
+    const sb = document.getElementById('modal-tab-signup');
+    if(!lf) return;
     if(tab === 'login'){
-      loginForm.style.display = 'block';
-      signupForm.style.display = 'none';
-      loginBtn.style.background = '#0F1F3D'; loginBtn.style.color = '#fff';
-      signupBtn.style.background = '#fff'; signupBtn.style.color = '#64748B';
+      lf.style.display='block'; sf.style.display='none';
+      if(lb){lb.style.background='#0F1F3D';lb.style.color='#fff';}
+      if(sb){sb.style.background='#fff';sb.style.color='#64748B';}
     } else {
-      loginForm.style.display = 'none';
-      signupForm.style.display = 'block';
-      signupBtn.style.background = '#0F1F3D'; signupBtn.style.color = '#fff';
-      loginBtn.style.background = '#fff'; loginBtn.style.color = '#64748B';
+      lf.style.display='none'; sf.style.display='block';
+      if(sb){sb.style.background='#0F1F3D';sb.style.color='#fff';}
+      if(lb){lb.style.background='#fff';lb.style.color='#64748B';}
     }
   };
 
-  // Sign In
   document.getElementById('signin-btn').onclick = async () => {
     const email = document.getElementById('li-email').value.trim();
     const password = document.getElementById('li-password').value.trim();
     if(!email||!password){showAuthError('auth-error','Please enter your email and password.');return;}
     const btn = document.getElementById('signin-btn');
-    btn.textContent = 'Signing in...'; btn.disabled = true;
+    btn.textContent='Signing in...';btn.disabled=true;
     try {
-      if(window.SupabaseStore){
-        const profile = await window.SupabaseStore.login(email, password);
-        store.data.currentUser = profile.id;
-        const existing = store.data.users.find(u=>u.id===profile.id);
-        if(!existing) store.data.users.push(sbToLocal(profile));
-        else Object.assign(existing, sbToLocal(profile));
-        store._save();
-        if(!profile.user_type) renderOnboarding();
-        else renderPage();
-      }
+      const profile = await window.SupabaseStore.login(email, password);
+      store.data.currentUser=profile.id;
+      const existing=store.data.users.find(u=>u.id===profile.id);
+      if(!existing) store.data.users.push(sbToLocal(profile));
+      else Object.assign(existing,sbToLocal(profile));
+      store._save();
+      if(!profile.user_type) renderOnboarding();
+      else renderPage();
     } catch(e){
-      showAuthError('auth-error', e.message||'Sign in failed. Check your email and password.');
-      btn.textContent = 'Sign In'; btn.disabled = false;
+      showAuthError('auth-error',e.message||'Sign in failed. Check your email and password.');
+      btn.textContent='Sign In';btn.disabled=false;
     }
   };
+  document.getElementById('li-password').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('signin-btn').click();});
 
-  // Enter key on password
-  document.getElementById('li-password').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('signin-btn').click(); });
-
-  // Magic link
   document.getElementById('magic-link-btn').onclick = async () => {
-    const email = document.getElementById('li-email').value.trim();
+    const email=document.getElementById('li-email').value.trim();
     if(!email){showAuthError('auth-error','Enter your email first.');return;}
     try {
       await window.Auth.sendMagicLink(email);
-      const el = document.getElementById('auth-error');
-      el.textContent = 'Magic link sent! Check your email.';
-      el.style.color = '#10B981'; el.style.display = 'block';
-    } catch(e){ showAuthError('auth-error', e.message); }
+      const el=document.getElementById('auth-error');
+      el.textContent='Magic link sent! Check your email.';el.style.color='#10B981';el.style.display='block';
+    } catch(e){showAuthError('auth-error',e.message);}
   };
 
-  // Forgot password
   document.getElementById('forgot-password-link').onclick = async (e) => {
     e.preventDefault();
-    const email = document.getElementById('li-email').value.trim();
+    const email=document.getElementById('li-email').value.trim();
     if(!email){showAuthError('auth-error','Enter your email address first.');return;}
     try {
-      await window._supabase.auth.resetPasswordForEmail(email, { redirectTo: 'https://fairriss.com' });
-      const el = document.getElementById('auth-error');
-      el.textContent = 'Password reset email sent! Check your inbox.';
-      el.style.color = '#10B981'; el.style.display = 'block';
-    } catch(e){ showAuthError('auth-error', e.message); }
+      await window._supabase.auth.resetPasswordForEmail(email,{redirectTo:'https://fairriss.com'});
+      const el=document.getElementById('auth-error');
+      el.textContent='Password reset email sent! Check your inbox.';el.style.color='#10B981';el.style.display='block';
+    } catch(e){showAuthError('auth-error',e.message);}
   };
 
-  // Sign Up
   document.getElementById('create-account-btn').onclick = async () => {
-    const name = document.getElementById('su-name').value.trim();
-    const username = document.getElementById('su-username').value.trim();
-    const email = document.getElementById('su-email').value.trim();
-    const password = document.getElementById('su-password').value.trim();
+    const name=document.getElementById('su-name').value.trim();
+    const username=document.getElementById('su-username').value.trim();
+    const email=document.getElementById('su-email').value.trim();
+    const password=document.getElementById('su-password').value.trim();
     if(!name||!username||!email||!password){showAuthError('signup-error','Please fill in all fields.');return;}
     if(password.length<6){showAuthError('signup-error','Password must be at least 6 characters.');return;}
-    const btn = document.getElementById('create-account-btn');
-    btn.textContent = 'Creating account...'; btn.disabled = true;
+    const btn=document.getElementById('create-account-btn');
+    btn.textContent='Creating account...';btn.disabled=true;
     try {
-      if(window.Auth){
-        const user = await window.Auth.signUp(email, password, name, username);
-        if(user){
-          const newUser = store.createUser({id:user.id,name,username,email,role:'member',bio:'',skills:[],location:'',availability:'available'});
-          store.data.currentUser = user.id;
-          store._save();
-          if(window._supabase){
-            setTimeout(async()=>{
-              try{ await window._supabase.from('notifications').insert({user_id:user.id,type:'welcome',text:'Welcome to Fairriss, '+escHtml(name)+'! Start by creating or joining a Wheel.'}); }catch(e){}
-            },2000);
-          }
-          toast('Account created! Check your email to verify.', 'success');
-          renderOnboarding();
-        }
+      const user=await window.Auth.signUp(email,password,name,username);
+      if(user){
+        store.createUser({id:user.id,name,username,email,role:'member',bio:'',skills:[],location:'',availability:'available'});
+        store.data.currentUser=user.id;store._save();
+        if(window._supabase){setTimeout(async()=>{try{await window._supabase.from('notifications').insert({user_id:user.id,type:'welcome',text:'Welcome to Fairriss, '+escHtml(name)+'! Start by creating or joining a Wheel.'});}catch(e){}},2000);}
+        toast('Account created! Check your email to verify.','success');
+        renderOnboarding();
       }
     } catch(e){
-      showAuthError('signup-error', e.message||'Sign up failed. Try a different email.');
-      btn.textContent = 'Create Account'; btn.disabled = false;
+      showAuthError('signup-error',e.message||'Sign up failed. Try a different email.');
+      btn.textContent='Create Account';btn.disabled=false;
     }
   };
-
-  document.getElementById('su-password').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('create-account-btn').click(); });
+  document.getElementById('su-password').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('create-account-btn').click();});
 }
+
 
 // ── Onboarding ─────────────────────────────────────────────────────────────
 function renderOnboarding(){
