@@ -390,9 +390,9 @@ function renderAuth(){
             <button onclick="showAuthModal('login')" style="background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:10px;padding:1rem 2rem;font-size:1.0625rem;font-weight:700;cursor:pointer">Sign In</button>
           </div>
           <div class="lp-stats">
-            <div><div style="color:#00C9A7;font-size:1.75rem;font-weight:900">10K+</div><div style="color:rgba(255,255,255,.6);font-size:.8125rem">Professionals</div></div>
-            <div><div style="color:#00C9A7;font-size:1.75rem;font-weight:900">$2M+</div><div style="color:rgba(255,255,255,.6);font-size:.8125rem">Deals Closed</div></div>
-            <div><div style="color:#00C9A7;font-size:1.75rem;font-weight:900">500+</div><div style="color:rgba(255,255,255,.6);font-size:.8125rem">Active Wheels</div></div>
+            <div style="display:flex;align-items:center;gap:.5rem"><span style="width:8px;height:8px;border-radius:50%;background:#00C9A7;display:inline-block"></span><span style="color:rgba(255,255,255,.85);font-size:.9375rem;font-weight:600">Professionals</span></div>
+            <div style="display:flex;align-items:center;gap:.5rem"><span style="width:8px;height:8px;border-radius:50%;background:#00C9A7;display:inline-block"></span><span style="color:rgba(255,255,255,.85);font-size:.9375rem;font-weight:600">Deals Closed</span></div>
+            <div style="display:flex;align-items:center;gap:.5rem"><span style="width:8px;height:8px;border-radius:50%;background:#00C9A7;display:inline-block"></span><span style="color:rgba(255,255,255,.85);font-size:.9375rem;font-weight:600">Active Wheels</span></div>
           </div>
         </div>
       </section>
@@ -431,27 +431,27 @@ function renderAuth(){
           </div>
           <div class="lp-grid-6">
             <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
-              <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
               <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Private Wheels</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Create invite-only communities for your network. Control who gets in.</p></div>
             </div>
             <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
-              <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
               <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Deal Pipeline</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Propose, negotiate, and close deals with built-in escrow protection.</p></div>
             </div>
             <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
-              <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <img src="https://images.unsplash.com/photo-1573497491208-6b1acb260507?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
               <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Secure Payments</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Card, Apple Pay, and Google Pay. Money held in escrow until work is approved.</p></div>
             </div>
             <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
-              <img src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
               <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Opportunities</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Post jobs, partnerships, referrals, and collaborations to your Wheel.</p></div>
             </div>
             <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
-              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
               <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Find People</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Search professionals by skill, location, and availability across the platform.</p></div>
             </div>
             <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
-              <img src="https://images.unsplash.com/photo-1463453091185-61582044d556?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
               <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Trust Score</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Build your reputation with every completed deal. Trust Score grows with you.</p></div>
             </div>
           </div>
