@@ -131,7 +131,7 @@ document.addEventListener('click',e=>{
   if(e.target.classList.contains('modal-close'))closeAllModals();
 });
 
-const PAGES=['home','wheels','members','opportunities','deals','profile','wheel-detail','deal-detail','analytics'];
+const PAGES=['home','wheels','members','opportunities','deals','profile','wheel-detail','deal-detail','analytics','admin'];
 let currentPage='home',pageParams={};
 function navigate(page,params={}){currentPage=page;pageParams=params;renderPage();window.scrollTo(0,0);}
 
@@ -143,7 +143,7 @@ function renderPage(){
   $$('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+currentPage)?.classList.add('active');
   $$('.nav-item[data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===currentPage));
-  const renders={home:renderHome,wheels:renderWheels,members:renderMembers,opportunities:renderOpportunities,deals:renderDeals,profile:renderProfile,'wheel-detail':renderWheelDetail,'deal-detail':renderDealDetail,analytics:renderAnalytics};
+  const renders={home:renderHome,wheels:renderWheels,members:renderMembers,opportunities:renderOpportunities,deals:renderDeals,profile:renderProfile,'wheel-detail':renderWheelDetail,'deal-detail':renderDealDetail,analytics:renderAnalytics,admin:renderAdmin};
   renders[currentPage]?.();
 }
 
@@ -648,7 +648,7 @@ window.ob2Finish=()=>{const wantTo=[...$$('label input[type=checkbox]:checked')]
 // ── Shell ──────────────────────────────────────────────────────────────────
 function renderShell(me){
   if($('.shell')){updateShellDynamic(me);return;}
-  document.body.innerHTML='<div class="shell"><header class="header"><div class="header-logo"><div class="header-logo-mark" onclick="navigate(\'home\')" style="cursor:pointer">F</div><span class="header-logo-text" onclick="navigate(\'home\')" style="cursor:pointer">Fairriss</span></div><div class="header-search"><svg class="header-search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search members, deals, opportunities..." id="global-search"></div><div class="header-actions"><div style="position:relative"><button class="header-btn" id="notif-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-dot" id="notif-dot" style="display:none"></span></button><div class="notif-panel" id="notif-panel"></div></div><div class="header-avatar" id="header-avatar" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+initials(me.name)+'</div></div></header><aside class="sidebar"><div class="sidebar-section"><div class="sidebar-label">Navigation</div><nav><div class="nav-item" data-page="home" onclick="navigate(\'home\')">'+icon('home')+' Home</div><div class="nav-item" data-page="wheels" onclick="navigate(\'wheels\')">'+icon('wheel')+' My Wheels</div><div class="nav-item" data-page="opportunities" onclick="navigate(\'opportunities\')">'+icon('opp')+' Opportunities</div><div class="nav-item" data-page="deals" onclick="navigate(\'deals\')">'+icon('deal')+' Deals <span class="nav-badge" id="deal-badge" style="display:none"></span></div><div class="nav-item" data-page="members" onclick="navigate(\'members\')">'+icon('members')+' Find People</div><div class="nav-item" data-page="analytics" onclick="navigate(\'analytics\')">'+icon('analytics')+' Analytics</div></nav></div><div class="sidebar-section"><div class="sidebar-label">My Wheels</div><div class="sidebar-wheels" id="sidebar-wheels"></div></div><div class="sidebar-bottom"><div class="sidebar-user" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+avatarHtml(me,'sm')+'<div class="sidebar-user-info"><div class="sidebar-user-name">'+escHtml(me.name)+'</div><div class="sidebar-user-role">'+(me.userType||me.role)+' - Trust '+me.trustScore+'</div></div><button class="btn-ghost bhandleLogout()" style="color:var(--red);font-size:.8125rem;font-weight:600;background:none;border:none;cursor:pointer;padding:.25rem .5rem">Log Out</button>/div><div style="padding:.625rem 1.25rem;border-top:1px solid var(--border);display:flex;gap:1rem"><a href="#" onclick="renderTerms()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Terms</a><a href="#" onclick="renderPrivacy()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Privacy</a></div></div></aside><main class="main" id="main-content">'+PAGES.map(p=>'<div class="page fade-in" id="page-'+p+'"></div>').join('')+'</main>'+
+  document.body.innerHTML='<div class="shell"><header class="header"><div class="header-logo"><div class="header-logo-mark" onclick="navigate(\'home\')" style="cursor:pointer">F</div><span class="header-logo-text" onclick="navigate(\'home\')" style="cursor:pointer">Fairriss</span></div><div class="header-search"><svg class="header-search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search members, deals, opportunities..." id="global-search"></div><div class="header-actions"><div style="position:relative"><button class="header-btn" id="notif-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-dot" id="notif-dot" style="display:none"></span></button><div class="notif-panel" id="notif-panel"></div></div><div class="header-avatar" id="header-avatar" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+initials(me.name)+'</div></div></header><aside class="sidebar"><div class="sidebar-section"><div class="sidebar-label">Navigation</div><nav><div class="nav-item" data-page="home" onclick="navigate(\'home\')">'+icon('home')+' Home</div><div class="nav-item" data-page="wheels" onclick="navigate(\'wheels\')">'+icon('wheel')+' My Wheels</div><div class="nav-item" data-page="opportunities" onclick="navigate(\'opportunities\')">'+icon('opp')+' Opportunities</div><div class="nav-item" data-page="deals" onclick="navigate(\'deals\')">'+icon('deal')+' Deals <span class="nav-badge" id="deal-badge" style="display:none"></span></div><div class="nav-item" data-page="members" onclick="navigate(\'members\')">'+icon('members')+' Find People</div><div class="nav-item" data-page="analytics" onclick="navigate(\'analytics\')">'+icon('analytics')+' Analytics</div>'+'</nav></div><div class="sidebar-section"><div class="sidebar-label">My Wheels</div><div class="sidebar-wheels" id="sidebar-wheels"></div></div><div class="sidebar-bottom"><div class="sidebar-user" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+avatarHtml(me,'sm')+'<div class="sidebar-user-info"><div class="sidebar-user-name">'+escHtml(me.name)+'</div><div class="sidebar-user-role">'+(me.userType||me.role)+' - Trust '+me.trustScore+'</div></div><button class="btn-ghost bhandleLogout()" style="color:var(--red);font-size:.8125rem;font-weight:600;background:none;border:none;cursor:pointer;padding:.25rem .5rem">Log Out</button>/div><div style="padding:.625rem 1.25rem;border-top:1px solid var(--border);display:flex;gap:1rem"><a href="#" onclick="renderTerms()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Terms</a><a href="#" onclick="renderPrivacy()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Privacy</a></div></div></aside><main class="main" id="main-content">'+PAGES.map(p=>'<div class="page fade-in" id="page-'+p+'"></div>').join('')+'</main>'+
   // Mobile bottom navigation
   '<nav class="mobile-nav" style="display:none" id="mobile-nav">'+
   '<div class="mobile-nav-item '+(currentPage==='home'?'active':'')+'" onclick="navigate(\'home\')">'+
@@ -678,6 +678,19 @@ async function updateShellDynamic(me){
     const wheels=await store.getMyWheels();
     sw.innerHTML=wheels.map(w=>'<div class="sidebar-wheel-item '+(pageParams.wheelId===w.id?'active':'')+'" onclick="navigate(\'wheel-detail\',{wheelId:\''+w.id+'\'})">'+hexBadge(w,24)+'<span class="sidebar-wheel-name">'+escHtml(w.name)+'</span><span class="sidebar-wheel-count">'+w.memberCount+'</span></div>').join('')+
     '<div class="sidebar-wheel-item" onclick="openModal(\'modal-create-wheel\')" style="color:var(--teal);font-weight:600;font-size:.8125rem"><span style="font-size:1.125rem">+</span> Create Wheel</div>';
+  }
+  // Add admin link if user is admin
+  const adminLink = document.querySelector('[data-page="admin"]');
+  if(me && me.role === 'admin' && !adminLink){
+    const nav = document.querySelector('.sidebar nav');
+    if(nav){
+      const div = document.createElement('div');
+      div.className = 'nav-item';
+      div.dataset.page = 'admin';
+      div.innerHTML = '&#x1F6E1; Admin';
+      div.onclick = () => navigate('admin');
+      nav.appendChild(div);
+    }
   }
   const dot=$('#notif-dot');
   if(dot){try{const notifs=await store.getMyNotifs();dot.style.display=notifs.some(n=>!n.read)?'block':'none';}catch(e){}}
@@ -1512,3 +1525,196 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     });
   }
 });
+
+// ── Admin Dashboard ────────────────────────────────────────────────────────
+async function renderAdmin(){
+  const me = store.getMe();
+  // Only allow admin role
+  if(!me || me.role !== 'admin'){
+    document.getElementById('page-admin').innerHTML = '<div class="empty-state"><div class="empty-icon">&#x1F6AB;</div><div class="empty-title">Access Denied</div><div class="empty-desc">You do not have admin permissions.</div></div>';
+    return;
+  }
+
+  const el = document.getElementById('page-admin');
+  el.innerHTML = '<div class="page-head"><div class="page-head-left"><h1 class="page-title">&#x1F6E1; Admin Dashboard</h1><p class="page-sub">Platform overview and management</p></div><div class="page-actions"><button class="btn btn-outline btn-sm" onclick="renderAdmin()">Refresh</button></div></div><div style="text-align:center;padding:3rem;color:var(--text-3)">Loading...</div>';
+
+  // Load all data
+  let allUsers = [], allWheels = [], allDeals = [], allOpps = [];
+  try {
+    if(window.LiveStore && window.LiveStore.isReady()){
+      const [u, w, d, o] = await Promise.all([
+        window._supabase.from('users').select('*').order('created_at', {ascending:false}),
+        window._supabase.from('wheels').select('*').order('created_at', {ascending:false}),
+        window._supabase.from('deals').select('*').order('created_at', {ascending:false}),
+        window._supabase.from('opportunities').select('*').order('created_at', {ascending:false}),
+      ]);
+      allUsers = u.data || [];
+      allWheels = w.data || [];
+      allDeals = d.data || [];
+      allOpps = o.data || [];
+    } else {
+      allUsers = store.get('users') || [];
+      allWheels = store.get('wheels') || [];
+      allDeals = store.get('deals') || [];
+      allOpps = store.get('opportunities') || [];
+    }
+  } catch(e){ console.warn('Admin load error:', e); }
+
+  const totalRevenue = allDeals.filter(d=>d.status==='paid').reduce((s,d)=>s+(d.price_cents||d.priceCents||0)/100,0);
+  const fairrissFees = totalRevenue * 0.10;
+  const activeDeals = allDeals.filter(d=>['proposed','negotiating','accepted','in_progress'].includes(d.status));
+
+  const adminTab = window._adminTab || 'overview';
+
+  el.innerHTML =
+    '<div class="page-head"><div class="page-head-left"><h1 class="page-title">&#x1F6E1; Admin Dashboard</h1><p class="page-sub">Platform overview and management</p></div><div class="page-actions"><button class="btn btn-outline btn-sm" onclick="renderAdmin()">Refresh</button></div></div>'+
+
+    // Stats
+    '<div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">'+
+    '<div class="stat-card"><span class="stat-label">Total Users</span><span class="stat-value">'+allUsers.length+'</span></div>'+
+    '<div class="stat-card"><span class="stat-label">Total Wheels</span><span class="stat-value">'+allWheels.length+'</span></div>'+
+    '<div class="stat-card"><span class="stat-label">Total Deals</span><span class="stat-value">'+allDeals.length+'</span><span class="stat-change">'+activeDeals.length+' active</span></div>'+
+    '<div class="stat-card"><span class="stat-label">Fairriss Fees</span><span class="stat-value">'+fmtMoney(fairrissFees)+'</span><span class="stat-change">from '+fmtMoney(totalRevenue)+' GMV</span></div>'+
+    '</div>'+
+
+    // Tabs
+    '<div class="tabs mb-4">'+
+    '<div class="tab-item '+(adminTab==='overview'?'active':'')+'" onclick="setAdminTab(\'overview\')">Overview</div>'+
+    '<div class="tab-item '+(adminTab==='users'?'active':'')+'" onclick="setAdminTab(\'users\')">Users ('+allUsers.length+')</div>'+
+    '<div class="tab-item '+(adminTab==='wheels'?'active':'')+'" onclick="setAdminTab(\'wheels\')">Wheels ('+allWheels.length+')</div>'+
+    '<div class="tab-item '+(adminTab==='deals'?'active':'')+'" onclick="setAdminTab(\'deals\')">Deals ('+allDeals.length+')</div>'+
+    '<div class="tab-item '+(adminTab==='opps'?'active':'')+'" onclick="setAdminTab(\'opps\')">Opportunities ('+allOpps.length+')</div>'+
+    '</div>'+
+
+    // Tab content
+    '<div id="admin-tab-content">'+renderAdminTab(adminTab, allUsers, allWheels, allDeals, allOpps)+'</div>';
+}
+
+function renderAdminTab(tab, users, wheels, deals, opps){
+  if(tab === 'overview'){
+    const recent = [...users].sort((a,b)=>new Date(b.created_at||b.joinedAt||0)-new Date(a.created_at||a.joinedAt||0)).slice(0,5);
+    const recentDeals = [...deals].sort((a,b)=>new Date(b.created_at||b.createdAt||0)-new Date(a.created_at||a.createdAt||0)).slice(0,5);
+    return '<div class="two-col">'+
+      '<div><div class="card"><h3 class="t-h2 mb-3">Recent Sign Ups</h3>'+
+      (recent.length ? recent.map(u=>'<div class="flex gap-3 items-center mb-3">'+avatarHtml({id:u.id,name:u.name,profilePics:u.profile_pics||u.profilePics||[]},'sm')+'<div class="flex-1"><div class="t-small" style="font-weight:600">'+escHtml(u.name)+'</div><div class="t-micro c-text4">'+escHtml(u.email||'')+'</div></div><div class="t-micro c-text4">'+timeAgo(u.created_at||u.joinedAt)+'</div></div>').join('') : '<div class="t-body c-text3">No users yet</div>')+
+      '</div></div>'+
+      '<div><div class="card"><h3 class="t-h2 mb-3">Recent Deals</h3>'+
+      (recentDeals.length ? recentDeals.map(d=>'<div class="flex justify-between items-center mb-3"><div><div class="t-small" style="font-weight:600">'+escHtml(d.title)+'</div><div class="t-micro c-text4">'+timeAgo(d.created_at||d.createdAt)+'</div></div>'+dealStatusBadge(d.status)+'</div>').join('') : '<div class="t-body c-text3">No deals yet</div>')+
+      '</div></div></div>';
+  }
+
+  if(tab === 'users'){
+    return '<div class="card"><table style="width:100%;border-collapse:collapse">'+
+      '<thead><tr style="border-bottom:2px solid var(--border)">'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">User</th>'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Email</th>'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Role</th>'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Joined</th>'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Actions</th>'+
+      '</tr></thead><tbody>'+
+      users.map(u=>'<tr style="border-bottom:1px solid var(--border)">'+
+        '<td style="padding:.75rem"><div class="flex gap-2 items-center">'+avatarHtml({id:u.id,name:u.name,profilePics:u.profile_pics||[]},'sm')+'<div><div class="t-small" style="font-weight:600">'+escHtml(u.name)+'</div><div class="t-micro c-text4">@'+escHtml(u.username||'')+'</div></div></div></td>'+
+        '<td style="padding:.75rem"><div class="t-small c-text3">'+escHtml(u.email||'')+'</div></td>'+
+        '<td style="padding:.75rem"><span class="type-badge type-'+( u.role==='admin'?'job':'service')+'" style="font-size:.6875rem">'+escHtml(u.role||'member')+'</span></td>'+
+        '<td style="padding:.75rem"><div class="t-micro c-text4">'+timeAgo(u.created_at||u.joinedAt)+'</div></td>'+
+        '<td style="padding:.75rem"><div class="flex gap-1">'+
+        '<button class="btn btn-ghost btn-xs" onclick="adminViewUser(\''+u.id+'\')">View</button>'+
+        (u.role!=='admin'?'<button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="adminSuspendUser(\''+u.id+'\',\''+escHtml(u.name)+'\')">Suspend</button>':'')+'</div></td>'+
+      '</tr>').join('')+
+      '</tbody></table></div>';
+  }
+
+  if(tab === 'wheels'){
+    return '<div class="card"><table style="width:100%;border-collapse:collapse">'+
+      '<thead><tr style="border-bottom:2px solid var(--border)">'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Wheel</th>'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Category</th>'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Members</th>'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Created</th>'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Actions</th>'+
+      '</tr></thead><tbody>'+
+      wheels.map(w=>'<tr style="border-bottom:1px solid var(--border)">'+
+        '<td style="padding:.75rem"><div class="flex gap-2 items-center">'+hexBadge({name:w.name,hexColor:w.hex_color||w.hexColor||'#0F1F3D'},28)+'<div class="t-small" style="font-weight:600">'+escHtml(w.name)+'</div></div></td>'+
+        '<td style="padding:.75rem"><div class="t-small c-text3">'+escHtml(w.category||'')+'</div></td>'+
+        '<td style="padding:.75rem"><div class="t-small">'+fmt(w.member_count||w.memberCount||0)+'</div></td>'+
+        '<td style="padding:.75rem"><div class="t-micro c-text4">'+timeAgo(w.created_at||w.createdAt)+'</div></td>'+
+        '<td style="padding:.75rem"><button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="adminDeleteWheel(\''+w.id+'\',\''+escHtml(w.name)+'\')">Delete</button></td>'+
+      '</tr>').join('')+
+      '</tbody></table></div>';
+  }
+
+  if(tab === 'deals'){
+    return '<div class="card"><table style="width:100%;border-collapse:collapse">'+
+      '<thead><tr style="border-bottom:2px solid var(--border)">'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Deal</th>'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Amount</th>'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Status</th>'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Fairriss Fee</th>'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Created</th>'+
+      '</tr></thead><tbody>'+
+      deals.map(d=>'<tr style="border-bottom:1px solid var(--border)">'+
+        '<td style="padding:.75rem"><div class="t-small" style="font-weight:600">'+escHtml(d.title)+'</div></td>'+
+        '<td style="padding:.75rem"><div class="t-small">'+fmtMoney((d.price_cents||d.priceCents||0)/100)+'</div></td>'+
+        '<td style="padding:.75rem">'+dealStatusBadge(d.status)+'</td>'+
+        '<td style="padding:.75rem"><div class="t-small '+(d.status==='paid'?'c-green':'c-text3')+'">'+fmtMoney((d.price_cents||d.priceCents||0)/100*0.10)+'</div></td>'+
+        '<td style="padding:.75rem"><div class="t-micro c-text4">'+timeAgo(d.created_at||d.createdAt)+'</div></td>'+
+      '</tr>').join('')+
+      '</tbody></table></div>';
+  }
+
+  if(tab === 'opps'){
+    return '<div class="card"><table style="width:100%;border-collapse:collapse">'+
+      '<thead><tr style="border-bottom:2px solid var(--border)">'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Title</th>'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Type</th>'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Status</th>'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Applications</th>'+
+      '<th style="text-align:left;padding:.75rem;font-size:.8125rem;color:var(--text-3);font-weight:600">Actions</th>'+
+      '</tr></thead><tbody>'+
+      opps.map(o=>'<tr style="border-bottom:1px solid var(--border)">'+
+        '<td style="padding:.75rem"><div class="t-small" style="font-weight:600">'+escHtml(o.title)+'</div></td>'+
+        '<td style="padding:.75rem"><span class="type-badge type-'+o.type+'" style="font-size:.6875rem">'+o.type+'</span></td>'+
+        '<td style="padding:.75rem"><span class="status-badge status-'+o.status+'"><span class="status-dot"></span>'+o.status+'</span></td>'+
+        '<td style="padding:.75rem"><div class="t-small">'+fmt(o.application_count||o.applicationCount||0)+'</div></td>'+
+        '<td style="padding:.75rem"><button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="adminRemoveOpp(\''+o.id+'\',\''+escHtml(o.title)+'\')">Remove</button></td>'+
+      '</tr>').join('')+
+      '</tbody></table></div>';
+  }
+  return '';
+}
+
+window.setAdminTab = (tab) => {
+  window._adminTab = tab;
+  renderAdmin();
+};
+
+window.adminViewUser = (userId) => {
+  navigate('profile', {userId});
+};
+
+window.adminSuspendUser = async (userId, name) => {
+  if(!confirm('Suspend ' + name + '? They will not be able to log in.')) return;
+  try {
+    await window._supabase.from('users').update({role:'suspended'}).eq('id', userId);
+    toast(name + ' has been suspended.', 'success');
+    renderAdmin();
+  } catch(e){ toast('Error: ' + e.message, 'error'); }
+};
+
+window.adminDeleteWheel = async (wheelId, name) => {
+  if(!confirm('Delete Wheel "' + name + '"? This cannot be undone.')) return;
+  try {
+    await window._supabase.from('wheels').delete().eq('id', wheelId);
+    toast('Wheel deleted.', 'success');
+    renderAdmin();
+  } catch(e){ toast('Error: ' + e.message, 'error'); }
+};
+
+window.adminRemoveOpp = async (oppId, title) => {
+  if(!confirm('Remove "' + title + '"?')) return;
+  try {
+    await window._supabase.from('opportunities').update({status:'closed'}).eq('id', oppId);
+    toast('Opportunity removed.', 'success');
+    renderAdmin();
+  } catch(e){ toast('Error: ' + e.message, 'error'); }
+};
