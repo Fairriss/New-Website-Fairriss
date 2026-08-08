@@ -1161,7 +1161,8 @@ window.previewPostVideo=e=>{const file=e.target.files[0];if(!file)return;const r
 
 // ── Analytics ──────────────────────────────────────────────────────────────
 async function renderAnalytics(){
-  const myWheels=store.getMyWheels(),allDeals=store.get('deals').filter(d=>myWheels.some(w=>w.id===d.wheelId));
+  const myWheels=await store.getMyWheels()||[];
+  const allDeals=store.get('deals').filter(d=>(myWheels||[]).some(w=>w.id===d.wheelId));
   const paid=allDeals.filter(d=>d.status==='paid'),gmv=paid.reduce((s,d)=>s+d.priceCents/100,0),fees=paid.reduce((s,d)=>s+d.priceCents/100*(d.creatorCommissionPct/100),0);
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul'],rev=[1200,2100,1800,3400,2800,4200,5100],maxRev=Math.max(...rev);
   document.getElementById('page-analytics').innerHTML=
