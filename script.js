@@ -330,6 +330,31 @@ function renderPrivacy(){
   '</div></div>';
 }
 
+
+function showAuthError(id, msg){
+  const el=document.getElementById(id);
+  if(el){el.textContent=msg;el.style.display='block';el.style.color='#EF4444';}
+}
+
+function sbToLocal(p){
+  if(!p)return null;
+  return {
+    id:p.id, name:p.name||'', username:p.username||'', email:p.email||'',
+    bio:p.bio||'', jobTitle:p.job_title||'', company:p.company||'',
+    location:p.location||'', website:p.website||'',
+    userType:p.user_type||'member', role:p.role||'member',
+    availability:p.availability||'available',
+    skills:p.skills||[], links:p.links||[], wantTo:p.want_to||[],
+    profilePics:p.profile_pics||[], introVideo:p.intro_video||'',
+    resume:p.resume||'', trustScore:p.trust_score||0,
+    deals:p.deals_count||0, revenue:p.revenue||0,
+    referralsSent:p.referrals_sent||0, referralsConverted:p.referrals_converted||0,
+    reviewAvg:p.review_avg||0, workHistory:p.work_history||[],
+    stripeAccountId:p.stripe_account_id||'',
+    joinedAt:p.created_at
+  };
+}
+
 // ── Auth / Landing Page ──────────────────────────────────────────────────────
 function renderAuth(){
   document.body.innerHTML = `
