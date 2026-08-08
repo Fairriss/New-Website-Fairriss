@@ -562,17 +562,57 @@ function renderAuth(){
     if(!email||!password){showAuthError('auth-error','Please enter your email and password.');return;}
     const btn = document.getElementById('signin-btn');
     btn.textContent='Signing in...';btn.disabled=true;
+
+    // Safety timeout - reset button if stuck after 10 seconds
+    const timeout = setTimeout(()=>{
+      btn.textContent='Sign In';btn.disabled=false;
+      showAuthError('auth-error','Sign in timed out. Please try again.');
+    }, 10000);
+
     try {
-      const profile = await window.SupabaseStore.login(email, password);
-      store.data.currentUser=profile.id;
-      const existing=store.data.users.find(u=>u.id===profile.id);
-      if(!existing) store.data.users.push(sbToLocal(profile));
-      else Object.assign(existing,sbToLocal(profile));
+      // Sign in directly with Supabase
+      const { data, error } = await window._supabase.auth.signInWithPassword({ email, password });
+      if(error) throw error;
+      const user = data.user;
+      if(!user) throw new Error('No user returned. Please try again.');
+
+      // Load profile from DB
+      const { data: profile, error: profileError } = await window._supabase
+        .from('users').select('*').eq('id', user.id).single();
+
+      clearTimeout(timeout);
+
+      if(profileError || !profile){
+        // Profile doesn't exist yet - create it
+        const newProfile = {
+          id: user.id, name: email.split('@')[0], username: email.split('@')[0],
+          email, role: 'member', bio: '', skills: [], location: '', availability: 'available'
+        };
+        store.data.users.push(newProfile);
+        store.data.currentUser = user.id;
+        store._save();
+        renderOnboarding();
+        return;
+      }
+
+      const localProfile = sbToLocal(profile);
+      store.data.currentUser = user.id;
+      const existing = store.data.users.find(u=>u.id===user.id);
+      if(!existing) store.data.users.push(localProfile);
+      else Object.assign(existing, localProfile);
       store._save();
+
+      if(window.LiveStore){
+        window.LiveStore._currentUserId = user.id;
+        window.LiveStore._profile = localProfile;
+        window.LiveStore._loaded = true;
+      }
+
       if(!profile.user_type) renderOnboarding();
       else renderPage();
     } catch(e){
-      showAuthError('auth-error',e.message||'Sign in failed. Check your email and password.');
+      clearTimeout(timeout);
+      showAuthError('auth-error', e.message||'Sign in failed. Check your email and password.');
       btn.textContent='Sign In';btn.disabled=false;
     }
   };
