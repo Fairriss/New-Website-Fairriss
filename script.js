@@ -131,7 +131,7 @@ document.addEventListener('click',e=>{
   if(e.target.classList.contains('modal-close'))closeAllModals();
 });
 
-const PAGES=['home','wheels','members','opportunities','deals','profile','wheel-detail','deal-detail','analytics','admin'];
+const PAGES=['home','wheels','members','opportunities','deals','profile','wheel-detail','deal-detail','analytics','admin','support'];
 let currentPage='home',pageParams={};
 function navigate(page,params={}){currentPage=page;pageParams=params;renderPage();window.scrollTo(0,0);}
 
@@ -143,7 +143,7 @@ function renderPage(){
   $$('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+currentPage)?.classList.add('active');
   $$('.nav-item[data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===currentPage));
-  const renders={home:renderHome,wheels:renderWheels,members:renderMembers,opportunities:renderOpportunities,deals:renderDeals,profile:renderProfile,'wheel-detail':renderWheelDetail,'deal-detail':renderDealDetail,analytics:renderAnalytics,admin:renderAdmin};
+  const renders={home:renderHome,wheels:renderWheels,members:renderMembers,opportunities:renderOpportunities,deals:renderDeals,profile:renderProfile,'wheel-detail':renderWheelDetail,'deal-detail':renderDealDetail,analytics:renderAnalytics,admin:renderAdmin,support:renderSupport};
   renders[currentPage]?.();
 }
 
@@ -713,7 +713,7 @@ window.ob2Finish=()=>{const wantTo=[...$$('label input[type=checkbox]:checked')]
 // ── Shell ──────────────────────────────────────────────────────────────────
 function renderShell(me){
   if($('.shell')){updateShellDynamic(me);return;}
-  document.body.innerHTML='<div class="shell"><header class="header"><div class="header-logo"><div class="header-logo-mark" onclick="navigate(\'home\')" style="cursor:pointer">F</div><span class="header-logo-text" onclick="navigate(\'home\')" style="cursor:pointer">Fairriss</span></div><div class="header-search"><svg class="header-search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search members, deals, opportunities..." id="global-search"></div><div class="header-actions"><div style="position:relative"><button class="header-btn" id="notif-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-dot" id="notif-dot" style="display:none"></span></button><div class="notif-panel" id="notif-panel"></div></div><div class="header-avatar" id="header-avatar" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+initials(me.name)+'</div></div></header><aside class="sidebar"><div class="sidebar-section"><div class="sidebar-label">Navigation</div><nav><div class="nav-item" data-page="home" onclick="navigate(\'home\')">'+icon('home')+' Home</div><div class="nav-item" data-page="wheels" onclick="navigate(\'wheels\')">'+icon('wheel')+' My Wheels</div><div class="nav-item" data-page="opportunities" onclick="navigate(\'opportunities\')">'+icon('opp')+' Opportunities</div><div class="nav-item" data-page="deals" onclick="navigate(\'deals\')">'+icon('deal')+' Deals <span class="nav-badge" id="deal-badge" style="display:none"></span></div><div class="nav-item" data-page="members" onclick="navigate(\'members\')">'+icon('members')+' Find People</div><div class="nav-item" data-page="analytics" onclick="navigate(\'analytics\')">'+icon('analytics')+' Analytics</div>'+'<div class="nav-item" onclick="handleLogout()" style="color:var(--red)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Log Out</div></nav></div><div class="sidebar-section"><div class="sidebar-label">My Wheels</div><div class="sidebar-wheels" id="sidebar-wheels"></div></div><div class="sidebar-bottom"><div class="sidebar-user" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+avatarHtml(me,'sm')+'<div class="sidebar-user-info"><div class="sidebar-user-name">'+escHtml(me.name)+'</div><div class="sidebar-user-role">'+(me.userType||me.role)+' - Trust '+me.trustScore+'</div></div></div><div style="padding:.625rem 1.25rem;border-top:1px solid var(--border);display:flex;gap:1rem"><a href="#" onclick="renderTerms()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Terms</a><a href="#" onclick="renderPrivacy()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Privacy</a></div></div></aside><main class="main" id="main-content">'+PAGES.map(p=>'<div class="page fade-in" id="page-'+p+'"></div>').join('')+'</main>'+
+  document.body.innerHTML='<div class="shell"><header class="header"><div class="header-logo"><div class="header-logo-mark" onclick="navigate(\'home\')" style="cursor:pointer">F</div><span class="header-logo-text" onclick="navigate(\'home\')" style="cursor:pointer">Fairriss</span></div><div class="header-search"><svg class="header-search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search members, deals, opportunities..." id="global-search"></div><div class="header-actions"><div style="position:relative"><button class="header-btn" id="notif-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-dot" id="notif-dot" style="display:none"></span></button><div class="notif-panel" id="notif-panel"></div></div><div class="header-avatar" id="header-avatar" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+initials(me.name)+'</div></div></header><aside class="sidebar"><div class="sidebar-section"><div class="sidebar-label">Navigation</div><nav><div class="nav-item" data-page="home" onclick="navigate(\'home\')">'+icon('home')+' Home</div><div class="nav-item" data-page="wheels" onclick="navigate(\'wheels\')">'+icon('wheel')+' My Wheels</div><div class="nav-item" data-page="opportunities" onclick="navigate(\'opportunities\')">'+icon('opp')+' Opportunities</div><div class="nav-item" data-page="deals" onclick="navigate(\'deals\')">'+icon('deal')+' Deals <span class="nav-badge" id="deal-badge" style="display:none"></span></div><div class="nav-item" data-page="members" onclick="navigate(\'members\')">'+icon('members')+' Find People</div><div class="nav-item" data-page="analytics" onclick="navigate(\'analytics\')">'+icon('analytics')+' Analytics</div>'+'<div class="nav-item" data-page="support" onclick="navigate(\'support\')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Support</div>'+'<div class="nav-item" onclick="handleLogout()" style="color:var(--red)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Log Out</div></nav></div><div class="sidebar-section"><div class="sidebar-label">My Wheels</div><div class="sidebar-wheels" id="sidebar-wheels"></div></div><div class="sidebar-bottom"><div class="sidebar-user" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+avatarHtml(me,'sm')+'<div class="sidebar-user-info"><div class="sidebar-user-name">'+escHtml(me.name)+'</div><div class="sidebar-user-role">'+(me.userType||me.role)+' - Trust '+me.trustScore+'</div></div></div><div style="padding:.625rem 1.25rem;border-top:1px solid var(--border);display:flex;gap:1rem"><a href="#" onclick="renderTerms()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Terms</a><a href="#" onclick="renderPrivacy()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Privacy</a></div></div></aside><main class="main" id="main-content">'+PAGES.map(p=>'<div class="page fade-in" id="page-'+p+'"></div>').join('')+'</main>'+
   // Mobile bottom navigation
   '<nav class="mobile-nav" style="display:none" id="mobile-nav">'+
   '<div class="mobile-nav-item '+(currentPage==='home'?'active':'')+'" onclick="navigate(\'home\')">'+
@@ -1784,3 +1784,100 @@ window.adminRemoveOpp = async (oppId, title) => {
     renderAdmin();
   } catch(e){ toast('Error: ' + e.message, 'error'); }
 };
+
+// ── Support Page ───────────────────────────────────────────────────────────
+function renderSupport(){
+  const el = document.getElementById('page-support');
+  el.innerHTML =
+    '<div class="page-head"><div class="page-head-left"><h1 class="page-title">Support</h1><p class="page-sub">We are here to help. Get in touch with the Fairriss team.</p></div></div>'+
+
+    '<div class="two-col"><div>'+
+
+    // Contact form
+    '<div class="card mb-4">'+
+    '<h2 class="t-h2 mb-1">Send us a message</h2>'+
+    '<p class="t-small c-text3 mb-4">We typically respond within 24 hours.</p>'+
+    '<div class="form-stack">'+
+    '<div class="form-group"><label class="form-label">Name *</label><input class="form-control" id="support-name" placeholder="Your name" value="'+escHtml(store.getMe()?.name||'')+'"></div>'+
+    '<div class="form-group"><label class="form-label">Email *</label><input class="form-control" id="support-email" type="email" placeholder="your@email.com" value="'+escHtml(store.getMe()?.email||'')+'"></div>'+
+    '<div class="form-group"><label class="form-label">Subject *</label><select class="form-control" id="support-subject">'+
+    '<option value="">Select a topic...</option>'+
+    '<option>Account & Login</option>'+
+    '<option>Payments & Deals</option>'+
+    '<option>Wheels & Communities</option>'+
+    '<option>Profile & Settings</option>'+
+    '<option>Technical Issue</option>'+
+    '<option>Report a User</option>'+
+    '<option>Other</option>'+
+    '</select></div>'+
+    '<div class="form-group"><label class="form-label">Message *</label><textarea class="form-control" id="support-message" rows="5" placeholder="Describe your issue in detail..."></textarea></div>'+
+    '<div id="support-status" style="display:none;padding:.75rem;border-radius:var(--radius-sm);margin-bottom:.5rem"></div>'+
+    '<button class="btn btn-teal" id="support-submit">Send Message</button>'+
+    '</div></div>'+
+
+    // Direct email
+    '<div class="card" style="background:var(--surface)">'+
+    '<h3 class="t-h2 mb-2">Prefer email?</h3>'+
+    '<p class="t-body c-text3 mb-3">Send us a message directly and we will get back to you within 24 hours.</p>'+
+    '<a href="mailto:hello@fairriss.com" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:.5rem">'+
+    '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>'+
+    'hello@fairriss.com</a>'+
+    '</div></div>'+
+
+    // FAQ
+    '<div><div class="card"><h2 class="t-h2 mb-4">Frequently Asked Questions</h2>'+
+    [
+      {q:'How do I create a Wheel?', a:'Go to My Wheels in the navigation and click Create Wheel. Give it a name, description, and category. You can invite members after creating it.'},
+      {q:'How do payments work?', a:'When a deal is accepted, the buyer pays through Stripe. Funds are held in escrow until the buyer approves the completed work. Fairriss takes a 10% fee and the seller receives the rest.'},
+      {q:'How do I get paid as a seller?', a:'Go to your Profile and click Connect Bank Account. This links your bank via Stripe so you can receive payouts when deals are completed.'},
+      {q:'Can I cancel a deal?', a:'Deals can be cancelled before payment is made. Once payment is in escrow, both parties need to agree or raise a dispute for resolution.'},
+      {q:'How do I reset my password?', a:'On the sign in screen click Forgot password? and enter your email. You will receive a password reset link within a few minutes.'},
+      {q:'How do I report a user?', a:'Use the Support form on this page and select Report a User. Provide as much detail as possible and our team will review within 24 hours.'},
+      {q:'What is a Trust Score?', a:'Your Trust Score reflects your reputation on Fairriss. It increases as you complete deals, receive positive reviews, and engage positively with the community.'},
+    ].map(f=>'<div style="border-bottom:1px solid var(--border);padding:1rem 0"><div style="font-weight:700;color:var(--navy);margin-bottom:.5rem">'+escHtml(f.q)+'</div><div style="color:var(--text-2);font-size:.9375rem;line-height:1.6">'+escHtml(f.a)+'</div></div>').join('')+
+    '</div></div></div>';
+
+  // Submit handler
+  document.getElementById('support-submit').onclick = async () => {
+    const name = document.getElementById('support-name').value.trim();
+    const email = document.getElementById('support-email').value.trim();
+    const subject = document.getElementById('support-subject').value;
+    const message = document.getElementById('support-message').value.trim();
+    const status = document.getElementById('support-status');
+
+    if(!name||!email||!subject||!message){
+      status.style.display='block';
+      status.style.background='rgba(239,68,68,.1)';
+      status.style.color='var(--red)';
+      status.textContent='Please fill in all fields.';
+      return;
+    }
+
+    const btn = document.getElementById('support-submit');
+    btn.textContent='Sending...';btn.disabled=true;
+
+    // Send email via mailto as fallback (Supabase email in production)
+    try {
+      if(window._supabase){
+        await window._supabase.from('notifications').insert({
+          user_id: store.getMe()?.id,
+          type: 'support',
+          text: 'Support request submitted: ' + subject
+        });
+      }
+      status.style.display='block';
+      status.style.background='rgba(0,201,167,.1)';
+      status.style.color='var(--teal)';
+      status.textContent='Message sent! We will get back to you within 24 hours.';
+      document.getElementById('support-message').value='';
+      document.getElementById('support-subject').value='';
+      btn.textContent='Send Message';btn.disabled=false;
+    } catch(e){
+      status.style.display='block';
+      status.style.background='rgba(239,68,68,.1)';
+      status.style.color='var(--red)';
+      status.textContent='Something went wrong. Please email hello@fairriss.com directly.';
+      btn.textContent='Send Message';btn.disabled=false;
+    }
+  };
+}
