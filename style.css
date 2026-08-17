@@ -215,6 +215,12 @@ ul, ol { list-style: none; }
   font-size: .875rem;
   flex-shrink: 0;
   border: 2px solid var(--teal);
+  overflow: hidden;
+}
+.header-logo-mark img {
+  width: 34px;
+  height: 34px;
+  object-fit: cover;
 }
 .header-logo-text { font-size: 1.0625rem; font-weight: 800; color: var(--navy); letter-spacing: -.025em; }
 
