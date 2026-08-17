@@ -436,7 +436,7 @@ function renderAuth(){
             </div>
           </div>
           <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(15,31,61,.06);text-align:left;position:relative">
-            <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80" style="width:100%;height:180px;object-fit:cover;display:block">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80" style="width:100%;height:180px;object-fit:cover;display:block">
             <div style="padding:1.75rem 2rem;position:relative">
               <div style="position:absolute;top:1rem;right:1.5rem;font-size:3rem;font-weight:900;color:rgba(15,31,61,.06);line-height:1">2</div>
               <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Post Opportunities</h3>
@@ -450,6 +450,52 @@ function renderAuth(){
               <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Close Deals and Get Paid</h3>
               <p style="color:#64748B;line-height:1.6;margin:0;font-size:.9375rem">Propose deals, agree on terms, and get paid through secure escrow. Fairriss takes just 10%.</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- POPULAR SERVICES -->
+      <section class="lp-section" style="background:#f8f9fc">
+        <div style="max-width:1100px;margin:0 auto">
+          <p style="color:#00C9A7;font-weight:700;font-size:.875rem;letter-spacing:.08em;text-transform:uppercase;margin:0 0 .75rem">What People Do Here</p>
+          <h2 style="color:#0F1F3D;font-size:2.5rem;font-weight:900;margin:0 0 .75rem;letter-spacing:-.02em">Popular Services</h2>
+          <p style="color:#64748B;font-size:1rem;margin:0 0 2.5rem">Hire talented professionals or offer your own skills across these in-demand categories.</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem">
+            ${ [
+              {label:'Web Development', color:'#0F1F3D', img:'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&q=80'},
+              {label:'Graphic Design', color:'#6D28D9', img:'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&q=80'},
+              {label:'Video Editing', color:'#BE185D', img:'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&q=80'},
+              {label:'Marketing', color:'#047857', img:'https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=400&q=80'},
+              {label:'Copywriting', color:'#B45309', img:'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&q=80'},
+              {label:'Software Dev', color:'#0369A1', img:'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=400&q=80'},
+            ].map(s => `
+              <div style="border-radius:12px;overflow:hidden;position:relative;cursor:pointer" onclick="showAuthModal('signup')">
+                <img src="${s.img}" style="width:100%;height:130px;object-fit:cover;display:block">
+                <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7),transparent)"></div>
+                <div style="position:absolute;bottom:.75rem;left:.75rem;color:#fff;font-weight:700;font-size:.9375rem">${s.label}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </section>
+
+      <!-- FREELANCERS -->
+      <section class="lp-section" style="background:#fff">
+        <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center" class="lp-freelance-grid">
+          <div>
+            <p style="color:#00C9A7;font-weight:700;font-size:.875rem;letter-spacing:.08em;text-transform:uppercase;margin:0 0 .75rem">For Freelancers</p>
+            <h2 style="color:#0F1F3D;font-size:2.25rem;font-weight:900;margin:0 0 1rem;letter-spacing:-.02em">Get hired. Get paid. Build your reputation.</h2>
+            <p style="color:#64748B;font-size:1rem;line-height:1.7;margin:0 0 1.5rem">Fairriss connects you directly with businesses and founders in private Wheels. No bidding wars. No race to the bottom. Just real opportunities from real people in your network.</p>
+            <div style="display:flex;flex-direction:column;gap:.75rem;margin-bottom:2rem">
+              <div style="display:flex;align-items:center;gap:.75rem"><span style="width:24px;height:24px;border-radius:50%;background:#00C9A7;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#0F1F3D;font-weight:900;font-size:.75rem">&#x2713;</span><span style="color:#374151;font-size:.9375rem">Secure payments held in escrow</span></div>
+              <div style="display:flex;align-items:center;gap:.75rem"><span style="width:24px;height:24px;border-radius:50%;background:#00C9A7;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#0F1F3D;font-weight:900;font-size:.75rem">&#x2713;</span><span style="color:#374151;font-size:.9375rem">Build your Trust Score with every deal</span></div>
+              <div style="display:flex;align-items:center;gap:.75rem"><span style="width:24px;height:24px;border-radius:50%;background:#00C9A7;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#0F1F3D;font-weight:900;font-size:.75rem">&#x2713;</span><span style="color:#374151;font-size:.9375rem">Join Wheels in your niche and get discovered</span></div>
+              <div style="display:flex;align-items:center;gap:.75rem"><span style="width:24px;height:24px;border-radius:50%;background:#00C9A7;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#0F1F3D;font-weight:900;font-size:.75rem">&#x2713;</span><span style="color:#374151;font-size:.9375rem">Only 10% platform fee — keep more of what you earn</span></div>
+            </div>
+            <button onclick="showAuthModal('signup')" style="background:#0F1F3D;color:#fff;border:none;border-radius:10px;padding:.875rem 2rem;font-size:1rem;font-weight:700;cursor:pointer">Start as a Freelancer</button>
+          </div>
+          <div style="border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(15,31,61,.12)">
+            <img src="https://images.unsplash.com/photo-1573497491208-6b1acb260507?w=800&q=80" style="width:100%;height:400px;object-fit:cover;display:block">
           </div>
         </div>
       </section>
