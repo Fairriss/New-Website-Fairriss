@@ -196,6 +196,8 @@ ul, ol { list-style: none; }
   padding: 0 1.5rem 0 0;
   position: sticky; top: 0; z-index: 100;
   gap: 1rem;
+  height: var(--header-h);
+  box-sizing: border-box;
 }
 .header-logo {
   width: var(--sidebar-w);
@@ -204,6 +206,7 @@ ul, ol { list-style: none; }
   flex-shrink: 0;
   border-right: 1px solid var(--border);
   height: 100%;
+  min-width: 180px;
 }
 .header-logo-mark {
   width: 34px; height: 34px;
