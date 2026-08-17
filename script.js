@@ -427,23 +427,29 @@ function renderAuth(){
         <h2 style="color:#0F1F3D;font-size:2.5rem;font-weight:900;margin:0 0 1rem;letter-spacing:-.02em">Three steps to get paid</h2>
         <p style="color:#64748B;font-size:1.0625rem;max-width:520px;margin:0 auto 4rem;line-height:1.6">Fairriss combines community, opportunities, and payments in one seamless platform.</p>
         <div class="lp-grid-3">
-          <div style="background:#fff;border-radius:16px;padding:2.5rem 2rem;box-shadow:0 4px 24px rgba(15,31,61,.06);text-align:left;position:relative">
-            <div style="width:48px;height:48px;border-radius:12px;background:#0F1F3D;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1.25rem;color:#00C9A7;font-weight:900;font-size:1.25rem">W</div>
-            <div style="position:absolute;top:1.5rem;right:1.5rem;font-size:3rem;font-weight:900;color:rgba(15,31,61,.06);line-height:1">1</div>
-            <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Create or Join a Wheel</h3>
-            <p style="color:#64748B;line-height:1.6;margin:0;font-size:.9375rem">Build your private community or join an existing one. Wheels are spaces where real deals happen.</p>
+          <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(15,31,61,.06);text-align:left;position:relative">
+            <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=600&q=80" style="width:100%;height:180px;object-fit:cover;display:block">
+            <div style="padding:1.75rem 2rem;position:relative">
+              <div style="position:absolute;top:1rem;right:1.5rem;font-size:3rem;font-weight:900;color:rgba(15,31,61,.06);line-height:1">1</div>
+              <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Create or Join a Wheel</h3>
+              <p style="color:#64748B;line-height:1.6;margin:0;font-size:.9375rem">Build your private community or join an existing one. Wheels are spaces where real deals happen.</p>
+            </div>
           </div>
-          <div style="background:#fff;border-radius:16px;padding:2.5rem 2rem;box-shadow:0 4px 24px rgba(15,31,61,.06);text-align:left;position:relative">
-            <div style="width:48px;height:48px;border-radius:12px;background:#6D28D9;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1.25rem">&#x1F3AF;</div>
-            <div style="position:absolute;top:1.5rem;right:1.5rem;font-size:3rem;font-weight:900;color:rgba(15,31,61,.06);line-height:1">2</div>
-            <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Post Opportunities</h3>
-            <p style="color:#64748B;line-height:1.6;margin:0;font-size:.9375rem">Share jobs, partnerships, referrals, and collaboration requests. Your network sees it first.</p>
+          <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(15,31,61,.06);text-align:left;position:relative">
+            <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80" style="width:100%;height:180px;object-fit:cover;display:block">
+            <div style="padding:1.75rem 2rem;position:relative">
+              <div style="position:absolute;top:1rem;right:1.5rem;font-size:3rem;font-weight:900;color:rgba(15,31,61,.06);line-height:1">2</div>
+              <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Post Opportunities</h3>
+              <p style="color:#64748B;line-height:1.6;margin:0;font-size:.9375rem">Share jobs, partnerships, referrals, and collaboration requests. Your network sees it first.</p>
+            </div>
           </div>
-          <div style="background:#fff;border-radius:16px;padding:2.5rem 2rem;box-shadow:0 4px 24px rgba(15,31,61,.06);text-align:left;position:relative">
-            <div style="width:48px;height:48px;border-radius:12px;background:#00C9A7;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1.25rem">&#x1F4B0;</div>
-            <div style="position:absolute;top:1.5rem;right:1.5rem;font-size:3rem;font-weight:900;color:rgba(15,31,61,.06);line-height:1">3</div>
-            <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Close Deals and Get Paid</h3>
-            <p style="color:#64748B;line-height:1.6;margin:0;font-size:.9375rem">Propose deals, agree on terms, and get paid through secure escrow. Fairriss takes just 10%.</p>
+          <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(15,31,61,.06);text-align:left;position:relative">
+            <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&q=80" style="width:100%;height:180px;object-fit:cover;display:block">
+            <div style="padding:1.75rem 2rem;position:relative">
+              <div style="position:absolute;top:1rem;right:1.5rem;font-size:3rem;font-weight:900;color:rgba(15,31,61,.06);line-height:1">3</div>
+              <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Close Deals and Get Paid</h3>
+              <p style="color:#64748B;line-height:1.6;margin:0;font-size:.9375rem">Propose deals, agree on terms, and get paid through secure escrow. Fairriss takes just 10%.</p>
+            </div>
           </div>
         </div>
       </section>
