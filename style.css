@@ -1159,3 +1159,5 @@ select.form-control { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+  .lp-freelance-grid { grid-template-columns:1fr !important; gap:2rem !important; }
+  .lp-freelance-grid > div:last-child img { height:250px !important; }
