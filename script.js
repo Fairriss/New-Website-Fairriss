@@ -436,7 +436,7 @@ function renderAuth(){
             </div>
           </div>
           <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(15,31,61,.06);text-align:left;position:relative">
-            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80" style="width:100%;height:180px;object-fit:cover;display:block">
+            <img src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=600&q=80" style="width:100%;height:180px;object-fit:cover;display:block">
             <div style="padding:1.75rem 2rem;position:relative">
               <div style="position:absolute;top:1rem;right:1.5rem;font-size:3rem;font-weight:900;color:rgba(15,31,61,.06);line-height:1">2</div>
               <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Post Opportunities</h3>
