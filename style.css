@@ -226,8 +226,9 @@ ul, ol { list-style: none; }
 
 .header-search {
   flex: 1;
-  max-width: 400px;
+  max-width: 560px;
   position: relative;
+  margin: 0 auto;
 }
 .header-search input {
   width: 100%;
