@@ -1461,7 +1461,7 @@ window.handleLogout = async () => {
 // ================================================================
 // STRIPE PAYMENTS
 // ================================================================
-const STRIPE_PK = 'pk_test_51TwRBCBcFQ7cg5YhnfyYN61re3AVzbuN8aFJIGieFaxESfSjx61zCLCasYXG7RaOyDfDtXcqC5Y57iBYQFlrdAwg00dX4e24yw'; // Replace with your pk_test_ key
+const STRIPE_PK = 'pk_live_51TwRBCBcFQ7cg5YhIPO8bijPfb5xZY0VEdBKJMIA2soSGJV3HgC13DBmIxCKP3eXHOvPDLE6TwbZ93v4jsuAufNu00vZATZgQ8'; // Live key
 let _stripe = null;
 
 function getStripe(){
