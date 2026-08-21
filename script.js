@@ -204,8 +204,8 @@ function renderResetPassword(){
   '</div>'+
   '<div style="padding:2rem">'+
   '<div class="form-stack">'+
-  '<div class="form-group"><label class="form-label">New Password</label><input class="form-control" id="rp-password" type="password" placeholder="Min 6 characters"></div>'+
-  '<div class="form-group"><label class="form-label">Confirm Password</label><input class="form-control" id="rp-confirm" type="password" placeholder="Repeat your password"></div>'+
+  '<div class="form-group"><label class="form-label">New Password</label><div style="position:relative"><input class="form-control" id="rp-password" type="password" placeholder="Min 6 characters" style="padding-right:2.75rem"><button type="button" onclick="togglePw(\'rp-password\',this)" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:.6rem .5rem;margin:-.6rem -.5rem;color:#94A3B8;font-size:.8125rem;font-weight:600;-webkit-tap-highlight-color:transparent">Show</button></div></div>'+
+  '<div class="form-group"><label class="form-label">Confirm Password</label><div style="position:relative"><input class="form-control" id="rp-confirm" type="password" placeholder="Repeat your password" style="padding-right:2.75rem"><button type="button" onclick="togglePw(\'rp-confirm\',this)" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:.6rem .5rem;margin:-.6rem -.5rem;color:#94A3B8;font-size:.8125rem;font-weight:600;-webkit-tap-highlight-color:transparent">Show</button></div></div>'+
   '<div id="rp-error" style="color:var(--red);font-size:.875rem;display:none"></div>'+
   '<button class="btn btn-primary w-full" id="rp-btn" style="justify-content:center;margin-top:.5rem">Set New Password</button>'+
   '</div></div></div></div>';
@@ -583,7 +583,7 @@ function renderAuth(){
           </div>
           <div id="auth-login-form">
             <div style="margin-bottom:1rem"><label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Email</label><input id="li-email" type="email" placeholder="you@example.com" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none"></div>
-            <div style="margin-bottom:1rem"><label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Password</label><input id="li-password" type="password" placeholder="Your password" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none"></div>
+            <div style="margin-bottom:1rem"><label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Password</label><div style="position:relative"><input id="li-password" type="password" placeholder="Your password" style="width:100%;padding:.75rem 2.75rem .75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none"><button type="button" onclick="togglePw('li-password',this)" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:.6rem .5rem;margin:-.6rem -.5rem;color:#94A3B8;font-size:.8125rem;font-weight:600;-webkit-tap-highlight-color:transparent">Show</button></div></div>
             <div id="auth-error" style="color:#EF4444;font-size:.875rem;margin-bottom:.75rem;display:none"></div>
             <button id="signin-btn" style="width:100%;padding:.875rem;background:#0F1F3D;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:1rem">Sign In</button>
             <div style="display:flex;justify-content:space-between;align-items:center">
@@ -597,7 +597,7 @@ function renderAuth(){
               <div><label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Username *</label><input id="su-username" placeholder="alexchen" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none"></div>
             </div>
             <div style="margin-bottom:1rem"><label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Email *</label><input id="su-email" type="email" placeholder="alex@example.com" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none"></div>
-            <div style="margin-bottom:1rem"><label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Password *</label><input id="su-password" type="password" placeholder="Min 6 characters" style="width:100%;padding:.75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none"></div>
+            <div style="margin-bottom:1rem"><label style="display:block;font-size:.875rem;font-weight:600;color:#0F1F3D;margin-bottom:.375rem">Password *</label><div style="position:relative"><input id="su-password" type="password" placeholder="Min 6 characters" style="width:100%;padding:.75rem 2.75rem .75rem 1rem;border:1.5px solid #E2E8F0;border-radius:8px;font-size:.9375rem;box-sizing:border-box;outline:none"><button type="button" onclick="togglePw('su-password',this)" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:.6rem .5rem;margin:-.6rem -.5rem;color:#94A3B8;font-size:.8125rem;font-weight:600;-webkit-tap-highlight-color:transparent">Show</button></div></div>
             <div id="signup-error" style="color:#EF4444;font-size:.875rem;margin-bottom:.75rem;display:none"></div>
             <button id="create-account-btn" style="width:100%;padding:.875rem;background:#0F1F3D;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:1rem">Create Account</button>
             <p style="font-size:.75rem;color:#94A3B8;text-align:center;margin:0">By signing up you agree to our <a href="#" onclick="renderTerms()" style="color:#00C9A7">Terms</a> and <a href="#" onclick="renderPrivacy()" style="color:#00C9A7">Privacy Policy</a></p>
@@ -607,6 +607,13 @@ function renderAuth(){
     </div>
   `;
 
+  window.togglePw = (inputId, btn) => {
+    const input = document.getElementById(inputId);
+    if(!input) return;
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.textContent = show ? 'Hide' : 'Show';
+  };
   window.showAuthModal = (tab) => {
     const modal = document.getElementById('auth-modal');
     modal.style.display = 'flex';
@@ -1461,7 +1468,7 @@ window.handleLogout = async () => {
 // ================================================================
 // STRIPE PAYMENTS
 // ================================================================
-const STRIPE_PK = 'pk_live_51TwRBCBcFQ7cg5YhIPO8bijPfb5xZY0VEdBKJMIA2soSGJV3HgC13DBmIxCKP3eXHOvPDLE6TwbZ93v4jsuAufNu00vZATZgQ8'; // Live key
+const STRIPE_PK = 'pk_test_51TwRBCBcFQ7cg5YhnfyYN61re3AVzbuN8aFJIGieFaxESfSjx61zCLCasYXG7RaOyDfDtXcqC5Y57iBYQFlrdAwg00dX4e24yw'; // Replace with your pk_test_ key
 let _stripe = null;
 
 function getStripe(){
