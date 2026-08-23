@@ -1148,6 +1148,7 @@ async function renderProfile(){
   const isMe = u.id === currentUserId;
   const myDeals=store.get('deals').filter(d=>d.sellerId===u.id||d.buyerId===u.id);
   const el=document.getElementById('page-profile');
+  if(!el) return;
 
   // Build photo slots
   let picSlots='<div style="display:flex;gap:.625rem;flex-wrap:wrap">';
@@ -1559,8 +1560,9 @@ window.connectBankAccount = async () => {
       email: me.email,
       name: me.name,
     });
-    window.open(url, '_blank');
-  } catch(e){ toast(e.message, 'error'); }
+    if(!url) throw new Error('No onboarding URL returned');
+    window.location.href = url;
+  } catch(e){ toast(e.message || 'Failed to start bank connection', 'error'); }
 };
 
 // Check if payment success on page load
