@@ -386,7 +386,7 @@ async function renderPublicProfile(username){
   '<div style="flex:1;min-width:180px">'+
   '<h1 class="profile-name" style="font-size:1.75rem;margin-bottom:.25rem">'+escHtml(u.name)+'</h1>'+
   (u.job_title?'<div style="color:rgba(255,255,255,.9);font-size:1rem;font-weight:600;margin-bottom:.2rem">'+escHtml(u.job_title)+(u.company?' at '+escHtml(u.company):'')+'</div>':'')+
-  '<div style="color:rgba(255,255,255,.55);font-size:.8125rem;margin-bottom:.75rem">'+escHtml(u.user_type||'Member')+'</div>'+
+  (u.user_type?'<div style="color:rgba(255,255,255,.55);font-size:.8125rem;margin-bottom:.75rem">'+escHtml(u.user_type)+'</div>':'')+
   (u.location?'<span style="color:rgba(255,255,255,.6);font-size:.8125rem">'+icon('map')+' '+escHtml(u.location)+'</span>':'')+
   '</div>'+
   '<div style="text-align:center"><div class="trust-score-circle" style="--pct:'+(u.trust_score||0)+'%;width:76px;height:76px"><div class="trust-score-inner" style="width:58px;height:58px"><div class="trust-score-num-lg" style="font-size:1.25rem">'+(u.trust_score||0)+'</div><div class="trust-score-label">Trust</div></div></div></div>'+
@@ -803,7 +803,7 @@ function renderOnboarding(){
   if(step===1){
     $('#ob-body').innerHTML='<h2 class="t-h1 mb-2">What best describes you?</h2><p class="t-body c-text3 mb-4">This helps us personalise your Fairriss experience.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.5rem">'+
     ['Founder','Freelancer','Owner','Investor','Advisor','Other'].map(t=>'<div class="auth-role-card" data-type="'+t+'" onclick="obSelectType(this,\''+t+'\')"><div class="auth-role-icon">'+({'Founder':'&#x1F680;','Freelancer':'&#x1F4BB;','Owner':'&#x1F3E2;','Investor':'&#x1F4B0;','Advisor':'&#x1F4A1;','Other':'&#x2728;'}[t])+'</div><div class="auth-role-name">'+t+'</div></div>').join('')+
-    '</div><button class="btn btn-teal w-full" style="justify-content:center" onclick="ob1Next()">Continue</button>';
+    '</div><div class="form-group mb-3" id="ob-other-row" style="display:none"><label class="form-label">Tell us what you do</label><input class="form-control" id="ob-other-input" placeholder="e.g. Consultant, Student, Recruiter..."></div><button class="btn btn-teal w-full" style="justify-content:center" onclick="ob1Next()">Continue</button>';
   }else{
     $('#ob-body').innerHTML='<h2 class="t-h1 mb-2">What do you want to do?</h2><p class="t-body c-text3 mb-4">Select all that apply.</p><div style="display:flex;flex-direction:column;gap:.625rem;margin-bottom:1.5rem">'+
     ['Hire People','Find Work','Join Communities','Post Opportunities','Network','Other'].map(t=>'<label style="display:flex;align-items:center;gap:.875rem;padding:.875rem 1rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer"><input type="checkbox" value="'+t+'" style="width:18px;height:18px;accent-color:var(--teal)"> <span style="font-size:.9375rem;font-weight:500">'+t+'</span></label>').join('')+
@@ -811,8 +811,17 @@ function renderOnboarding(){
     '<button class="btn btn-teal w-full" style="justify-content:center" onclick="ob2Finish()">Get Started</button>';
   }
 }
-window.obSelectType=(el,type)=>{$$('[data-type]').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');store.data._pendingType=type;};
-window.ob1Next=()=>{const type=store.data._pendingType;if(!type){toast('Please select what describes you','error');return;}store.updateMe({userType:type});store.data._obStep=2;renderOnboarding();};
+window.obSelectType=(el,type)=>{$$('[data-type]').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');store.data._pendingType=type;const row=document.getElementById('ob-other-row');if(row)row.style.display=(type==='Other')?'block':'none';};
+window.ob1Next=()=>{
+  let type=store.data._pendingType;
+  if(!type){toast('Please select what describes you','error');return;}
+  if(type==='Other'){
+    const custom=$('#ob-other-input')?.value.trim();
+    if(!custom){toast('Please tell us what you do','error');return;}
+    type=custom;
+  }
+  store.updateMe({userType:type});store.data._obStep=2;renderOnboarding();
+};
 window.ob2Finish=()=>{const wantTo=[...$$('label input[type=checkbox]:checked')].map(i=>i.value);store.updateMe({wantTo,jobTitle:$('#ob-title')?.value.trim()||'',company:$('#ob-company')?.value.trim()||''});store.data._obStep=null;store.data._pendingType=null;store._save();toast('Welcome to Fairriss!','success');navigate('home');};
 
 // ── Shell ──────────────────────────────────────────────────────────────────
@@ -1449,6 +1458,11 @@ window.updateDealStatus=async(id,status)=>{await store.updateDeal(id,{status});t
 function renderAboutCard(u,isMe){
   let h='<div class="card mb-4"><h2 class="t-h2 mb-3">About</h2>';
   if(isMe){
+    const roleOptions=['','Founder','Freelancer','Owner','Investor','Advisor','Other'];
+    const isCustomRole = u.userType && !roleOptions.includes(u.userType);
+    const selectedValue = isCustomRole ? 'Other' : (u.userType||'');
+    h+='<div class="form-group mb-2"><label class="form-label">What best describes you? <span>(optional)</span></label><select class="form-control" id="profile-usertype" onchange="document.getElementById(\'profile-other-row\').style.display=(this.value===\'Other\')?\'block\':\'none\'">'+roleOptions.map(r=>'<option value="'+escHtml(r)+'"'+(selectedValue===r?' selected':'')+'>'+(r||'Not set')+'</option>').join('')+'</select></div>';
+    h+='<div class="form-group mb-2" id="profile-other-row" style="display:'+(isCustomRole?'block':'none')+'"><label class="form-label">Tell us what you do</label><input class="form-control" id="profile-other-input" value="'+escHtml(isCustomRole?u.userType:'')+'" placeholder="e.g. Consultant, Student, Recruiter..."></div>';
     h+='<textarea class="form-control mb-2" id="profile-bio" rows="3">'+escHtml(u.bio||'')+'</textarea>';
     h+='<div class="form-row mb-2"><div class="form-group"><label class="form-label">Job Title</label><input class="form-control" id="profile-title" value="'+escHtml(u.jobTitle||'')+'" placeholder="CEO, Designer..."></div><div class="form-group"><label class="form-label">Company</label><input class="form-control" id="profile-company" value="'+escHtml(u.company||'')+'" placeholder="Acme Corp..."></div></div>';
     h+='<div class="form-group mb-3"><label class="form-label">Website / Link</label><input class="form-control" id="profile-website" value="'+escHtml(u.website||'')+'" placeholder="yoursite.com or linkedin.com/in/you"></div>';
@@ -1512,7 +1526,7 @@ async function renderProfile(){
   '<div style="flex:1;min-width:180px">'+
   '<h1 class="profile-name" style="font-size:1.75rem;margin-bottom:.25rem;line-height:1.1">'+escHtml(u.name)+'</h1>'+
   (u.jobTitle?'<div style="color:rgba(255,255,255,.9);font-size:1rem;font-weight:600;margin-bottom:.2rem">'+escHtml(u.jobTitle)+(u.company?' at '+escHtml(u.company):'')+'</div>':'')+
-  '<div style="color:rgba(255,255,255,.55);font-size:.8125rem;margin-bottom:.75rem">'+escHtml(u.userType||u.role)+'</div>'+
+  (u.userType?'<div style="color:rgba(255,255,255,.55);font-size:.8125rem;margin-bottom:.75rem">'+escHtml(u.userType)+'</div>':'')+
   '<div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">'+
   (u.location?'<span style="color:rgba(255,255,255,.6);font-size:.8125rem;display:flex;align-items:center;gap:.3rem">'+icon('map')+' '+escHtml(u.location)+'</span>':'')+
   '<span class="avail-badge '+(u.availability||'unavailable')+'" style="font-size:.75rem">'+(u.availability==='available'?'Available':u.availability==='limited'?'Limited':'Unavailable')+'</span>'+
@@ -1559,7 +1573,13 @@ window.shareMyProfile = async (username) => {
 
 window.saveProfileInfo=async()=>{
   const links=[...$$('.profile-link-input')].map(i=>i.value.trim()).filter(Boolean);
-  const fields={bio:$('#profile-bio').value.trim(),jobTitle:$('#profile-title').value.trim(),company:$('#profile-company').value.trim(),website:$('#profile-website')?.value.trim()||'',links};
+  let userType=$('#profile-usertype')?.value||'';
+  if(userType==='Other'){
+    const custom=$('#profile-other-input')?.value.trim();
+    if(!custom){ toast('Please tell us what you do, or pick "Not set"', 'error'); return; }
+    userType=custom;
+  }
+  const fields={bio:$('#profile-bio').value.trim(),jobTitle:$('#profile-title').value.trim(),company:$('#profile-company').value.trim(),website:$('#profile-website')?.value.trim()||'',userType,links};
   // Save to local store
   store.updateMe(fields);
   // Save to Supabase if connected
