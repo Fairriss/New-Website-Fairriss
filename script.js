@@ -1682,11 +1682,17 @@ function bindModalForms(){
     const w=store.createWheel({name,slug:name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,''),description:desc,category:$('#cw-cat').value,dealCommission:parseFloat($('#cw-commission').value)||2.5,hexColor:color,coverGradient:'linear-gradient(135deg,'+color+'cc,'+color+')',isEventWheel:$('#cw-is-event').checked});
     toast('Wheel "'+name+'" created!','success');closeAllModals();updateShellDynamic(store.getMe());navigate('wheel-detail',{wheelId:w.id});
   });
-  $('#create-opp-btn')?.addEventListener('click',()=>{
+  $('#create-opp-btn')?.addEventListener('click', async ()=>{
     const title=$('#co-title').value.trim(),desc=$('#co-desc').value.trim();
     if(!title||!desc){toast('Title and description are required','error');return;}
-    store.createOpportunity({type:$('#co-type').value,title,description:desc,skills:$('#co-skills').value.split(',').map(s=>s.trim()).filter(Boolean),location:$('#co-location').value.trim()||'Remote',remoteOk:true,wheelIds:store.getMyWheels().map(w=>w.id),metadata:{value:$('#co-comp').value.trim(),requireResume:$('#co-require-resume')?.checked!==false},expiresAt:null});
-    toast('Opportunity posted!','success');closeAllModals();navigate('opportunities');
+    const btn=$('#create-opp-btn'); btn.disabled=true; btn.textContent='Posting...';
+    try {
+      const myWheels = await store.getMyWheels();
+      await store.createOpportunity({type:$('#co-type').value,title,description:desc,skills:$('#co-skills').value.split(',').map(s=>s.trim()).filter(Boolean),location:$('#co-location').value.trim()||'Remote',remoteOk:true,wheelIds:(myWheels||[]).map(w=>w.id),metadata:{value:$('#co-comp').value.trim(),requireResume:$('#co-require-resume')?.checked!==false},expiresAt:null});
+      toast('Opportunity posted!','success');closeAllModals();navigate('opportunities');
+    } catch(e){
+      toast('Failed to post: '+e.message,'error'); btn.disabled=false; btn.textContent='Post Opportunity';
+    }
   });
   $('#create-deal-btn')?.addEventListener('click',()=>{
     const title=$('#cd-title').value.trim(),scope=$('#cd-scope').value.trim(),price=parseInt($('#cd-price').value)||0,sellerId=$('#cd-seller').value;
@@ -1696,17 +1702,19 @@ function bindModalForms(){
     store.addNotif(sellerId,'deal_message','<strong>'+store.getMe().name+'</strong> proposed a deal: '+escHtml(title));
     toast('Deal proposed!','success');closeAllModals();navigate('deal-detail',{dealId:d.id});
   });
-  document.getElementById('modal-create-deal')?.addEventListener('click',()=>{
+  document.getElementById('modal-create-deal')?.addEventListener('click', async ()=>{
     const sel=$('#cd-seller'),wsel=$('#cd-wheel');
     if(!sel||sel.options.length>1)return;
     store.get('users').filter(u=>u.id!==store.getMe()?.id).forEach(u=>sel.options.add(new Option(u.name,u.id)));
-    store.getMyWheels().forEach(w=>wsel.options.add(new Option(w.name,w.id)));
+    const myWheels = await store.getMyWheels();
+    (myWheels||[]).forEach(w=>wsel.options.add(new Option(w.name,w.id)));
   });
-  $('#create-post-btn')?.addEventListener('click',()=>{
+  $('#create-post-btn')?.addEventListener('click', async ()=>{
     const body=$('#cp-body')?.value.trim()||'',link=$('#cp-link')?.value.trim()||'';
     const photoFile=document.getElementById('cp-photo')?.files[0],videoFile=document.getElementById('cp-video')?.files[0];
     if(!body&&!link&&!photoFile&&!videoFile){toast('Add a message, link, photo or video','error');return;}
-    const wheelId=pageParams.wheelId||store.getMyWheels()[0]?.id;
+    const myWheels = await store.getMyWheels();
+    const wheelId=pageParams.wheelId||(myWheels||[])[0]?.id;
     if(!wheelId){toast('Join a Wheel first','error');return;}
     const doPost=(photo,video)=>{
       store.createPost({wheelId,body,type:$('#cp-type').value,link:link||null,photo:photo||null,video:video||null});
@@ -1719,10 +1727,11 @@ function bindModalForms(){
     else doPost(null,null);
   });
   document.getElementById('modal-create-post')?.addEventListener('click',()=>{setTimeout(()=>initMentionAutocomplete('cp-body',pageParams.wheelId||null),50);});
-  $('#create-event-btn')?.addEventListener('click',()=>{
+  $('#create-event-btn')?.addEventListener('click', async ()=>{
     const title=$('#ev-title').value.trim(),desc=$('#ev-desc').value.trim(),date=$('#ev-date').value,location=$('#ev-location').value.trim();
     if(!title||!desc||!date||!location){toast('Please fill all required fields','error');return;}
-    const wheelId=pageParams.wheelId||store.getMyWheels()[0]?.id;if(!wheelId){toast('Open a Wheel first','error');return;}
+    const myWheels = await store.getMyWheels();
+    const wheelId=pageParams.wheelId||(myWheels||[])[0]?.id;if(!wheelId){toast('Open a Wheel first','error');return;}
     store.createEvent({wheelId,title,description:desc,date,time:$('#ev-time').value||'7:00 PM',location,ticketPrice:parseInt($('#ev-price').value)||0,ticketCount:parseInt($('#ev-count').value)||50});
     toast('Event created!','success');closeAllModals();renderWheelDetail();
   });
