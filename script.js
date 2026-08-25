@@ -1204,6 +1204,22 @@ window.deleteOpportunityAction = async (oppId, oppTitle) => {
   } catch(e){ toast('Failed to delete: '+e.message, 'error'); }
 };
 
+window.deleteDealAction = async (dealId, dealTitle) => {
+  if(!confirm('Delete "'+(dealTitle||'this deal')+'"? This removes it from your Deals list and message history. Any real Stripe payment record stays in your Stripe dashboard regardless.')) return;
+  const sb = getSb();
+  try {
+    if(sb){
+      await sb.from('deal_messages').delete().eq('deal_id', dealId).then(()=>{}, ()=>{});
+      const { error } = await sb.from('deals').delete().eq('id', dealId);
+      if(error) throw error;
+    }
+    store.data.deals = (store.data.deals||[]).filter(d=>d.id!==dealId);
+    store._save();
+    toast('Deal deleted', 'success');
+    if(currentPage==='deal-detail') navigate('deals'); else renderDeals();
+  } catch(e){ toast('Failed to delete: '+e.message, 'error'); }
+};
+
 
 // ── Deals ──────────────────────────────────────────────────────────────────
 async function renderDeals(){
@@ -1217,9 +1233,11 @@ async function renderDeals(){
   '<div class="filter-bar">'+['all','proposed','in_progress','completed','paid'].map(s=>{const cnt=s==='all'?deals.length:deals.filter(d=>d.status===s).length;return cnt>0||s==='all'?'<button class="filter-pill deal-filter-btn '+(filter===s?'active':'')+'" data-status="'+s+'">'+s.replace('_',' ')+' ('+cnt+')</button>':'';}).join('')+'</div>'+
   '<div class="deal-list">'+(filtered.length?filtered.map(d=>{
     const other=store.getUser(d.buyerId===me.id?d.sellerId:d.buyerId),si=STAGES.indexOf(d.status);
-    return '<div class="deal-card" onclick="navigate(\'deal-detail\',{dealId:\''+d.id+'\'})"><div class="deal-card-top"><div><div class="deal-title">'+escHtml(d.title)+'</div><div class="deal-parties">'+avatarHtml(other,'sm')+' '+escHtml(other?.name||'?')+' - '+(d.buyerId===me.id?'You are Buyer':'You are Seller')+'</div></div><div style="text-align:right"><div class="deal-amount">'+fmtMoney(d.priceCents/100,d.currency)+'</div>'+dealStatusBadge(d.status)+'</div></div><div class="deal-stages">'+STAGES.map((s,i)=>'<div class="deal-stage-dot '+(i<si?'done':i===si?'current':'')+'"></div>').join('')+'</div><div class="deal-card-footer"><span class="deal-due">'+icon('clock')+' '+(d.endDate||'TBD')+'</span><span class="t-micro c-text3">'+(d.messages?.length||0)+' messages</span></div></div>';
+    const isDone = d.status==='paid' || d.status==='completed';
+    return '<div class="deal-card" data-deal-id="'+d.id+'" onclick="navigate(\'deal-detail\',{dealId:\''+d.id+'\'})"><div class="deal-card-top"><div><div class="deal-title">'+escHtml(d.title)+'</div><div class="deal-parties">'+avatarHtml(other,'sm')+' '+escHtml(other?.name||'?')+' - '+(d.buyerId===me.id?'You are Buyer':'You are Seller')+'</div></div><div style="text-align:right"><div class="deal-amount">'+fmtMoney(d.priceCents/100,d.currency)+'</div>'+dealStatusBadge(d.status)+'</div></div><div class="deal-stages">'+STAGES.map((s,i)=>'<div class="deal-stage-dot '+(i<si?'done':i===si?'current':'')+'"></div>').join('')+'</div><div class="deal-card-footer"><span class="deal-due">'+icon('clock')+' '+(d.endDate||'TBD')+'</span><span class="flex items-center gap-2"><span class="t-micro c-text3">'+(d.messages?.length||0)+' messages</span>'+(isDone?'<button class="btn btn-ghost btn-xs delete-deal-btn" style="color:var(--red)" data-deal-id="'+d.id+'" data-deal-title="'+escHtml(d.title)+'" onclick="event.stopPropagation()">Delete</button>':'')+'</span></div></div>';
   }).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F91D;</div><div class="empty-title">No deals yet</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-deal\')">Create Deal</button></div>')+'</div>';
   $$('.deal-filter-btn',el).forEach(btn=>btn.addEventListener('click',()=>navigate('deals',{status:btn.dataset.status})));
+  $$('.delete-deal-btn',el).forEach(btn=>btn.onclick=()=>deleteDealAction(btn.dataset.dealId, btn.dataset.dealTitle));
 }
 
 async function renderDealDetail(){
@@ -1242,7 +1260,7 @@ async function renderDealDetail(){
   '<div class="deal-detail-header"><div class="flex justify-between items-start mb-3"><div><div class="deal-detail-title">'+escHtml(deal.title)+'</div><div class="deal-detail-meta">'+dealStatusBadge(deal.status)+'<span class="t-small c-text3">Created '+timeAgo(deal.createdAt)+'</span></div></div><div style="text-align:right"><div class="deal-detail-amount">'+fmtMoney(deal.priceCents/100,deal.currency)+'</div><div class="deal-detail-amount-label">'+(deal.paymentType==='lump_sum'?'Full Amount':deal.paymentType||'Full Amount')+'</div></div></div>'+
   '<div class="deal-stages mb-4">'+STAGES.map((s,i)=>'<div class="deal-stage-dot '+(i<si?'done':i===si?'current':'')+'" title="'+s+'"></div>').join('')+'</div>'+
   '<div class="two-col-equal"><div class="card card-sm" style="background:var(--surface)"><div class="t-label c-text4 mb-2">Buyer</div><div class="flex gap-2 items-center">'+avatarHtml(buyer,'md')+'<div class="t-h3">'+escHtml(buyer?.name||'?')+'</div></div></div><div class="card card-sm" style="background:var(--surface)"><div class="t-label c-text4 mb-2">Seller</div><div class="flex gap-2 items-center">'+avatarHtml(seller,'md')+'<div class="t-h3">'+escHtml(seller?.name||'?')+'</div></div></div></div>'+
-  (actions[deal.status]?.length?'<div class="flex gap-2 mt-4">'+actions[deal.status].map(a=>'<button class="btn '+a.cls+'" onclick="'+a.fn+'">'+a.label+'</button>').join('')+'</div>':'')+'</div>'+
+  (actions[deal.status]?.length?'<div class="flex gap-2 mt-4">'+actions[deal.status].map(a=>'<button class="btn '+a.cls+'" onclick="'+a.fn+'">'+a.label+'</button>').join('')+'</div>':'')+(['paid','completed'].includes(deal.status)?'<div class="mt-3"><button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteDealAction(\''+deal.id+'\',\''+escHtml(deal.title).replace(/'/g,"\\\\'")+'\')">Delete Deal</button></div>':'')+'</div>'+
   '<div class="two-col"><div><div class="card mb-3"><h3 class="t-h2 mb-2">Scope</h3><p class="t-body" style="line-height:1.7;color:var(--text-2)">'+escHtml(deal.scope)+'</p></div>'+
   '<div class="card mb-3"><h3 class="t-h2 mb-3">Deliverables</h3>'+(deal.deliverables?.map(del=>'<div class="deliverable-item '+(del.done?'done':'')+'"><div class="deliverable-check '+(del.done?'checked':'')+'">'+( del.done?icon('check'):'')+'</div><div class="deliverable-title" style="'+(del.done?'text-decoration:line-through;opacity:.6':'')+'">'+escHtml(del.title)+'</div></div>').join('')||'<div class="t-body c-text3">No deliverables</div>')+'</div>'+
   '<div class="card card-sm" style="background:var(--surface)"><div class="t-label c-text4 mb-2">Fee Breakdown</div><div class="flex justify-between mb-1"><span class="t-small c-text3">Deal value</span><span class="t-small">'+fmtMoney(deal.priceCents/100)+'</span></div><div class="flex justify-between mb-2"><span class="t-small c-text3">Fairriss fee (10%)</span><span class="t-small c-red">-'+fmtMoney(fees)+'</span></div><div class="divider" style="margin:.5rem 0"></div><div class="flex justify-between"><span class="t-body" style="font-weight:700">Seller receives</span><span class="t-body c-green" style="font-weight:700">'+fmtMoney(sellerGets)+'</span></div></div></div>'+
@@ -1440,13 +1458,30 @@ async function dmFetchConversations(){
     .or('sender_id.eq.'+me.id+',recipient_id.eq.'+me.id)
     .order('created_at', { ascending: false });
   if(error){ console.warn('DM conversations failed:', error.message); return []; }
+  let hiddenIds = [];
+  try {
+    const { data: hidden } = await sb.from('dm_hidden_conversations').select('other_user_id').eq('user_id', me.id);
+    hiddenIds = (hidden||[]).map(h=>h.other_user_id);
+  } catch(e){ /* table may not exist yet — treat as nothing hidden */ }
   const seen = new Map();
   (data||[]).forEach(m=>{
     const otherId = m.sender_id===me.id ? m.recipient_id : m.sender_id;
-    if(!seen.has(otherId)) seen.set(otherId, m);
+    if(!seen.has(otherId) && !hiddenIds.includes(otherId)) seen.set(otherId, m);
   });
   return [...seen.entries()];
 }
+
+window.hideConversation = async (otherUserId) => {
+  const me = store.getMe();
+  const sb = getSb();
+  if(!sb || !me) return;
+  try {
+    const { error } = await sb.from('dm_hidden_conversations').upsert({ user_id: me.id, other_user_id: otherUserId });
+    if(error) throw error;
+    toast('Conversation removed from Inbox', 'success');
+    navigate('messages');
+  } catch(e){ toast('Failed to remove: '+e.message, 'error'); }
+};
 
 async function dmSend(otherUserId, body, attachment){
   const me = store.getMe();
@@ -1457,6 +1492,12 @@ async function dmSend(otherUserId, body, attachment){
   if(attachment){ row.attachment_url = attachment.url; row.attachment_name = attachment.name; }
   const { error } = await sb.from('direct_messages').insert(row);
   if(error){ toast('Failed to send: '+error.message, 'error'); return false; }
+  // A new message un-hides the conversation for both people, so it doesn't
+  // stay lost just because one side had previously removed it.
+  try {
+    await sb.from('dm_hidden_conversations').delete().eq('user_id', me.id).eq('other_user_id', otherUserId);
+    await sb.from('dm_hidden_conversations').delete().eq('user_id', otherUserId).eq('other_user_id', me.id);
+  } catch(e){ /* non-critical */ }
   return true;
 }
 
@@ -1518,7 +1559,7 @@ async function renderMessages(){
   if(withUserId){
     const other = await dmGetUser(withUserId);
     const panel = document.getElementById('dm-thread-panel');
-    panel.innerHTML = '<div class="notif-panel-head" style="padding:.875rem 1rem;display:flex;align-items:center;gap:.625rem"><button class="dm-back-btn" onclick="navigate(\'messages\')" aria-label="Back to conversations"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>'+avatarHtml(other,'sm')+'<h3 class="t-h2" style="margin:0">'+escHtml(other?.name||'Unknown')+'</h3></div>'+
+    panel.innerHTML = '<div class="notif-panel-head" style="padding:.875rem 1rem;display:flex;align-items:center;gap:.625rem"><button class="dm-back-btn" onclick="navigate(\'messages\')" aria-label="Back to conversations"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>'+avatarHtml(other,'sm')+'<h3 class="t-h2" style="margin:0">'+escHtml(other?.name||'Unknown')+'</h3><button class="btn btn-ghost btn-xs" style="margin-left:auto;color:var(--red)" onclick="if(confirm(\'Remove this conversation from your Inbox? It will come back if either of you messages again.\'))hideConversation(\''+withUserId+'\')">Delete</button></div>'+
     '<div class="message-thread" id="dm-messages" style="flex:1;overflow-y:auto"></div>'+
     '<div id="dm-attach-preview" style="display:none;padding:.5rem 1rem 0;font-size:.8125rem;color:var(--text-3)"></div>'+
     '<div class="message-input-row"><label class="btn btn-ghost btn-sm" style="cursor:pointer;padding:.5rem" title="Attach a file"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg><input type="file" id="dm-file" style="display:none"></label><input class="message-input" id="dm-input" placeholder="Write a message..."><button class="btn btn-teal btn-sm" id="dm-send">'+icon('send')+'</button></div>';
