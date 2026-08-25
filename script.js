@@ -131,7 +131,7 @@ document.addEventListener('click',e=>{
   if(e.target.classList.contains('modal-close'))closeAllModals();
 });
 
-const PAGES=['home','wheels','members','opportunities','deals','profile','wheel-detail','deal-detail','analytics','admin','support'];
+const PAGES=['home','wheels','members','opportunities','deals','profile','wheel-detail','deal-detail','analytics','admin','support','messages'];
 let currentPage='home',pageParams={};
 function navigate(page,params={}){currentPage=page;pageParams=params;renderPage();window.scrollTo(0,0);}
 
@@ -143,7 +143,7 @@ function renderPage(){
   $$('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+currentPage)?.classList.add('active');
   $$('.nav-item[data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===currentPage));
-  const renders={home:renderHome,wheels:renderWheels,members:renderMembers,opportunities:renderOpportunities,deals:renderDeals,profile:renderProfile,'wheel-detail':renderWheelDetail,'deal-detail':renderDealDetail,analytics:renderAnalytics,admin:renderAdmin,support:renderSupport};
+  const renders={home:renderHome,wheels:renderWheels,members:renderMembers,opportunities:renderOpportunities,deals:renderDeals,profile:renderProfile,'wheel-detail':renderWheelDetail,'deal-detail':renderDealDetail,analytics:renderAnalytics,admin:renderAdmin,support:renderSupport,messages:renderMessages};
   renders[currentPage]?.();
 }
 
@@ -775,7 +775,7 @@ window.ob2Finish=()=>{const wantTo=[...$$('label input[type=checkbox]:checked')]
 // ── Shell ──────────────────────────────────────────────────────────────────
 function renderShell(me){
   if($('.shell')){updateShellDynamic(me);return;}
-  document.body.innerHTML='<div class="shell"><header class="header"><div class="header-logo"><div class="header-logo-mark" onclick="navigate(\'home\')" style="cursor:pointer">F</div><span class="header-logo-text" onclick="navigate(\'home\')" style="cursor:pointer">Fairriss</span></div><div class="header-search"><svg class="header-search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search members, deals, opportunities..." id="global-search"></div><div class="header-actions"><div style="position:relative"><button class="header-btn" id="notif-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-dot" id="notif-dot" style="display:none"></span></button><div class="notif-panel" id="notif-panel"></div></div><div class="header-avatar" id="header-avatar" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+initials(me.name)+'</div></div></header><aside class="sidebar"><div class="sidebar-section"><div class="sidebar-label">Navigation</div><nav><div class="nav-item" data-page="home" onclick="navigate(\'home\')">'+icon('home')+' Home</div><div class="nav-item" data-page="wheels" onclick="navigate(\'wheels\')">'+icon('wheel')+' My Wheels</div><div class="nav-item" data-page="opportunities" onclick="navigate(\'opportunities\')">'+icon('opp')+' Opportunities</div><div class="nav-item" data-page="deals" onclick="navigate(\'deals\')">'+icon('deal')+' Deals <span class="nav-badge" id="deal-badge" style="display:none"></span></div><div class="nav-item" data-page="members" onclick="navigate(\'members\')">'+icon('members')+' Find People</div><div class="nav-item" data-page="analytics" onclick="navigate(\'analytics\')">'+icon('analytics')+' Analytics</div>'+'<div class="nav-item" data-page="support" onclick="navigate(\'support\')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Support</div>'+'<div class="nav-item" onclick="handleLogout()" style="color:var(--red)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Log Out</div></nav></div><div class="sidebar-section"><div class="sidebar-label">My Wheels</div><div class="sidebar-wheels" id="sidebar-wheels"></div></div><div class="sidebar-bottom"><div class="sidebar-user" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+avatarHtml(me,'sm')+'<div class="sidebar-user-info"><div class="sidebar-user-name">'+escHtml(me.name)+'</div><div class="sidebar-user-role">'+(me.userType||me.role)+' - Trust '+me.trustScore+'</div></div></div><div style="padding:.625rem 1.25rem;border-top:1px solid var(--border);display:flex;gap:1rem"><a href="#" onclick="renderTerms()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Terms</a><a href="#" onclick="renderPrivacy()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Privacy</a></div></div></aside><main class="main" id="main-content">'+PAGES.map(p=>'<div class="page fade-in" id="page-'+p+'"></div>').join('')+'</main>'+
+  document.body.innerHTML='<div class="shell"><header class="header"><div class="header-logo"><div class="header-logo-mark" onclick="navigate(\'home\')" style="cursor:pointer">F</div><span class="header-logo-text" onclick="navigate(\'home\')" style="cursor:pointer">Fairriss</span></div><div class="header-search"><svg class="header-search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search members, deals, opportunities..." id="global-search"></div><div class="header-actions"><div style="position:relative"><button class="header-btn" id="notif-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-dot" id="notif-dot" style="display:none"></span></button><div class="notif-panel" id="notif-panel"></div></div><div class="header-avatar" id="header-avatar" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+initials(me.name)+'</div></div></header><aside class="sidebar"><div class="sidebar-section"><div class="sidebar-label">Navigation</div><nav><div class="nav-item" data-page="home" onclick="navigate(\'home\')">'+icon('home')+' Home</div><div class="nav-item" data-page="wheels" onclick="navigate(\'wheels\')">'+icon('wheel')+' My Wheels</div><div class="nav-item" data-page="opportunities" onclick="navigate(\'opportunities\')">'+icon('opp')+' Opportunities</div><div class="nav-item" data-page="deals" onclick="navigate(\'deals\')">'+icon('deal')+' Deals <span class="nav-badge" id="deal-badge" style="display:none"></span></div><div class="nav-item" data-page="messages" onclick="navigate(\'messages\')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Inbox <span class="nav-badge" id="dm-badge" style="display:none"></span></div><div class="nav-item" data-page="members" onclick="navigate(\'members\')">'+icon('members')+' Find People</div><div class="nav-item" data-page="analytics" onclick="navigate(\'analytics\')">'+icon('analytics')+' Analytics</div>'+'<div class="nav-item" data-page="support" onclick="navigate(\'support\')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Support</div>'+'<div class="nav-item" onclick="handleLogout()" style="color:var(--red)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Log Out</div></nav></div><div class="sidebar-section"><div class="sidebar-label">My Wheels</div><div class="sidebar-wheels" id="sidebar-wheels"></div></div><div class="sidebar-bottom"><div class="sidebar-user" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+avatarHtml(me,'sm')+'<div class="sidebar-user-info"><div class="sidebar-user-name">'+escHtml(me.name)+'</div><div class="sidebar-user-role">'+(me.userType||me.role)+' - Trust '+me.trustScore+'</div></div></div><div style="padding:.625rem 1.25rem;border-top:1px solid var(--border);display:flex;gap:1rem"><a href="#" onclick="renderTerms()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Terms</a><a href="#" onclick="renderPrivacy()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Privacy</a></div></div></aside><main class="main" id="main-content">'+PAGES.map(p=>'<div class="page fade-in" id="page-'+p+'"></div>').join('')+'</main>'+
   // Mobile bottom navigation
   '<nav class="mobile-nav" style="display:none" id="mobile-nav">'+
   '<div class="mobile-nav-item '+(currentPage==='home'?'active':'')+'" onclick="navigate(\'home\')">'+
@@ -786,6 +786,8 @@ function renderShell(me){
   '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>Opps</div>'+
   '<div class="mobile-nav-item '+(currentPage==='deals'||currentPage==='deal-detail'?'active':'')+'" onclick="navigate(\'deals\')">'+
   '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Deals</div>'+
+  '<div class="mobile-nav-item '+(currentPage==='messages'?'active':'')+'" onclick="navigate(\'messages\')">'+
+  '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Inbox</div>'+
   '<div class="mobile-nav-item '+(currentPage==='members'?'active':'')+'" onclick="navigate(\'members\')">'+
   '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>People</div>'+
   '<div class="mobile-nav-item '+(currentPage==='profile'?'active':'')+'" onclick="goProfile()">'+ '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Me</div>'+
@@ -1175,7 +1177,7 @@ async function renderProfile(){
   '<div style="flex-shrink:0;text-align:center;margin-left:auto"><div class="trust-score-circle" style="--pct:'+u.trustScore+'%;width:76px;height:76px"><div class="trust-score-inner" style="width:58px;height:58px"><div class="trust-score-num-lg" style="font-size:1.25rem">'+u.trustScore+'</div><div class="trust-score-label">Trust</div></div></div></div>'+
   '</div>'+
   '<div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,.1)"><div style="font-size:.6875rem;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.07em;text-transform:uppercase;margin-bottom:.625rem">Photos</div>'+picSlots+'</div></div>'+
-  (!isMe?'<div class="flex gap-2 mb-4"><button class="btn btn-primary" onclick="openModal(\'modal-create-deal\')">Create Deal</button><button class="btn btn-outline" onclick="toast(\'Messaging coming soon\',\'default\')">Message</button><button class="btn btn-ghost" onclick="toast(\'Referral sent!\',\'success\')">Refer</button></div>':'')+
+  (!isMe?'<div class="flex gap-2 mb-4"><button class="btn btn-primary" onclick="openModal(\'modal-create-deal\')">Create Deal</button><button class="btn btn-outline" onclick="openDM(\''+u.id+'\')">Message</button></div>':'')+
   '<div class="two-col"><div>'+renderAboutCard(u,isMe)+
   (u.introVideo?'<div class="card mb-4"><h2 class="t-h2 mb-3">'+icon('video')+' Intro Video</h2><video src="'+u.introVideo+'" controls style="width:100%;border-radius:var(--radius-sm);background:#000;max-height:240px"></video>'+(isMe?'<div class="mt-2"><label class="btn btn-ghost btn-sm" style="cursor:pointer">Replace<input type="file" accept="video/*" style="display:none" onchange="uploadVideo(event)"></label></div>':'')+'</div>':
   (isMe?'<div class="card mb-4"><h2 class="t-h2 mb-3">'+icon('video')+' Intro Video</h2><p class="t-small c-text3 mb-3">Add a short intro video so people can get to know you.</p><label class="btn btn-outline btn-sm" style="cursor:pointer">'+icon('video')+' Upload Video<input type="file" accept="video/*" style="display:none" onchange="uploadVideo(event)"></label></div>':''))+
@@ -1233,6 +1235,139 @@ async function renderAnalytics(){
   '<div class="stats-grid"><div class="stat-card"><span class="stat-label">Total Members</span><span class="stat-value">'+fmt(myWheels.reduce((s,w)=>s+w.memberCount,0))+'</span></div><div class="stat-card"><span class="stat-label">GMV</span><span class="stat-value">'+fmtMoney(gmv)+'</span></div><div class="stat-card"><span class="stat-label">Commission Earned</span><span class="stat-value">'+fmtMoney(fees)+'</span></div><div class="stat-card"><span class="stat-label">Active Deals</span><span class="stat-value">'+allDeals.filter(d=>d.status==='in_progress').length+'</span></div></div>'+
   '<div class="two-col"><div><div class="analytics-chart"><h3 class="t-h2 mb-3">Revenue (Monthly)</h3><div class="chart-bars">'+months.map((m,i)=>'<div class="chart-bar-group"><div class="chart-bar-val">'+fmtMoney(rev[i])+'</div><div class="chart-bar" style="height:'+Math.round(rev[i]/maxRev*100)+'%;background:'+(i===months.length-1?'var(--teal)':'var(--navy)')+'"></div><div class="chart-bar-label">'+m+'</div></div>').join('')+'</div></div></div>'+
   '<div><div class="card"><h3 class="t-h2 mb-3">Top Members by Trust</h3>'+myWheels.flatMap(w=>store.getWheelMembers(w.id)).filter((u,i,a)=>a.findIndex(x=>x.id===u.id)===i).sort((a,b)=>b.trustScore-a.trustScore).slice(0,5).map(u=>'<div class="flex gap-2 items-center mb-3">'+avatarHtml(u,'sm')+'<div class="flex-1"><div class="t-small" style="font-weight:600">'+escHtml(u.name)+'</div></div><div class="trust-bar-wrap" style="width:80px"><div class="trust-bar-fill" style="width:'+u.trustScore+'%"></div></div><span class="trust-score-num">'+u.trustScore+'</span></div>').join('')+'</div></div></div>';
+}
+
+// ── Direct Messages ──────────────────────────────────────────────────────
+let _dmActiveUserId = null;
+
+// Resolve the Supabase client from whichever global is actually set up.
+function getSb(){
+  return window._supabase || window.SupabaseStore?._supabase || window.supabaseClient || null;
+}
+
+// Get a user's profile, falling back to a live Supabase fetch if not cached locally.
+async function dmGetUser(id){
+  let u = store.getUser(id);
+  if(u) return u;
+  try {
+    if(window.Users?.getById){
+      const p = await window.Users.getById(id);
+      if(p){ u = sbToLocal(p); store.data.users.push(u); return u; }
+    }
+    const sb = getSb();
+    if(sb){
+      const { data } = await sb.from('users').select('*').eq('id', id).single();
+      if(data){ u = sbToLocal(data); store.data.users.push(u); return u; }
+    }
+  } catch(e){ console.warn('User lookup failed:', e.message); }
+  return null;
+}
+
+async function dmFetchThread(otherUserId){
+  const me = store.getMe();
+  const sb = getSb();
+  if(!sb || !me) return [];
+  const { data, error } = await sb
+    .from('direct_messages')
+    .select('*')
+    .or('and(sender_id.eq.'+me.id+',recipient_id.eq.'+otherUserId+'),and(sender_id.eq.'+otherUserId+',recipient_id.eq.'+me.id+')')
+    .order('created_at', { ascending: true });
+  if(error){ console.warn('DM fetch failed:', error.message); return []; }
+  return data || [];
+}
+
+async function dmFetchConversations(){
+  const me = store.getMe();
+  const sb = getSb();
+  if(!sb || !me) return [];
+  const { data, error } = await sb
+    .from('direct_messages')
+    .select('*')
+    .or('sender_id.eq.'+me.id+',recipient_id.eq.'+me.id)
+    .order('created_at', { ascending: false });
+  if(error){ console.warn('DM conversations failed:', error.message); return []; }
+  const seen = new Map();
+  (data||[]).forEach(m=>{
+    const otherId = m.sender_id===me.id ? m.recipient_id : m.sender_id;
+    if(!seen.has(otherId)) seen.set(otherId, m);
+  });
+  return [...seen.entries()];
+}
+
+async function dmSend(otherUserId, body){
+  const me = store.getMe();
+  const sb = getSb();
+  if(!sb){ toast('Messaging is not connected. Please refresh and try again.', 'error'); return false; }
+  if(!me || !body.trim()) return false;
+  const { error } = await sb.from('direct_messages').insert({
+    sender_id: me.id, recipient_id: otherUserId, body: body.trim(), read: false
+  });
+  if(error){ toast('Failed to send: '+error.message, 'error'); return false; }
+  return true;
+}
+
+window.openDM = (userId) => { navigate('messages', { withUserId: userId }); };
+
+async function renderMessages(){
+  const me = store.getMe();
+  const el = document.getElementById('page-messages');
+  if(!el || !me) return;
+  const withUserId = pageParams.withUserId || null;
+
+  el.innerHTML = '<div class="page-head"><div class="page-head-left"><h1 class="page-title">Messages</h1><p class="page-sub">Direct conversations</p></div></div>'+
+  '<div style="display:grid;grid-template-columns:280px 1fr;gap:1rem;height:65vh;min-height:420px">'+
+  '<div class="card card-flush" style="overflow-y:auto" id="dm-convo-list"><div style="padding:1.5rem;text-align:center;color:var(--text-3);font-size:.875rem">Loading...</div></div>'+
+  '<div class="card card-flush" style="display:flex;flex-direction:column" id="dm-thread-panel"><div class="empty-state" style="margin:auto"><div class="empty-icon">&#x1F4AC;</div><div class="empty-title">Select a conversation</div></div></div>'+
+  '</div>';
+
+  const convos = await dmFetchConversations();
+  const listEl = document.getElementById('dm-convo-list');
+  if(!listEl) return;
+  if(!convos.length && !withUserId){
+    listEl.innerHTML = '<div class="empty-state" style="padding:1.5rem"><div class="empty-icon">&#x1F4EC;</div><div class="empty-title">No messages yet</div><div class="empty-desc">Visit a profile and click Message</div></div>';
+  } else {
+    const otherIds = convos.map(([id])=>id);
+    if(withUserId && !otherIds.includes(withUserId)) otherIds.unshift(withUserId);
+    const users = await Promise.all(otherIds.map(id=>dmGetUser(id)));
+    listEl.innerHTML = otherIds.map((id,i)=>{
+      const u = users[i];
+      const convo = convos.find(([cid])=>cid===id);
+      const preview = convo ? convo[1].body : 'Say hello';
+      return '<div class="dm-convo-item" data-user-id="'+id+'" style="padding:.875rem 1rem;border-bottom:1px solid var(--border);cursor:pointer;display:flex;gap:.625rem;align-items:center'+(withUserId===id?';background:var(--surface)':'')+'">'+avatarHtml(u,'sm')+'<div style="min-width:0;flex:1"><div style="font-size:.875rem;font-weight:600;color:var(--navy)">'+escHtml(u?.name||'Unknown')+'</div><div style="font-size:.75rem;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escHtml(preview)+'</div></div></div>';
+    }).join('');
+    $$('.dm-convo-item', listEl).forEach(item=>{
+      item.onclick = () => navigate('messages', { withUserId: item.dataset.userId });
+    });
+  }
+
+  if(withUserId){
+    const other = await dmGetUser(withUserId);
+    const panel = document.getElementById('dm-thread-panel');
+    panel.innerHTML = '<div class="notif-panel-head" style="padding:.875rem 1rem;display:flex;align-items:center;gap:.625rem">'+avatarHtml(other,'sm')+'<h3 class="t-h2" style="margin:0">'+escHtml(other?.name||'Unknown')+'</h3></div>'+
+    '<div class="message-thread" id="dm-messages" style="flex:1;overflow-y:auto"></div>'+
+    '<div class="message-input-row"><input class="message-input" id="dm-input" placeholder="Write a message..."><button class="btn btn-teal btn-sm" id="dm-send">'+icon('send')+'</button></div>';
+
+    const thread = await dmFetchThread(withUserId);
+    const msgsEl = document.getElementById('dm-messages');
+    msgsEl.innerHTML = thread.length ? thread.map(m=>{
+      const isMine = m.sender_id === me.id;
+      const sender = isMine ? me : other;
+      return '<div class="message-item '+(isMine?'mine':'')+'">'+(!isMine?avatarHtml(sender,'sm'):'')+'<div><div class="message-bubble">'+escHtml(m.body)+'</div><div class="message-time">'+timeAgo(m.created_at)+'</div></div></div>';
+    }).join('') : '<div class="empty-state" style="padding:1.5rem">No messages yet. Say hello!</div>';
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+
+    const send = async () => {
+      const input = document.getElementById('dm-input');
+      const body = input.value.trim();
+      if(!body) return;
+      input.value=''; input.disabled=true;
+      const ok = await dmSend(withUserId, body);
+      input.disabled=false;
+      if(ok) renderMessages();
+    };
+    document.getElementById('dm-send').onclick = send;
+    document.getElementById('dm-input').onkeydown = e => { if(e.key==='Enter') send(); };
+  }
 }
 
 // ── Invite Modal ────────────────────────────────────────────────────────────
@@ -1582,7 +1717,7 @@ window.addEventListener('load', () => {
 
 window.renderTerms=renderTerms;window.renderPrivacy=renderPrivacy;
 window.goProfile=()=>{const me=store.getMe();if(me)navigate('profile',{userId:me.id});};window.navigate=navigate;window.openModal=openModal;window.closeAllModals=closeAllModals;
-window.store=store;window.toast=toast;window.renderHome=renderHome;
+window.store=store;window.toast=toast;window.renderHome=renderHome;window.renderMessages=renderMessages;
 window.renderProfile=renderProfile;window.renderWheelDetail=renderWheelDetail;
 window.renderDealDetail=renderDealDetail;window.renderOppDetail=renderOppDetail;
 window.createFromTemplate=createFromTemplate;
