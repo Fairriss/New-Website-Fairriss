@@ -829,7 +829,7 @@ async function updateShellDynamic(me){
 
 function renderNotifPanel(){
   const notifs=store.getMyNotifs();
-  const icons={deal_message:'&#x1F4AC;',new_member:'&#x1F464;',deal_completed:'&#x2705;',new_opportunity:'&#x1F3AF;',wheel_invite:'&#x1F517;',mention:'@'};
+  const icons={deal_message:'&#x1F4AC;',new_member:'&#x1F464;',deal_completed:'&#x2705;',new_opportunity:'&#x1F3AF;',wheel_invite:'&#x1F517;',mention:'@',event_reminder:'&#x1F39F;'};
   $('#notif-panel').innerHTML='<div class="notif-panel-head"><span class="notif-panel-title">Notifications</span></div>'+
   (notifs.length?notifs.map(n=>'<div class="notif-item '+(n.read?'':'unread')+'"><div class="notif-icon">'+(icons[n.type]||'&#x1F514;')+'</div><div><div class="notif-text">'+n.text+'</div><div class="notif-time">'+timeAgo(n.createdAt)+'</div></div></div>').join(''):'<div class="empty-state" style="padding:1.5rem">No notifications yet</div>');
 }
@@ -937,6 +937,7 @@ async function renderWheelDetail(){
     store.getOpportunities ? store.getOpportunities({wheelId:wheel.id}) : Promise.resolve([]),
     store.getEvents ? store.getEvents(wheel.id) : Promise.resolve([]),
   ]);
+  const attendeesByEvent = await fetchAttendeesForEvents(events.map(e=>e.id));
   const isCreator=wheel.creatorId===store.getMe()?.id;
   const isMember=store.isMember(wheel.id);
   const el=document.getElementById('page-wheel-detail');
@@ -947,7 +948,7 @@ async function renderWheelDetail(){
     '<div class="tab-panel active" id="tab-feed">'+(posts.length?posts.map(renderFeedPost).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F4DD;</div><div class="empty-title">No posts yet</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-post\')">Post Something</button></div>')+'</div>'+
     '<div class="tab-panel" id="tab-members"><div class="member-grid">'+members.map(u=>renderMemberCard(u)).join('')+'</div></div>'+
     '<div class="tab-panel" id="tab-opportunities"><div class="flex justify-between items-center mb-3"><span class="t-body c-text3">'+opps.length+' open</span><button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-opp\')">'+icon('plus')+' Post</button></div><div class="opp-list">'+(opps.length?opps.map(renderOppCard).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F3AF;</div><div class="empty-title">No opportunities yet</div></div>')+'</div></div>'+
-    '<div class="tab-panel" id="tab-events"><div class="flex justify-between items-center mb-3"><span class="t-body c-text3">'+events.length+' events</span>'+(isCreator?'<button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-event\')">'+icon('plus')+' Create Event</button>':'')+'</div>'+(events.length?events.map(renderEventCard).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F39F;</div><div class="empty-title">No events yet</div></div>')+'</div>';
+    '<div class="tab-panel" id="tab-events"><div class="flex justify-between items-center mb-3"><span class="t-body c-text3">'+events.length+' events</span>'+(isCreator?'<button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-event\')">'+icon('plus')+' Create Event</button>':'')+'</div>'+(events.length?events.map(ev=>renderEventCard(ev, attendeesByEvent[ev.id]||[])).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F39F;</div><div class="empty-title">No events yet</div></div>')+'</div>';
   $$('.tab-item',el).forEach(tab=>tab.onclick=()=>{$$('.tab-item',el).forEach(t=>t.classList.remove('active'));$$('.tab-panel',el).forEach(p=>p.classList.remove('active'));tab.classList.add('active');document.getElementById('tab-'+tab.dataset.tab)?.classList.add('active');});
   $$('.post-like-btn',el).forEach(btn=>btn.onclick=()=>{store.likePost(btn.dataset.postId);renderWheelDetail();});
   $$('.member-card',el).forEach(c=>c.onclick=()=>navigate('profile',{userId:c.dataset.userId}));
@@ -957,16 +958,118 @@ async function renderWheelDetail(){
   $$('.leave-wheel-btn',el).forEach(btn=>btn.onclick=()=>leaveWheelAction(btn.dataset.wheelId, btn.dataset.wheelName));
 }
 
-function renderEventCard(ev){
-  const sold=ev.ticketsSold||0,rem=ev.ticketCount-sold,pct=Math.round((sold/ev.ticketCount)*100);
-  const price=ev.ticketPrice>0?fmtMoney(ev.ticketPrice):'Free';
-  let h='<div class="card mb-3"><div class="flex justify-between items-start mb-3"><div><div class="t-h2 mb-1">'+escHtml(ev.title)+'</div><div class="t-small c-text3 mb-1">'+icon('clock')+' '+escHtml(ev.date)+' at '+escHtml(ev.time)+'</div><div class="t-small c-text3">'+icon('map')+' '+escHtml(ev.location)+'</div></div><div style="text-align:right"><div style="font-size:1.5rem;font-weight:900;color:var(--navy)">'+price+'</div><div class="t-micro c-text4">per ticket</div></div></div>';
+async function fetchAttendeesForEvents(eventIds){
+  const sb = getSb();
+  const result = {};
+  eventIds.forEach(id=>result[id]=[]);
+  if(!sb || !eventIds.length) return result;
+  try {
+    const { data, error } = await sb.from('event_attendees').select('event_id, user_id').in('event_id', eventIds);
+    if(error) throw error;
+    for(const row of (data||[])){
+      if(!result[row.event_id]) result[row.event_id]=[];
+      result[row.event_id].push(row.user_id);
+    }
+  } catch(e){ console.warn('Attendee fetch failed:', e.message); }
+  return result;
+}
+
+function renderEventCard(ev, attendeeIds){
+  attendeeIds = attendeeIds || [];
+  const me = store.getMe();
+  const isGoing = me && attendeeIds.includes(me.id);
+  const cap = ev.ticketCount || null;
+  const full = cap && attendeeIds.length >= cap;
+  const attendees = attendeeIds.slice(0, 6).map(id=>store.getUser(id)).filter(Boolean);
+  const avatarsHtml = attendees.length
+    ? '<div style="display:flex;align-items:center;flex-shrink:0">'+attendees.map((u,i)=>'<div style="margin-left:'+(i?'-.5rem':'0')+';border-radius:50%;border:2px solid var(--white)">'+avatarHtml(u,'sm')+'</div>').join('')+'</div>'
+    : '<span class="t-small c-text4">No one yet — be the first!</span>';
+  let h='<div class="card mb-3"><div class="flex justify-between items-start mb-3"><div><div class="t-h2 mb-1">'+escHtml(ev.title)+'</div><div class="t-small c-text3 mb-1">'+icon('clock')+' '+escHtml(ev.date)+' at '+escHtml(ev.time)+'</div><div class="t-small c-text3">'+icon('map')+' '+escHtml(ev.location)+'</div></div><div style="text-align:right"><div style="font-size:1.5rem;font-weight:900;color:var(--navy)">'+attendeeIds.length+(cap?'/'+cap:'')+'</div><div class="t-micro c-text4">attending</div></div></div>';
   h+='<p class="t-body mb-3" style="color:var(--text-2)">'+escHtml(ev.description)+'</p>';
-  h+='<div class="mb-3"><div class="flex justify-between mb-1"><span class="t-small c-text3">'+sold+' / '+ev.ticketCount+' tickets sold</span><span class="t-small" style="font-weight:600;color:'+(rem<5?'var(--red)':'var(--green)')+'">'+rem+' left</span></div><div style="height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--teal);border-radius:99px"></div></div></div>';
-  h+='<button class="btn btn-teal" onclick="buyTicketAction(\''+ev.id+'\')" '+(rem===0?'disabled style="opacity:.5"':'')+'>'+icon('ticket')+' '+(rem===0?'Sold Out':'Buy Ticket - '+price)+'</button></div>';
+  h+='<div class="mb-3" style="display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;row-gap:.375rem"'+(attendeeIds.length?' onclick="showEventAttendees(\''+ev.id+'\',\''+escHtml(ev.title).replace(/'/g,"\\\\'")+'\')" role="button"':'')+'>'+avatarsHtml+(attendeeIds.length>6?'<span class="t-micro c-text4">+'+(attendeeIds.length-6)+' more</span>':'')+(attendeeIds.length?'<span class="t-micro" style="color:var(--teal);font-weight:600;cursor:pointer">See all</span>':'')+'</div>';
+  if(isGoing){
+    h+='<button class="btn btn-outline" style="color:var(--red);border-color:var(--red)" onclick="cancelRsvpAction(\''+ev.id+'\')">'+icon('check')+' Going &mdash; Cancel RSVP</button>';
+  } else {
+    h+='<button class="btn btn-teal" onclick="rsvpToEvent(\''+ev.id+'\')" '+(full?'disabled style="opacity:.5"':'')+'>'+icon('ticket')+' '+(full?'Event Full':'RSVP')+'</button>';
+  }
+  h+='</div>';
   return h;
 }
-window.buyTicketAction=eid=>{if(store.buyTicket(eid)){toast('Ticket purchased!','success');renderWheelDetail();}else toast('Sold out','error');};
+
+window.showEventAttendees = async (eventId, eventTitle) => {
+  openModal('modal-event-attendees');
+  $('#modal-event-attendees .modal-title').textContent = 'Attending: '+(eventTitle||'Event');
+  const bodyEl = document.getElementById('event-attendees-body');
+  bodyEl.innerHTML = '<div class="t-small c-text3" style="padding:1rem">Loading...</div>';
+  const sb = getSb();
+  if(!sb) return;
+  try {
+    const { data, error } = await sb.from('event_attendees').select('user_id, rsvp_at').eq('event_id', eventId).order('rsvp_at', { ascending: true });
+    if(error) throw error;
+    if(!data || !data.length){
+      bodyEl.innerHTML = '<div class="empty-state" style="padding:1.5rem"><div class="empty-title">No one has RSVP\'d yet</div></div>';
+      return;
+    }
+    const users = await Promise.all(data.map(row=>dmGetUser(row.user_id)));
+    bodyEl.innerHTML = data.map((row,i)=>{
+      const u = users[i];
+      return '<div class="flex items-center gap-3 mb-2" style="padding:.625rem;border:1px solid var(--border);border-radius:var(--radius-sm)">'+avatarHtml(u,'sm')+'<div class="flex-1"><div class="t-small" style="font-weight:600">'+escHtml(u?.name||'Unknown')+'</div></div><button class="btn btn-ghost btn-xs" onclick="closeAllModals();openDM(\''+(u?.id||'')+'\')">Message</button></div>';
+    }).join('');
+  } catch(e){ bodyEl.innerHTML = '<div class="t-small c-red" style="padding:1rem">Failed to load attendees.</div>'; }
+};
+
+window.rsvpToEvent = async (eventId) => {
+  const me = store.getMe();
+  const sb = getSb();
+  if(!me || !sb) return;
+  try {
+    const { error } = await sb.from('event_attendees').insert({ event_id: eventId, user_id: me.id });
+    if(error && error.code !== '23505') throw error;
+    toast("You're on the list!", 'success');
+    renderWheelDetail();
+  } catch(e){ toast('Failed to RSVP: '+e.message, 'error'); }
+};
+
+window.cancelRsvpAction = async (eventId) => {
+  const me = store.getMe();
+  const sb = getSb();
+  if(!me || !sb) return;
+  if(!confirm('Cancel your RSVP for this event?')) return;
+  try {
+    const { error } = await sb.from('event_attendees').delete().eq('event_id', eventId).eq('user_id', me.id);
+    if(error) throw error;
+    toast('RSVP cancelled', 'success');
+    renderWheelDetail();
+  } catch(e){ toast('Failed to cancel: '+e.message, 'error'); }
+};
+
+// In-platform reminders: on app load, check the current user's upcoming RSVPs
+// and post a one-time notification for anything happening within 48 hours.
+async function checkEventReminders(){
+  const me = store.getMe();
+  const sb = getSb();
+  if(!me || !sb) return;
+  try {
+    const { data, error } = await sb.from('event_attendees').select('event_id, events(*)').eq('user_id', me.id).eq('reminder_sent', false);
+    if(error || !data) return;
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const windowEnd = new Date(todayStart.getTime() + 2*24*60*60*1000);
+    for(const row of data){
+      const ev = row.events;
+      if(!ev || !ev.event_date) continue;
+      const evDate = new Date(ev.event_date+'T00:00:00');
+      if(evDate >= todayStart && evDate <= windowEnd){
+        await sb.from('notifications').insert({
+          user_id: me.id, type: 'event_reminder', read: false,
+          text: 'Reminder: <strong>'+escHtml(ev.title)+'</strong> is coming up on '+escHtml(ev.event_date)+(ev.event_time?' at '+escHtml(ev.event_time):'')+'.'
+        });
+        await sb.from('event_attendees').update({ reminder_sent: true }).eq('event_id', ev.id).eq('user_id', me.id);
+        updateShellDynamic(me);
+      }
+    }
+  } catch(e){ console.warn('Event reminder check failed:', e.message); }
+}
 
 // ── Members / Find People ──────────────────────────────────────────────────
 async function renderMembers(){
@@ -1710,7 +1813,7 @@ function buildModals(){
   '<div class="modal-overlay" id="modal-create-opp"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Post an Opportunity</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Type *</label><select class="form-control" id="co-type" onchange="document.getElementById(\'co-resume-row\').style.display=this.value===\'job\'?\'flex\':\'none\'"><option value="job">Job</option><option value="partnership">Partnership</option><option value="collaboration">Collaboration</option><option value="investment">Investment</option><option value="referral">Referral</option><option value="service">Service Request</option></select></div><div class="form-group"><label class="form-label">Title *</label><input class="form-control" id="co-title" placeholder="Head of Product at Acme Corp"></div><div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="co-desc" rows="4" placeholder="Tell members about this opportunity..."></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Location</label><input class="form-control" id="co-location" placeholder="Remote, New York..."></div><div class="form-group"><label class="form-label">Skills Required</label><input class="form-control" id="co-skills" placeholder="React, Design, Growth..."></div></div><div class="form-group"><label class="form-label">Compensation</label><input class="form-control" id="co-comp" placeholder="$120k - $150k or $500 bonus..."></div><label id="co-resume-row" style="display:flex;align-items:center;gap:.625rem;cursor:pointer;padding:.75rem;background:var(--surface);border-radius:8px"><input type="checkbox" id="co-require-resume" checked style="width:18px;height:18px;accent-color:var(--teal)"><span class="t-body">Require applicants to submit a resume</span></label></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-opp-btn">Post Opportunity</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-deal"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Create a Deal</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Deal Title *</label><input class="form-control" id="cd-title" placeholder="Website Redesign Project"></div><div class="form-group"><label class="form-label">Counterparty (Seller) *</label><select class="form-control" id="cd-seller"><option value="">Select member...</option></select></div><div class="form-group"><label class="form-label">Scope *</label><textarea class="form-control" id="cd-scope" rows="3" placeholder="Describe what you are buying..."></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Price ($) *</label><input class="form-control" id="cd-price" type="number" min="1" placeholder="5000"></div><div class="form-group"><label class="form-label">Payment Type</label><select class="form-control" id="cd-payment-type"><option value="lump_sum">Full Amount</option><option value="milestones">Milestones</option></select></div></div><div class="form-row"><div class="form-group"><label class="form-label">Start Date</label><input class="form-control" id="cd-start" type="date"></div><div class="form-group"><label class="form-label">End Date</label><input class="form-control" id="cd-end" type="date"></div></div><div class="form-group"><label class="form-label">Deliverables <span>one per line</span></label><textarea class="form-control" id="cd-deliverables" rows="3" placeholder="Discovery and wireframes&#10;High-fidelity mockups&#10;Developer handoff"></textarea></div><div class="form-group"><label class="form-label">Wheel</label><select class="form-control" id="cd-wheel"><option value="">None (direct deal)</option></select></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-deal-btn">Propose Deal</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-post"><div class="modal"><div class="modal-header"><span class="modal-title">New Post</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Type</label><select class="form-control" id="cp-type"><option value="post">Post</option><option value="announcement">Announcement</option><option value="referral">Referral</option></select></div><div class="form-group"><label class="form-label">Message</label><textarea class="form-control" id="cp-body" rows="3" placeholder="Share something with your Wheel... Use @name to mention someone"></textarea></div><div class="form-group"><label class="form-label">Link <span>(optional)</span></label><input class="form-control" id="cp-link" placeholder="https://..."></div><div class="form-group"><label class="form-label">Photo <span>(optional)</span></label><input type="file" id="cp-photo" accept="image/*" class="form-control" style="padding:.375rem" onchange="previewPostPhoto(event)"><div id="cp-photo-preview" style="margin-top:.5rem"></div></div><div class="form-group"><label class="form-label">Video <span>(optional)</span></label><input type="file" id="cp-video" accept="video/*" class="form-control" style="padding:.375rem" onchange="previewPostVideo(event)"><div id="cp-video-preview" style="margin-top:.5rem"></div></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-post-btn">Publish</button></div></div></div>'+
-  '<div class="modal-overlay" id="modal-create-event"><div class="modal"><div class="modal-header"><span class="modal-title">Create Event</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Event Title *</label><input class="form-control" id="ev-title" placeholder="Founders Dinner - Toronto"></div><div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="ev-desc" rows="3" placeholder="What is this event about?"></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Date *</label><input class="form-control" id="ev-date" type="date"></div><div class="form-group"><label class="form-label">Time</label><input class="form-control" id="ev-time" type="time"></div></div><div class="form-group"><label class="form-label">Location *</label><input class="form-control" id="ev-location" placeholder="Toronto, ON or Virtual"></div><div class="form-row"><div class="form-group"><label class="form-label">Ticket Price ($) <span>0 = Free</span></label><input class="form-control" id="ev-price" type="number" min="0" placeholder="75"></div><div class="form-group"><label class="form-label">Total Tickets *</label><input class="form-control" id="ev-count" type="number" min="1" placeholder="50"></div></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-event-btn">Create Event</button></div></div></div>'+
+  '<div class="modal-overlay" id="modal-create-event"><div class="modal"><div class="modal-header"><span class="modal-title">Create Event</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Event Title *</label><input class="form-control" id="ev-title" placeholder="Founders Dinner - Toronto"></div><div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="ev-desc" rows="3" placeholder="What is this event about?"></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Date *</label><input class="form-control" id="ev-date" type="date"></div><div class="form-group"><label class="form-label">Time</label><input class="form-control" id="ev-time" type="time"></div></div><div class="form-group"><label class="form-label">Location *</label><input class="form-control" id="ev-location" placeholder="Toronto, ON or Virtual"></div><div class="form-group"><label class="form-label">Capacity <span>(optional \u2014 defaults to 50 if left blank)</span></label><input class="form-control" id="ev-count" type="number" min="1" placeholder="50"></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-event-btn">Create Event</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-invite-wheel"><div class="modal"><div class="modal-header"><span class="modal-title">Invite to Wheel</span><button class="modal-close">x</button></div><div class="modal-body">'+
     '<div style="position:relative;margin-bottom:1rem">'+
     '<svg style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--text-4);pointer-events:none" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'+
@@ -1720,7 +1823,8 @@ function buildModals(){
     '<div id="invite-member-list" style="max-height:360px;overflow-y:auto"></div>'+
     '</div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="send-invites-btn">Send Invites</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-payment"><div class="modal"><div class="modal-header"><span class="modal-title">Complete Payment</span><button class="modal-close">x</button></div><div class="modal-body" id="payment-modal-body"><div style="text-align:center;padding:2rem;color:var(--text-3)">Loading payment...</div></div></div></div>'+
-  '<div class="modal-overlay" id="modal-opp-detail"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title" id="modal-opp-title">Opportunity</span><button class="modal-close">x</button></div><div class="modal-body" id="modal-opp-body"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Close</button><button class="btn btn-teal" onclick="applyToOpportunity(getActiveOppId(), this)">Apply Now</button></div></div></div>'
+  '<div class="modal-overlay" id="modal-opp-detail"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title" id="modal-opp-title">Opportunity</span><button class="modal-close">x</button></div><div class="modal-body" id="modal-opp-body"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Close</button><button class="btn btn-teal" onclick="applyToOpportunity(getActiveOppId(), this)">Apply Now</button></div></div></div>'+
+  '<div class="modal-overlay" id="modal-event-attendees"><div class="modal"><div class="modal-header"><span class="modal-title">Attendees</span><button class="modal-close">x</button></div><div class="modal-body" id="event-attendees-body"></div></div></div>'
   );
 }
 
@@ -1791,7 +1895,7 @@ function bindModalForms(){
     if(!title||!desc||!date||!location){toast('Please fill all required fields','error');return;}
     const myWheels = await store.getMyWheels();
     const wheelId=pageParams.wheelId||(myWheels||[])[0]?.id;if(!wheelId){toast('Open a Wheel first','error');return;}
-    store.createEvent({wheelId,title,description:desc,date,time:$('#ev-time').value||'7:00 PM',location,ticketPrice:parseInt($('#ev-price').value)||0,ticketCount:parseInt($('#ev-count').value)||50});
+    store.createEvent({wheelId,title,description:desc,date,time:$('#ev-time').value||'7:00 PM',location,ticketCount:parseInt($('#ev-count').value)||null});
     toast('Event created!','success');closeAllModals();renderWheelDetail();
   });
 }
@@ -2009,6 +2113,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   }
 
   renderPage();
+  if(store.getMe()) checkEventReminders();
 
   // Listen for auth state changes (e.g. after magic link click)
   if(window.Auth){
