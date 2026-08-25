@@ -1001,6 +1001,9 @@ function renderEventCard(ev, attendeeIds){
   } else {
     h+='<button class="btn btn-teal" onclick="rsvpToEvent(\''+ev.id+'\')" '+(full?'disabled style="opacity:.5"':'')+'>'+icon('ticket')+' '+(full?'Event Full':'RSVP')+'</button>';
   }
+  if(me && ev.creatorId===me.id){
+    h+='<button class="btn btn-ghost btn-sm" style="color:var(--red);margin-left:.5rem" onclick="deleteEventAction(\''+ev.id+'\',\''+escHtml(ev.title).replace(/'/g,"\\\\'")+'\')">Delete Event</button>';
+  }
   h+='</div>';
   return h;
 }
@@ -1329,6 +1332,20 @@ window.deleteDealAction = async (dealId, dealTitle) => {
     store._save();
     toast('Deal deleted', 'success');
     if(currentPage==='deal-detail') navigate('deals'); else renderDeals();
+  } catch(e){ toast('Failed to delete: '+e.message, 'error'); }
+};
+
+window.deleteEventAction = async (eventId, eventTitle) => {
+  if(!confirm('Delete "'+(eventTitle||'this event')+'"? This cannot be undone and everyone\'s RSVPs will be removed.')) return;
+  const sb = getSb();
+  try {
+    if(sb){
+      await sb.from('event_attendees').delete().eq('event_id', eventId).then(()=>{}, ()=>{});
+      const { error } = await sb.from('events').delete().eq('id', eventId);
+      if(error) throw error;
+    }
+    toast('Event deleted', 'success');
+    renderWheelDetail();
   } catch(e){ toast('Failed to delete: '+e.message, 'error'); }
 };
 
