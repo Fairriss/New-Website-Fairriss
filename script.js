@@ -952,6 +952,7 @@ async function renderWheelDetail(){
   $$('.post-like-btn',el).forEach(btn=>btn.onclick=()=>{store.likePost(btn.dataset.postId);renderWheelDetail();});
   $$('.member-card',el).forEach(c=>c.onclick=()=>navigate('profile',{userId:c.dataset.userId}));
   $$('.opp-card',el).forEach(c=>c.onclick=()=>{openModal('modal-opp-detail');renderOppDetail(c.dataset.oppId);});
+  $$('.delete-opp-btn',el).forEach(btn=>btn.onclick=()=>deleteOpportunityAction(btn.dataset.oppId, btn.dataset.oppTitle));
   $$('.delete-wheel-btn',el).forEach(btn=>btn.onclick=()=>deleteWheelAction(btn.dataset.wheelId, btn.dataset.wheelName));
   $$('.leave-wheel-btn',el).forEach(btn=>btn.onclick=()=>leaveWheelAction(btn.dataset.wheelId, btn.dataset.wheelName));
 }
@@ -1039,12 +1040,14 @@ async function renderOpportunities(){
   let st;$('#opp-search')?.addEventListener('input',e=>{clearTimeout(st);st=setTimeout(()=>navigate('opportunities',{type:filter,q:e.target.value}),300);});
   $$('.opp-filter-btn',el).forEach(btn=>btn.addEventListener('click',()=>navigate('opportunities',{type:btn.dataset.type,q})));
   $$('.opp-card',el).forEach(c=>c.onclick=()=>{openModal('modal-opp-detail');renderOppDetail(c.dataset.oppId);});
+  $$('.delete-opp-btn',el).forEach(btn=>btn.onclick=()=>deleteOpportunityAction(btn.dataset.oppId, btn.dataset.oppTitle));
 }
 
 function renderOppCard(o){
   const creator=store.getUser(o.creatorId);
-  const valMap={job:fmtMoney(o.metadata?.salaryMin||0)+' - '+fmtMoney(o.metadata?.salaryMax||0),partnership:'Equity: '+(o.metadata?.equity||'TBD'),collaboration:'Equity: '+(o.metadata?.equity||'TBD'),investment:'Ticket: '+(o.metadata?.ticketSize||'TBD'),referral:'Bonus: '+(o.metadata?.bonus?fmtMoney(o.metadata.bonus):'TBD'),service:'Budget: '+(o.metadata?.budgetMin?fmtMoney(o.metadata.budgetMin)+' - '+fmtMoney(o.metadata.budgetMax):'TBD'),service_request:'TBD'};
-  return '<div class="opp-card" data-opp-id="'+o.id+'"><div class="opp-main"><div class="opp-title">'+escHtml(o.title)+'</div><div class="opp-meta"><span class="type-badge type-'+o.type+'">'+o.type.replace('_',' ')+'</span>'+avatarHtml(creator,'sm')+'<span class="opp-meta-item">'+escHtml(creator?.name||'')+'</span>'+(o.remoteOk?'<span class="opp-meta-item">Remote OK</span>':'')+'<span class="opp-meta-item">'+o.applicationCount+' applied</span></div><div class="opp-desc">'+escHtml(o.description)+'</div><div class="skill-tags mt-2">'+(o.skills||[]).map(s=>'<span class="skill-tag">'+escHtml(s)+'</span>').join('')+'</div></div><div class="opp-right"><div class="opp-value">'+(valMap[o.type]||'')+'</div><div class="opp-posted">'+timeAgo(o.createdAt)+'</div><button class="btn btn-teal btn-sm mt-2" onclick="event.stopPropagation();applyToOpportunity(\''+o.id+'\',this)">Apply</button></div></div>';
+  const isCreator = store.getMe()?.id === o.creatorId;
+  const valMap={job:(o.metadata?.value?o.metadata.value:'TBD'),partnership:'Equity: '+(o.metadata?.equity||'TBD'),collaboration:'Equity: '+(o.metadata?.equity||'TBD'),investment:'Ticket: '+(o.metadata?.ticketSize||'TBD'),referral:'Bonus: '+(o.metadata?.bonus?fmtMoney(o.metadata.bonus):'TBD'),service:'Budget: '+(o.metadata?.budgetMin?fmtMoney(o.metadata.budgetMin)+' - '+fmtMoney(o.metadata.budgetMax):'TBD'),service_request:'TBD'};
+  return '<div class="opp-card" data-opp-id="'+o.id+'"><div class="opp-main"><div class="opp-title">'+escHtml(o.title)+'</div><div class="opp-meta"><span class="type-badge type-'+o.type+'">'+o.type.replace('_',' ')+'</span>'+avatarHtml(creator,'sm')+'<span class="opp-meta-item">'+escHtml(creator?.name||'')+'</span>'+(o.remoteOk?'<span class="opp-meta-item">Remote OK</span>':'')+'<span class="opp-meta-item">'+o.applicationCount+' applied</span></div><div class="opp-desc">'+escHtml(o.description)+'</div><div class="skill-tags mt-2">'+(o.skills||[]).map(s=>'<span class="skill-tag">'+escHtml(s)+'</span>').join('')+'</div></div><div class="opp-right"><div class="opp-value">'+(valMap[o.type]||'')+'</div><div class="opp-posted">'+timeAgo(o.createdAt)+'</div>'+(isCreator?'<button class="btn btn-ghost btn-xs mt-2 delete-opp-btn" style="color:var(--red)" data-opp-id="'+o.id+'" data-opp-title="'+escHtml(o.title)+'" onclick="event.stopPropagation()">Delete</button>':'<button class="btn btn-teal btn-sm mt-2" onclick="event.stopPropagation();applyToOpportunity(\''+o.id+'\',this)">Apply</button>')+'</div></div>';
 }
 
 let _activeOppId = null;
@@ -1100,7 +1103,7 @@ async function renderOppDetail(oppId){
   let html='<div class="flex gap-3 items-start mb-4">'+avatarHtml(creator,'md')+'<div><div class="t-h3">'+escHtml(creator?.name||'')+'</div><div class="t-small c-text3">'+timeAgo(o.createdAt)+' - '+o.applicationCount+' applied</div></div><span class="type-badge type-'+o.type+'" style="margin-left:auto">'+o.type.replace('_',' ')+'</span></div><p class="t-body mb-4" style="line-height:1.7">'+escHtml(o.description)+'</p><div class="skill-tags mb-4">'+(o.skills||[]).map(s=>'<span class="skill-tag primary">'+escHtml(s)+'</span>').join('')+'</div><div class="card card-sm" style="background:var(--surface)"><div class="form-row"><div><div class="t-label c-text4 mb-1">Location</div><div class="t-body">'+escHtml(o.location)+(o.remoteOk?' (Remote OK)':'')+'</div></div><div><div class="t-label c-text4 mb-1">Expires</div><div class="t-body">'+(o.expiresAt?new Date(o.expiresAt).toLocaleDateString():'Open')+'</div></div></div></div>';
 
   if(isCreator){
-    html += '<div class="mt-4"><h3 class="t-h2 mb-2">Applicants</h3><div id="opp-applicants-list"><div class="t-small c-text3" style="padding:1rem">Loading...</div></div></div>';
+    html += '<div class="mt-4"><div class="flex justify-between items-center mb-2"><h3 class="t-h2" style="margin:0">Applicants</h3><button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="deleteOpportunityAction(getActiveOppId(),\''+escHtml(o.title).replace(/'/g,"\\\\'")+'\')">Delete Posting</button></div><div id="opp-applicants-list"><div class="t-small c-text3" style="padding:1rem">Loading...</div></div></div>';
   }
   $('#modal-opp-body').innerHTML = html;
   const footerBtn = $('#modal-opp-detail .modal-footer .btn-teal');
@@ -1181,6 +1184,24 @@ window.leaveWheelAction = async (wheelId, wheelName) => {
     updateShellDynamic(me);
     navigate('wheels');
   } catch(e){ toast('Failed to leave: '+e.message, 'error'); }
+};
+
+window.deleteOpportunityAction = async (oppId, oppTitle) => {
+  if(!confirm('Delete "'+(oppTitle||'this posting')+'"? This cannot be undone and all applications to it will be removed.')) return;
+  const sb = getSb();
+  try {
+    if(sb){
+      await sb.from('opportunity_applications').delete().eq('opportunity_id', oppId).then(()=>{}, ()=>{});
+      const { error } = await sb.from('opportunities').delete().eq('id', oppId);
+      if(error) throw error;
+    }
+    store.data.opportunities = (store.data.opportunities||[]).filter(o=>o.id!==oppId);
+    store._save();
+    toast('Posting deleted', 'success');
+    closeAllModals();
+    if(currentPage==='wheel-detail') renderWheelDetail();
+    else navigate('opportunities');
+  } catch(e){ toast('Failed to delete: '+e.message, 'error'); }
 };
 
 
