@@ -746,19 +746,32 @@ select.form-control { cursor: pointer; }
 .message-thread {
   display: flex; flex-direction: column; gap: .75rem;
   padding: 1rem;
-  max-height: 360px; overflow-y: auto;
+  max-height: 360px; overflow-y: auto; overflow-x: hidden;
 }
-.message-item { display: flex; gap: .625rem; align-items: flex-start; }
+.message-item { display: flex; gap: .625rem; align-items: flex-start; max-width: 100%; }
 .message-item.mine { flex-direction: row-reverse; }
+.message-item > div:last-child { display: flex; flex-direction: column; width: fit-content; max-width: 75%; }
+.message-item.mine > div:last-child { align-items: flex-end; margin-left: auto; }
 .message-bubble {
-  max-width: 70%;
+  width: fit-content;
+  max-width: 100%;
   padding: .625rem .875rem;
   border-radius: var(--radius);
   font-size: .875rem; line-height: 1.55;
   color: var(--text);
   background: var(--surface);
   border: 1px solid var(--border);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
+.message-attachment {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .5rem .75rem; margin-top: .375rem;
+  background: rgba(0,0,0,.04); border-radius: 8px;
+  font-size: .8125rem; text-decoration: none; color: inherit;
+}
+.message-item.mine .message-attachment { background: rgba(255,255,255,.12); }
 .message-item.mine .message-bubble {
   background: var(--navy);
   color: var(--white);
