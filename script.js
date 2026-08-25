@@ -1294,16 +1294,37 @@ async function dmFetchConversations(){
   return [...seen.entries()];
 }
 
-async function dmSend(otherUserId, body){
+async function dmSend(otherUserId, body, attachment){
   const me = store.getMe();
   const sb = getSb();
   if(!sb){ toast('Messaging is not connected. Please refresh and try again.', 'error'); return false; }
-  if(!me || !body.trim()) return false;
-  const { error } = await sb.from('direct_messages').insert({
-    sender_id: me.id, recipient_id: otherUserId, body: body.trim(), read: false
-  });
+  if(!me || (!body.trim() && !attachment)) return false;
+  const row = { sender_id: me.id, recipient_id: otherUserId, body: body.trim(), read: false };
+  if(attachment){ row.attachment_url = attachment.url; row.attachment_name = attachment.name; }
+  const { error } = await sb.from('direct_messages').insert(row);
   if(error){ toast('Failed to send: '+error.message, 'error'); return false; }
   return true;
+}
+
+async function dmUploadAttachment(file){
+  const me = store.getMe();
+  if(!me) return null;
+  try {
+    if(window.LiveStore?.uploadFile){
+      const path = me.id + '/dm_' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      const url = await window.LiveStore.uploadFile('post-media', path, file);
+      return { url, name: file.name };
+    }
+    const sb = getSb();
+    if(sb){
+      const path = me.id + '/dm_' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      const { data, error } = await sb.storage.from('post-media').upload(path, file, { upsert: true });
+      if(error) throw error;
+      const { data: pub } = sb.storage.from('post-media').getPublicUrl(data.path);
+      return { url: pub.publicUrl, name: file.name };
+    }
+  } catch(e){ toast('Attachment upload failed: '+e.message, 'error'); }
+  return null;
 }
 
 window.openDM = (userId) => { navigate('messages', { withUserId: userId }); };
@@ -1345,23 +1366,41 @@ async function renderMessages(){
     const panel = document.getElementById('dm-thread-panel');
     panel.innerHTML = '<div class="notif-panel-head" style="padding:.875rem 1rem;display:flex;align-items:center;gap:.625rem">'+avatarHtml(other,'sm')+'<h3 class="t-h2" style="margin:0">'+escHtml(other?.name||'Unknown')+'</h3></div>'+
     '<div class="message-thread" id="dm-messages" style="flex:1;overflow-y:auto"></div>'+
-    '<div class="message-input-row"><input class="message-input" id="dm-input" placeholder="Write a message..."><button class="btn btn-teal btn-sm" id="dm-send">'+icon('send')+'</button></div>';
+    '<div id="dm-attach-preview" style="display:none;padding:.5rem 1rem 0;font-size:.8125rem;color:var(--text-3)"></div>'+
+    '<div class="message-input-row"><label class="btn btn-ghost btn-sm" style="cursor:pointer;padding:.5rem" title="Attach a file"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg><input type="file" id="dm-file" style="display:none"></label><input class="message-input" id="dm-input" placeholder="Write a message..."><button class="btn btn-teal btn-sm" id="dm-send">'+icon('send')+'</button></div>';
 
     const thread = await dmFetchThread(withUserId);
     const msgsEl = document.getElementById('dm-messages');
     msgsEl.innerHTML = thread.length ? thread.map(m=>{
       const isMine = m.sender_id === me.id;
       const sender = isMine ? me : other;
-      return '<div class="message-item '+(isMine?'mine':'')+'">'+(!isMine?avatarHtml(sender,'sm'):'')+'<div><div class="message-bubble">'+escHtml(m.body)+'</div><div class="message-time">'+timeAgo(m.created_at)+'</div></div></div>';
+      const attach = m.attachment_url ? '<a href="'+escHtml(m.attachment_url)+'" target="_blank" rel="noopener" class="message-attachment">'+icon('file')+' '+escHtml(m.attachment_name||'Attachment')+'</a>' : '';
+      const bodyHtml = m.body ? '<div class="message-bubble">'+escHtml(m.body)+attach+'</div>' : (attach?'<div class="message-bubble">'+attach+'</div>':'');
+      return '<div class="message-item '+(isMine?'mine':'')+'">'+(!isMine?avatarHtml(sender,'sm'):'')+'<div>'+bodyHtml+'<div class="message-time">'+timeAgo(m.created_at)+'</div></div></div>';
     }).join('') : '<div class="empty-state" style="padding:1.5rem">No messages yet. Say hello!</div>';
     msgsEl.scrollTop = msgsEl.scrollHeight;
+
+    let pendingAttachment = null;
+    const fileInput = document.getElementById('dm-file');
+    const preview = document.getElementById('dm-attach-preview');
+    fileInput.onchange = async () => {
+      const file = fileInput.files[0];
+      if(!file) return;
+      if(file.size > 10*1024*1024){ toast('File must be under 10MB', 'error'); fileInput.value=''; return; }
+      preview.style.display='block'; preview.textContent='Uploading '+file.name+'...';
+      const uploaded = await dmUploadAttachment(file);
+      if(uploaded){ pendingAttachment = uploaded; preview.textContent='Ready to send: '+uploaded.name; }
+      else { preview.style.display='none'; }
+      fileInput.value='';
+    };
 
     const send = async () => {
       const input = document.getElementById('dm-input');
       const body = input.value.trim();
-      if(!body) return;
+      if(!body && !pendingAttachment) return;
       input.value=''; input.disabled=true;
-      const ok = await dmSend(withUserId, body);
+      const ok = await dmSend(withUserId, body, pendingAttachment);
+      pendingAttachment = null; preview.style.display='none';
       input.disabled=false;
       if(ok) renderMessages();
     };
