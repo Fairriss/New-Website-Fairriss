@@ -941,7 +941,7 @@ async function renderWheelDetail(){
   const isMember=store.isMember(wheel.id);
   const el=document.getElementById('page-wheel-detail');
   el.innerHTML=
-    '<div class="page-head"><div class="flex gap-3 items-center">'+hexBadge(wheel,44)+'<div><h1 class="page-title" style="margin-bottom:0">'+escHtml(wheel.name)+'</h1><p class="page-sub">'+escHtml(wheel.description)+'</p></div></div><div class="page-actions">'+(isCreator?'<button class="btn btn-outline btn-sm" onclick="openInviteModal(\''+wheel.id+'\')">'+icon('users')+' Invite</button><button class="btn btn-outline btn-sm" onclick="openModal(\'modal-create-event\')">+ Event</button><button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteWheelAction(\''+wheel.id+'\')">Delete Wheel</button>':(isMember?'<button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="leaveWheelAction(\''+wheel.id+'\')">Leave Wheel</button>':''))+'<button class="btn btn-teal btn-sm" onclick="handlePostClick(\''+wheel.id+'\')">'+ icon('plus') +' Post</button></div></div>'+
+    '<div class="page-head"><div class="flex gap-3 items-center">'+hexBadge(wheel,44)+'<div><h1 class="page-title" style="margin-bottom:0">'+escHtml(wheel.name)+'</h1><p class="page-sub">'+escHtml(wheel.description)+'</p></div></div><div class="page-actions">'+(isCreator?'<button class="btn btn-outline btn-sm" onclick="openInviteModal(\''+wheel.id+'\')">'+icon('users')+' Invite</button><button class="btn btn-outline btn-sm" onclick="openModal(\'modal-create-event\')">+ Event</button><button class="btn btn-ghost btn-sm delete-wheel-btn" style="color:var(--red)" data-wheel-id="'+wheel.id+'" data-wheel-name="'+escHtml(wheel.name)+'">Delete Wheel</button>':(isMember?'<button class="btn btn-ghost btn-sm leave-wheel-btn" style="color:var(--red)" data-wheel-id="'+wheel.id+'" data-wheel-name="'+escHtml(wheel.name)+'">Leave Wheel</button>':''))+'<button class="btn btn-teal btn-sm" onclick="handlePostClick(\''+wheel.id+'\')">'+ icon('plus') +' Post</button></div></div>'+
     '<div class="stats-grid" style="grid-template-columns:repeat(4,1fr)"><div class="stat-card"><span class="stat-label">Members</span><span class="stat-value">'+fmt(wheel.memberCount)+'</span></div><div class="stat-card"><span class="stat-label">Opportunities</span><span class="stat-value">'+opps.length+'</span></div><div class="stat-card"><span class="stat-label">Events</span><span class="stat-value">'+events.length+'</span></div><div class="stat-card"><span class="stat-label">Commission</span><span class="stat-value">'+wheel.dealCommission+'%</span></div></div>'+
     '<div class="tabs"><div class="tab-item active" data-tab="feed">Feed</div><div class="tab-item" data-tab="members">Members ('+members.length+')</div><div class="tab-item" data-tab="opportunities">Opportunities ('+opps.length+')</div><div class="tab-item" data-tab="events">Events ('+events.length+')</div></div>'+
     '<div class="tab-panel active" id="tab-feed">'+(posts.length?posts.map(renderFeedPost).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F4DD;</div><div class="empty-title">No posts yet</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-post\')">Post Something</button></div>')+'</div>'+
@@ -952,6 +952,8 @@ async function renderWheelDetail(){
   $$('.post-like-btn',el).forEach(btn=>btn.onclick=()=>{store.likePost(btn.dataset.postId);renderWheelDetail();});
   $$('.member-card',el).forEach(c=>c.onclick=()=>navigate('profile',{userId:c.dataset.userId}));
   $$('.opp-card',el).forEach(c=>c.onclick=()=>{openModal('modal-opp-detail');renderOppDetail(c.dataset.oppId);});
+  $$('.delete-wheel-btn',el).forEach(btn=>btn.onclick=()=>deleteWheelAction(btn.dataset.wheelId, btn.dataset.wheelName));
+  $$('.leave-wheel-btn',el).forEach(btn=>btn.onclick=()=>leaveWheelAction(btn.dataset.wheelId, btn.dataset.wheelName));
 }
 
 function renderEventCard(ev){
@@ -1125,10 +1127,8 @@ async function renderOppDetail(oppId){
 }
 window.getActiveOppId = () => _activeOppId;
 
-window.deleteWheelAction = async (wheelId) => {
-  const wheel = store.get('wheels').find(w=>w.id===wheelId);
-  if(!wheel) return;
-  if(!confirm('Delete "'+wheel.name+'"? This cannot be undone. All posts, opportunities, and events in this Wheel will be removed.')) return;
+window.deleteWheelAction = async (wheelId, wheelName) => {
+  if(!confirm('Delete "'+(wheelName||'this Wheel')+'"? This cannot be undone. All posts, opportunities, and events in this Wheel will be removed.')) return;
   const sb = getSb();
   try {
     if(sb){
@@ -1166,10 +1166,8 @@ window.deleteWheelAction = async (wheelId) => {
   } catch(e){ toast('Failed to delete: '+e.message, 'error'); }
 };
 
-window.leaveWheelAction = async (wheelId) => {
-  const wheel = store.get('wheels').find(w=>w.id===wheelId);
-  if(!wheel) return;
-  if(!confirm('Leave "'+wheel.name+'"? You can rejoin later if it stays open.')) return;
+window.leaveWheelAction = async (wheelId, wheelName) => {
+  if(!confirm('Leave "'+(wheelName||'this Wheel')+'"? You can rejoin later if it stays open.')) return;
   const me = store.getMe();
   const sb = getSb();
   try {
@@ -1178,9 +1176,8 @@ window.leaveWheelAction = async (wheelId) => {
       if(error) throw error;
     }
     store.data.wheelMembers = store.data.wheelMembers.filter(m=>!(m.wheelId===wheelId && m.userId===me.id));
-    if(wheel.memberCount>0) wheel.memberCount--;
     store._save();
-    toast('You left '+wheel.name, 'success');
+    toast('You left '+(wheelName||'the Wheel'), 'success');
     updateShellDynamic(me);
     navigate('wheels');
   } catch(e){ toast('Failed to leave: '+e.message, 'error'); }
