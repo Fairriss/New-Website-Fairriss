@@ -356,6 +356,49 @@ function sbToLocal(p){
 }
 
 // ── Auth / Landing Page ──────────────────────────────────────────────────────
+// ── Public Profile (shareable, no login required) ─────────────────────────
+async function renderPublicProfile(username){
+  document.body.innerHTML = '<div style="min-height:100vh;background:var(--surface);display:flex;align-items:center;justify-content:center;padding:1.5rem"><div style="text-align:center;color:var(--text-3)">Loading profile...</div></div>';
+  let u = null;
+  try {
+    const sb = getSb() || (window._supabase);
+    if(sb){
+      const { data } = await sb.from('public_profiles').select('*').eq('username', username).single();
+      if(data) u = data;
+    }
+  } catch(e){ console.warn('Public profile fetch failed:', e.message); }
+
+  if(!u){
+    document.body.innerHTML = '<div style="min-height:100vh;background:var(--surface);display:flex;align-items:center;justify-content:center;padding:1.5rem"><div style="text-align:center"><h2 style="color:var(--navy)">Profile not found</h2><p class="t-body c-text3 mb-4">This profile doesn\'t exist or the link is incorrect.</p><a href="'+window.location.pathname+'" class="btn btn-primary">Go to Fairriss</a></div></div>';
+    return;
+  }
+
+  const initialsStr = (u.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  const photoHtml = (u.profile_pics && u.profile_pics[0])
+    ? '<img src="'+u.profile_pics[0]+'" style="width:130px;height:130px;border-radius:50%;object-fit:cover;border:4px solid rgba(255,255,255,.3);box-shadow:0 6px 24px rgba(0,0,0,.4);display:block">'
+    : '<div class="profile-avatar-lg">'+initialsStr+'</div>';
+
+  document.body.innerHTML =
+  '<div style="min-height:100vh;background:var(--surface)">'+
+  '<div class="profile-header" style="padding:2rem;max-width:720px;margin:0 auto">'+
+  '<div style="display:flex;align-items:center;gap:1.75rem;flex-wrap:wrap">'+
+  photoHtml+
+  '<div style="flex:1;min-width:180px">'+
+  '<h1 class="profile-name" style="font-size:1.75rem;margin-bottom:.25rem">'+escHtml(u.name)+'</h1>'+
+  (u.job_title?'<div style="color:rgba(255,255,255,.9);font-size:1rem;font-weight:600;margin-bottom:.2rem">'+escHtml(u.job_title)+(u.company?' at '+escHtml(u.company):'')+'</div>':'')+
+  '<div style="color:rgba(255,255,255,.55);font-size:.8125rem;margin-bottom:.75rem">'+escHtml(u.user_type||'Member')+'</div>'+
+  (u.location?'<span style="color:rgba(255,255,255,.6);font-size:.8125rem">'+icon('map')+' '+escHtml(u.location)+'</span>':'')+
+  '</div>'+
+  '<div style="text-align:center"><div class="trust-score-circle" style="--pct:'+(u.trust_score||0)+'%;width:76px;height:76px"><div class="trust-score-inner" style="width:58px;height:58px"><div class="trust-score-num-lg" style="font-size:1.25rem">'+(u.trust_score||0)+'</div><div class="trust-score-label">Trust</div></div></div></div>'+
+  '</div></div>'+
+  '<div style="max-width:720px;margin:0 auto;padding:1.5rem">'+
+  (u.bio?'<div class="card mb-4"><h2 class="t-h2 mb-3">About</h2><p class="t-body" style="color:var(--text-2);line-height:1.7">'+escHtml(u.bio)+'</p></div>':'')+
+  '<div class="card mb-4"><h2 class="t-h2 mb-3">Reputation</h2><div class="reputation-grid"><div class="rep-item"><div class="rep-value">'+(u.deals_count||0)+'</div><div class="rep-label">Deals Done</div></div><div class="rep-item"><div class="rep-value">'+(u.referrals_sent||0)+'</div><div class="rep-label">Referrals</div></div><div class="rep-item"><div class="rep-value">'+(u.referrals_converted||0)+'</div><div class="rep-label">Converted</div></div><div class="rep-item"><div class="rep-value">'+(u.review_avg?u.review_avg+'*':'-')+'</div><div class="rep-label">Avg Review</div></div></div></div>'+
+  (u.skills&&u.skills.length?'<div class="card mb-4"><h2 class="t-h2 mb-3">Skills</h2><div class="skill-tags">'+u.skills.map(s=>'<span class="skill-tag primary">'+escHtml(s)+'</span>').join('')+'</div></div>':'')+
+  '<div class="card" style="text-align:center;background:var(--navy)"><h2 style="color:var(--teal);margin-bottom:.5rem">Join Fairriss to connect with '+escHtml(u.name.split(' ')[0])+'</h2><p style="color:rgba(255,255,255,.7);margin-bottom:1.25rem">The platform where professional networks become commerce engines.</p><button class="btn btn-teal" style="justify-content:center;width:100%" onclick="window.location.href=window.location.pathname">Join Fairriss</button></div>'+
+  '</div></div>';
+}
+
 function renderAuth(){
   document.body.innerHTML = `
     <style>
@@ -1478,7 +1521,7 @@ async function renderProfile(){
   '<div style="flex-shrink:0;text-align:center;margin-left:auto"><div class="trust-score-circle" style="--pct:'+u.trustScore+'%;width:76px;height:76px"><div class="trust-score-inner" style="width:58px;height:58px"><div class="trust-score-num-lg" style="font-size:1.25rem">'+u.trustScore+'</div><div class="trust-score-label">Trust</div></div></div></div>'+
   '</div>'+
   '<div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,.1)"><div style="font-size:.6875rem;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.07em;text-transform:uppercase;margin-bottom:.625rem">Photos</div>'+picSlots+'</div></div>'+
-  (!isMe?'<div class="flex gap-2 mb-4"><button class="btn btn-primary" onclick="openModal(\'modal-create-deal\')">Create Deal</button><button class="btn btn-outline" onclick="openDM(\''+u.id+'\')">Message</button></div>':'')+
+  (!isMe?'<div class="flex gap-2 mb-4"><button class="btn btn-primary" onclick="openModal(\'modal-create-deal\')">Create Deal</button><button class="btn btn-outline" onclick="openDM(\''+u.id+'\')">Message</button></div>':'<div class="flex gap-2 mb-4"><button class="btn btn-outline" onclick="shareMyProfile(\''+escHtml(u.username||'')+'\')">'+icon('link')+' Share Profile</button></div>')+
   '<div class="two-col"><div>'+renderAboutCard(u,isMe)+
   (u.introVideo?'<div class="card mb-4"><h2 class="t-h2 mb-3">'+icon('video')+' Intro Video</h2><video src="'+u.introVideo+'" controls style="width:100%;border-radius:var(--radius-sm);background:#000;max-height:240px"></video>'+(isMe?'<div class="mt-2"><label class="btn btn-ghost btn-sm" style="cursor:pointer">Replace<input type="file" accept="video/*" style="display:none" onchange="uploadVideo(event)"></label></div>':'')+'</div>':
   (isMe?'<div class="card mb-4"><h2 class="t-h2 mb-3">'+icon('video')+' Intro Video</h2><p class="t-small c-text3 mb-3">Add a short intro video so people can get to know you.</p><label class="btn btn-outline btn-sm" style="cursor:pointer">'+icon('video')+' Upload Video<input type="file" accept="video/*" style="display:none" onchange="uploadVideo(event)"></label></div>':''))+
@@ -1502,6 +1545,17 @@ async function renderProfile(){
   '</div><div class="card"><h2 class="t-h2 mb-3">Recent Deals</h2>'+(myDeals.slice(0,3).length?myDeals.slice(0,3).map(d=>{const other=store.getUser(d.buyerId===u.id?d.sellerId:d.buyerId);return '<div class="flex justify-between items-center mb-3">'+avatarHtml(other,'sm')+'<div class="flex-1" style="margin-left:.5rem"><div class="t-small" style="font-weight:600">'+escHtml(d.title)+'</div><div class="t-micro c-text4">'+timeAgo(d.createdAt)+'</div></div>'+dealStatusBadge(d.status)+'</div>';}).join(''):'<div class="t-body c-text3">No deals yet</div>')+
   '</div></div></div>';
 }
+
+window.shareMyProfile = async (username) => {
+  if(!username){ toast('Set a username in your profile first', 'error'); return; }
+  const url = window.location.origin + window.location.pathname + '?u=' + encodeURIComponent(username);
+  try {
+    await navigator.clipboard.writeText(url);
+    toast('Profile link copied!', 'success');
+  } catch(e){
+    prompt('Copy your profile link:', url);
+  }
+};
 
 window.saveProfileInfo=async()=>{
   const links=[...$$('.profile-link-input')].map(i=>i.value.trim()).filter(Boolean);
@@ -2108,6 +2162,13 @@ window.renderDealDetail=renderDealDetail;window.renderOppDetail=renderOppDetail;
 window.createFromTemplate=createFromTemplate;
 
 document.addEventListener('DOMContentLoaded', async ()=>{
+  // Public shareable profile link (?u=username) — works without logging in
+  const publicUsername = new URLSearchParams(window.location.search).get('u');
+  if(publicUsername){
+    await renderPublicProfile(publicUsername);
+    return;
+  }
+
   // Clear old cache versions
   ['fairriss_mvp_v1','fairriss_mvp_v2','fairriss_mvp_v3'].forEach(k=>localStorage.removeItem(k));
 
