@@ -136,6 +136,8 @@ function dbEvent(e) {
     ticketPrice: e.ticket_price || 0,
     ticketCount: e.ticket_count || 50,
     ticketsSold: e.tickets_sold || 0,
+    imageUrl: e.image_url || null,
+    links: e.links || [],
     createdAt: e.created_at,
   };
 }
@@ -431,6 +433,8 @@ const LiveStore = {
         location: fields.location || '',
         ticket_price: fields.ticketPrice || 0,
         ticket_count: fields.ticketCount || 50,
+        image_url: fields.imageUrl || null,
+        links: fields.links || [],
       })
       .select().single();
     if (error) throw error;
