@@ -856,7 +856,7 @@ async function renderHome(){
     '</div><div><div class="flex justify-between items-center mb-3"><h2 class="t-h2">Active Deals</h2><button class="btn btn-ghost btn-sm" onclick="navigate(\'deals\')">All</button></div>'+
     (activeDeals.length?activeDeals.map(renderDealCardCompact).join(''):'<div class="card"><div class="empty-state" style="padding:1.5rem"><div class="empty-icon">&#x1F91D;</div><div class="empty-title">No active deals</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-deal\')">Create Deal</button></div></div>')+
     '<div class="flex justify-between items-center mt-4 mb-3"><h2 class="t-h2">Fresh Opportunities</h2><button class="btn btn-ghost btn-sm" onclick="navigate(\'opportunities\')">All</button></div>'+
-    topOpps.map(o=>'<div class="card card-sm mb-2" style="cursor:pointer" onclick="openModal(\'modal-opp-detail\');renderOppDetail(\''+o.id+'\')"><div class="flex gap-3 items-start"><div class="flex-1"><div class="t-h3 mb-1">'+escHtml(o.title)+'</div><div class="flex gap-2 items-center"><span class="type-badge type-'+o.type+'">'+o.type.replace('_',' ')+'</span><span class="t-micro c-text4">'+timeAgo(o.createdAt)+'</span></div></div><button class="btn btn-teal btn-xs" onclick="event.stopPropagation();toast(\'Application submitted!\',\'success\');this.textContent=\'Applied\';this.disabled=true">Apply</button></div></div>').join('')+
+    topOpps.map(o=>'<div class="card card-sm mb-2" style="cursor:pointer" onclick="openModal(\'modal-opp-detail\');renderOppDetail(\''+o.id+'\')"><div class="flex gap-3 items-start"><div class="flex-1"><div class="t-h3 mb-1">'+escHtml(o.title)+'</div><div class="flex gap-2 items-center"><span class="type-badge type-'+o.type+'">'+o.type.replace('_',' ')+'</span><span class="t-micro c-text4">'+timeAgo(o.createdAt)+'</span></div></div><button class="btn btn-teal btn-xs" onclick="event.stopPropagation();applyToOpportunity(\''+o.id+'\',this)">Apply</button></div></div>').join('')+
     '</div></div>';
   $$('.post-like-btn',el).forEach(btn=>btn.onclick=()=>{store.likePost(btn.dataset.postId);renderHome();});
 }
@@ -938,9 +938,10 @@ async function renderWheelDetail(){
     store.getEvents ? store.getEvents(wheel.id) : Promise.resolve([]),
   ]);
   const isCreator=wheel.creatorId===store.getMe()?.id;
+  const isMember=store.isMember(wheel.id);
   const el=document.getElementById('page-wheel-detail');
   el.innerHTML=
-    '<div class="page-head"><div class="flex gap-3 items-center">'+hexBadge(wheel,44)+'<div><h1 class="page-title" style="margin-bottom:0">'+escHtml(wheel.name)+'</h1><p class="page-sub">'+escHtml(wheel.description)+'</p></div></div><div class="page-actions">'+(isCreator?'<button class="btn btn-outline btn-sm" onclick="openInviteModal(\''+wheel.id+'\')">'+icon('users')+' Invite</button><button class="btn btn-outline btn-sm" onclick="openModal(\'modal-create-event\')">+ Event</button>':'')+'<button class="btn btn-teal btn-sm" onclick="handlePostClick(\''+wheel.id+'\')">'+ icon('plus') +' Post</button></div></div>'+
+    '<div class="page-head"><div class="flex gap-3 items-center">'+hexBadge(wheel,44)+'<div><h1 class="page-title" style="margin-bottom:0">'+escHtml(wheel.name)+'</h1><p class="page-sub">'+escHtml(wheel.description)+'</p></div></div><div class="page-actions">'+(isCreator?'<button class="btn btn-outline btn-sm" onclick="openInviteModal(\''+wheel.id+'\')">'+icon('users')+' Invite</button><button class="btn btn-outline btn-sm" onclick="openModal(\'modal-create-event\')">+ Event</button><button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteWheelAction(\''+wheel.id+'\')">Delete Wheel</button>':(isMember?'<button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="leaveWheelAction(\''+wheel.id+'\')">Leave Wheel</button>':''))+'<button class="btn btn-teal btn-sm" onclick="handlePostClick(\''+wheel.id+'\')">'+ icon('plus') +' Post</button></div></div>'+
     '<div class="stats-grid" style="grid-template-columns:repeat(4,1fr)"><div class="stat-card"><span class="stat-label">Members</span><span class="stat-value">'+fmt(wheel.memberCount)+'</span></div><div class="stat-card"><span class="stat-label">Opportunities</span><span class="stat-value">'+opps.length+'</span></div><div class="stat-card"><span class="stat-label">Events</span><span class="stat-value">'+events.length+'</span></div><div class="stat-card"><span class="stat-label">Commission</span><span class="stat-value">'+wheel.dealCommission+'%</span></div></div>'+
     '<div class="tabs"><div class="tab-item active" data-tab="feed">Feed</div><div class="tab-item" data-tab="members">Members ('+members.length+')</div><div class="tab-item" data-tab="opportunities">Opportunities ('+opps.length+')</div><div class="tab-item" data-tab="events">Events ('+events.length+')</div></div>'+
     '<div class="tab-panel active" id="tab-feed">'+(posts.length?posts.map(renderFeedPost).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F4DD;</div><div class="empty-title">No posts yet</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-post\')">Post Something</button></div>')+'</div>'+
@@ -1041,15 +1042,130 @@ async function renderOpportunities(){
 function renderOppCard(o){
   const creator=store.getUser(o.creatorId);
   const valMap={job:fmtMoney(o.metadata?.salaryMin||0)+' - '+fmtMoney(o.metadata?.salaryMax||0),partnership:'Equity: '+(o.metadata?.equity||'TBD'),collaboration:'Equity: '+(o.metadata?.equity||'TBD'),investment:'Ticket: '+(o.metadata?.ticketSize||'TBD'),referral:'Bonus: '+(o.metadata?.bonus?fmtMoney(o.metadata.bonus):'TBD'),service:'Budget: '+(o.metadata?.budgetMin?fmtMoney(o.metadata.budgetMin)+' - '+fmtMoney(o.metadata.budgetMax):'TBD'),service_request:'TBD'};
-  return '<div class="opp-card" data-opp-id="'+o.id+'"><div class="opp-main"><div class="opp-title">'+escHtml(o.title)+'</div><div class="opp-meta"><span class="type-badge type-'+o.type+'">'+o.type.replace('_',' ')+'</span>'+avatarHtml(creator,'sm')+'<span class="opp-meta-item">'+escHtml(creator?.name||'')+'</span>'+(o.remoteOk?'<span class="opp-meta-item">Remote OK</span>':'')+'<span class="opp-meta-item">'+o.applicationCount+' applied</span></div><div class="opp-desc">'+escHtml(o.description)+'</div><div class="skill-tags mt-2">'+(o.skills||[]).map(s=>'<span class="skill-tag">'+escHtml(s)+'</span>').join('')+'</div></div><div class="opp-right"><div class="opp-value">'+(valMap[o.type]||'')+'</div><div class="opp-posted">'+timeAgo(o.createdAt)+'</div><button class="btn btn-teal btn-sm mt-2" onclick="event.stopPropagation();toast(\'Application submitted!\',\'success\');this.textContent=\'Applied\';this.disabled=true">Apply</button></div></div>';
+  return '<div class="opp-card" data-opp-id="'+o.id+'"><div class="opp-main"><div class="opp-title">'+escHtml(o.title)+'</div><div class="opp-meta"><span class="type-badge type-'+o.type+'">'+o.type.replace('_',' ')+'</span>'+avatarHtml(creator,'sm')+'<span class="opp-meta-item">'+escHtml(creator?.name||'')+'</span>'+(o.remoteOk?'<span class="opp-meta-item">Remote OK</span>':'')+'<span class="opp-meta-item">'+o.applicationCount+' applied</span></div><div class="opp-desc">'+escHtml(o.description)+'</div><div class="skill-tags mt-2">'+(o.skills||[]).map(s=>'<span class="skill-tag">'+escHtml(s)+'</span>').join('')+'</div></div><div class="opp-right"><div class="opp-value">'+(valMap[o.type]||'')+'</div><div class="opp-posted">'+timeAgo(o.createdAt)+'</div><button class="btn btn-teal btn-sm mt-2" onclick="event.stopPropagation();applyToOpportunity(\''+o.id+'\',this)">Apply</button></div></div>';
 }
 
-function renderOppDetail(oppId){
-  const o=store.get('opportunities').find(x=>x.id===oppId);if(!o)return;
-  const creator=store.getUser(o.creatorId);
-  $('#modal-opp-detail .modal-title').textContent=o.title;
-  $('#modal-opp-body').innerHTML='<div class="flex gap-3 items-start mb-4">'+avatarHtml(creator,'md')+'<div><div class="t-h3">'+escHtml(creator?.name||'')+'</div><div class="t-small c-text3">'+timeAgo(o.createdAt)+' - '+o.applicationCount+' applied</div></div><span class="type-badge type-'+o.type+'" style="margin-left:auto">'+o.type.replace('_',' ')+'</span></div><p class="t-body mb-4" style="line-height:1.7">'+escHtml(o.description)+'</p><div class="skill-tags mb-4">'+(o.skills||[]).map(s=>'<span class="skill-tag primary">'+escHtml(s)+'</span>').join('')+'</div><div class="card card-sm" style="background:var(--surface)"><div class="form-row"><div><div class="t-label c-text4 mb-1">Location</div><div class="t-body">'+escHtml(o.location)+(o.remoteOk?' (Remote OK)':'')+'</div></div><div><div class="t-label c-text4 mb-1">Expires</div><div class="t-body">'+(o.expiresAt?new Date(o.expiresAt).toLocaleDateString():'Open')+'</div></div></div></div>';
+let _activeOppId = null;
+
+async function appFetchApplications(oppId){
+  const sb = getSb();
+  if(!sb) return [];
+  const { data, error } = await sb.from('opportunity_applications').select('*').eq('opportunity_id', oppId).order('created_at', { ascending: false });
+  if(error){ console.warn('Applications fetch failed:', error.message); return []; }
+  return data || [];
 }
+
+window.applyToOpportunity = async (oppId, btnEl) => {
+  const me = store.getMe();
+  if(!me) return;
+  const opp = store.get('opportunities').find(o=>o.id===oppId);
+  if(!opp) return;
+  if(opp.type==='job' && !me.resume){
+    toast('Add a resume to your profile before applying to jobs.', 'error');
+    closeAllModals();
+    navigate('profile', { userId: me.id });
+    return;
+  }
+  const sb = getSb();
+  if(btnEl){ btnEl.disabled=true; btnEl.textContent='Applying...'; }
+  try {
+    if(sb){
+      const { error } = await sb.from('opportunity_applications').insert({
+        opportunity_id: oppId, applicant_id: me.id,
+        resume_url: me.resume || null, message: ''
+      });
+      if(error && error.code !== '23505') throw error; // 23505 = already applied, treat as success
+    }
+    opp.applicationCount = (opp.applicationCount||0) + 1;
+    store._save();
+    toast('Application submitted!', 'success');
+    if(btnEl){ btnEl.textContent='Applied'; }
+    if($('#modal-opp-detail')?.classList.contains('open')) renderOppDetail(oppId);
+  } catch(e){
+    toast('Failed to apply: '+e.message, 'error');
+    if(btnEl){ btnEl.disabled=false; btnEl.textContent='Apply'; }
+  }
+};
+
+async function renderOppDetail(oppId){
+  const o=store.get('opportunities').find(x=>x.id===oppId);if(!o)return;
+  _activeOppId = oppId;
+  const creator=store.getUser(o.creatorId);
+  const me=store.getMe();
+  const isCreator = me && o.creatorId===me.id;
+  $('#modal-opp-detail .modal-title').textContent=o.title;
+  let html='<div class="flex gap-3 items-start mb-4">'+avatarHtml(creator,'md')+'<div><div class="t-h3">'+escHtml(creator?.name||'')+'</div><div class="t-small c-text3">'+timeAgo(o.createdAt)+' - '+o.applicationCount+' applied</div></div><span class="type-badge type-'+o.type+'" style="margin-left:auto">'+o.type.replace('_',' ')+'</span></div><p class="t-body mb-4" style="line-height:1.7">'+escHtml(o.description)+'</p><div class="skill-tags mb-4">'+(o.skills||[]).map(s=>'<span class="skill-tag primary">'+escHtml(s)+'</span>').join('')+'</div><div class="card card-sm" style="background:var(--surface)"><div class="form-row"><div><div class="t-label c-text4 mb-1">Location</div><div class="t-body">'+escHtml(o.location)+(o.remoteOk?' (Remote OK)':'')+'</div></div><div><div class="t-label c-text4 mb-1">Expires</div><div class="t-body">'+(o.expiresAt?new Date(o.expiresAt).toLocaleDateString():'Open')+'</div></div></div></div>';
+
+  if(isCreator){
+    html += '<div class="mt-4"><h3 class="t-h2 mb-2">Applicants</h3><div id="opp-applicants-list"><div class="t-small c-text3" style="padding:1rem">Loading...</div></div></div>';
+  }
+  $('#modal-opp-body').innerHTML = html;
+  const footerBtn = $('#modal-opp-detail .modal-footer .btn-teal');
+  if(footerBtn){
+    if(isCreator){ footerBtn.style.display='none'; }
+    else { footerBtn.style.display=''; footerBtn.textContent='Apply Now'; footerBtn.disabled=false; }
+  }
+
+  if(isCreator){
+    const apps = await appFetchApplications(oppId);
+    const listEl = document.getElementById('opp-applicants-list');
+    if(!listEl) return;
+    if(!apps.length){
+      listEl.innerHTML = '<div class="empty-state" style="padding:1.5rem"><div class="empty-icon">&#x1F4E5;</div><div class="empty-title">No applicants yet</div></div>';
+      return;
+    }
+    const applicants = await Promise.all(apps.map(a=>dmGetUser(a.applicant_id)));
+    listEl.innerHTML = apps.map((a,i)=>{
+      const u = applicants[i];
+      const resumeUrl = a.resume_url || u?.resume;
+      return '<div class="card card-sm mb-2" style="display:flex;align-items:center;gap:.75rem">'+avatarHtml(u,'sm')+'<div class="flex-1"><div class="t-small" style="font-weight:600">'+escHtml(u?.name||'Unknown')+'</div><div class="t-micro c-text4">Applied '+timeAgo(a.created_at)+'</div></div>'+(resumeUrl?'<a href="'+escHtml(resumeUrl)+'" target="_blank" rel="noopener" class="btn btn-outline btn-xs">'+icon('file')+' Resume</a>':'<span class="t-micro c-text4">No resume</span>')+'<button class="btn btn-ghost btn-xs" onclick="openDM(\''+(u?.id||'')+'\')">Message</button></div>';
+    }).join('');
+  }
+}
+window.getActiveOppId = () => _activeOppId;
+
+window.deleteWheelAction = async (wheelId) => {
+  const wheel = store.get('wheels').find(w=>w.id===wheelId);
+  if(!wheel) return;
+  if(!confirm('Delete "'+wheel.name+'"? This cannot be undone. All posts, opportunities, and events in this Wheel will be removed.')) return;
+  const sb = getSb();
+  try {
+    if(sb){
+      await sb.from('wheel_members').delete().eq('wheel_id', wheelId);
+      await sb.from('posts').delete().eq('wheel_id', wheelId);
+      await sb.from('events').delete().eq('wheel_id', wheelId);
+      const { error } = await sb.from('wheels').delete().eq('id', wheelId);
+      if(error) throw error;
+    }
+    store.data.wheels = store.data.wheels.filter(w=>w.id!==wheelId);
+    store.data.wheelMembers = store.data.wheelMembers.filter(m=>m.wheelId!==wheelId);
+    store._save();
+    toast('Wheel deleted', 'success');
+    updateShellDynamic(store.getMe());
+    navigate('wheels');
+  } catch(e){ toast('Failed to delete: '+e.message, 'error'); }
+};
+
+window.leaveWheelAction = async (wheelId) => {
+  const wheel = store.get('wheels').find(w=>w.id===wheelId);
+  if(!wheel) return;
+  if(!confirm('Leave "'+wheel.name+'"? You can rejoin later if it stays open.')) return;
+  const me = store.getMe();
+  const sb = getSb();
+  try {
+    if(sb){
+      const { error } = await sb.from('wheel_members').delete().eq('wheel_id', wheelId).eq('user_id', me.id);
+      if(error) throw error;
+    }
+    store.data.wheelMembers = store.data.wheelMembers.filter(m=>!(m.wheelId===wheelId && m.userId===me.id));
+    if(wheel.memberCount>0) wheel.memberCount--;
+    store._save();
+    toast('You left '+wheel.name, 'success');
+    updateShellDynamic(me);
+    navigate('wheels');
+  } catch(e){ toast('Failed to leave: '+e.message, 'error'); }
+};
+
 
 // ── Deals ──────────────────────────────────────────────────────────────────
 async function renderDeals(){
@@ -1336,9 +1452,9 @@ async function renderMessages(){
   const withUserId = pageParams.withUserId || null;
 
   el.innerHTML = '<div class="page-head"><div class="page-head-left"><h1 class="page-title">Messages</h1><p class="page-sub">Direct conversations</p></div></div>'+
-  '<div style="display:grid;grid-template-columns:280px 1fr;gap:1rem;height:65vh;min-height:420px">'+
+  '<div class="dm-container'+(withUserId?' dm-show-thread':'')+'" id="dm-container">'+
   '<div class="card card-flush" style="overflow-y:auto" id="dm-convo-list"><div style="padding:1.5rem;text-align:center;color:var(--text-3);font-size:.875rem">Loading...</div></div>'+
-  '<div class="card card-flush" style="display:flex;flex-direction:column" id="dm-thread-panel"><div class="empty-state" style="margin:auto"><div class="empty-icon">&#x1F4AC;</div><div class="empty-title">Select a conversation</div></div></div>'+
+  '<div class="card card-flush dm-thread-panel" id="dm-thread-panel"><div class="empty-state" style="margin:auto"><div class="empty-icon">&#x1F4AC;</div><div class="empty-title">Select a conversation</div></div></div>'+
   '</div>';
 
   const convos = await dmFetchConversations();
@@ -1364,7 +1480,7 @@ async function renderMessages(){
   if(withUserId){
     const other = await dmGetUser(withUserId);
     const panel = document.getElementById('dm-thread-panel');
-    panel.innerHTML = '<div class="notif-panel-head" style="padding:.875rem 1rem;display:flex;align-items:center;gap:.625rem">'+avatarHtml(other,'sm')+'<h3 class="t-h2" style="margin:0">'+escHtml(other?.name||'Unknown')+'</h3></div>'+
+    panel.innerHTML = '<div class="notif-panel-head" style="padding:.875rem 1rem;display:flex;align-items:center;gap:.625rem"><button class="dm-back-btn" onclick="navigate(\'messages\')" aria-label="Back to conversations"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>'+avatarHtml(other,'sm')+'<h3 class="t-h2" style="margin:0">'+escHtml(other?.name||'Unknown')+'</h3></div>'+
     '<div class="message-thread" id="dm-messages" style="flex:1;overflow-y:auto"></div>'+
     '<div id="dm-attach-preview" style="display:none;padding:.5rem 1rem 0;font-size:.8125rem;color:var(--text-3)"></div>'+
     '<div class="message-input-row"><label class="btn btn-ghost btn-sm" style="cursor:pointer;padding:.5rem" title="Attach a file"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg><input type="file" id="dm-file" style="display:none"></label><input class="message-input" id="dm-input" placeholder="Write a message..."><button class="btn btn-teal btn-sm" id="dm-send">'+icon('send')+'</button></div>';
@@ -1525,7 +1641,7 @@ function buildModals(){
     '<div id="invite-member-list" style="max-height:360px;overflow-y:auto"></div>'+
     '</div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="send-invites-btn">Send Invites</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-payment"><div class="modal"><div class="modal-header"><span class="modal-title">Complete Payment</span><button class="modal-close">x</button></div><div class="modal-body" id="payment-modal-body"><div style="text-align:center;padding:2rem;color:var(--text-3)">Loading payment...</div></div></div></div>'+
-  '<div class="modal-overlay" id="modal-opp-detail"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title" id="modal-opp-title">Opportunity</span><button class="modal-close">x</button></div><div class="modal-body" id="modal-opp-body"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Close</button><button class="btn btn-teal" onclick="toast(\'Application submitted!\',\'success\');closeAllModals()">Apply Now</button></div></div></div>'
+  '<div class="modal-overlay" id="modal-opp-detail"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title" id="modal-opp-title">Opportunity</span><button class="modal-close">x</button></div><div class="modal-body" id="modal-opp-body"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Close</button><button class="btn btn-teal" onclick="applyToOpportunity(getActiveOppId(), this)">Apply Now</button></div></div></div>'
   );
 }
 
