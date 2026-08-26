@@ -1227,11 +1227,19 @@ function renderMemberCard(u){
 
 // ── Opportunities ──────────────────────────────────────────────────────────
 async function renderOpportunities(){
+  const view = pageParams.view || 'requests';
+  const el=document.getElementById('page-opportunities');
+
+  if(view === 'services'){
+    await renderServicesTab(el);
+    return;
+  }
+
   const filter=pageParams.type||'all',q=pageParams.q||'';
   let opps=[];
   try { opps=await store.getOpportunities({type:filter,q}); } catch(e){ opps=[]; }
-  const el=document.getElementById('page-opportunities');
   el.innerHTML='<div class="page-head"><div class="page-head-left"><h1 class="page-title">Opportunities</h1><p class="page-sub">'+opps.length+' open across your Wheels</p></div><div class="page-actions"><button class="btn btn-teal" onclick="openModal(\'modal-create-opp\')">'+icon('plus')+' Post Opportunity</button></div></div>'+
+  '<div class="tabs"><div class="tab-item active" onclick="navigate(\'opportunities\',{view:\'requests\'})">Requests</div><div class="tab-item" onclick="navigate(\'opportunities\',{view:\'services\'})">Services</div></div>'+
   '<div class="filter-bar">'+['all','job','partnership','collaboration','investment','referral','service'].map(t=>'<button class="filter-pill opp-filter-btn '+(filter===t?'active':'')+'" data-type="'+t+'"><span class="type-badge type-'+t+'" style="'+(t==='all'?'background:none;color:inherit;font-size:.8125rem;font-weight:500;padding:0':'')+'">'+t.replace('_',' ')+'</span></button>').join('')+'<div style="position:relative;margin-left:auto"><svg style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--text-4);pointer-events:none" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input class="form-control" id="opp-search" placeholder="Search..." value="'+escHtml(q)+'" style="padding-left:2.25rem;width:180px"></div></div>'+
   '<div class="opp-list">'+(opps.length?opps.map(renderOppCard).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F3AF;</div><div class="empty-title">No opportunities found</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-opp\')">Post One</button></div>')+'</div>';
   let st;$('#opp-search')?.addEventListener('input',e=>{clearTimeout(st);st=setTimeout(()=>navigate('opportunities',{type:filter,q:e.target.value}),300);});
@@ -1239,6 +1247,52 @@ async function renderOpportunities(){
   $$('.opp-card',el).forEach(c=>c.onclick=()=>{openModal('modal-opp-detail');renderOppDetail(c.dataset.oppId);});
   $$('.delete-opp-btn',el).forEach(btn=>btn.onclick=()=>deleteOpportunityAction(btn.dataset.oppId, btn.dataset.oppTitle));
 }
+
+async function fetchServices(q){
+  const sb = getSb();
+  if(!sb) return [];
+  try {
+    let query = sb.from('services').select('*').eq('status','open').order('created_at',{ascending:false});
+    const { data, error } = await query;
+    if(error) throw error;
+    let rows = data||[];
+    if(q){
+      const ql = q.toLowerCase();
+      rows = rows.filter(s=>s.title.toLowerCase().includes(ql) || (s.description||'').toLowerCase().includes(ql) || (s.skills||[]).some(sk=>sk.toLowerCase().includes(ql)));
+    }
+    return rows;
+  } catch(e){ console.warn('Services fetch failed:', e.message); return []; }
+}
+
+function renderServiceCard(s, creator){
+  const me = store.getMe();
+  const isOwner = me && s.creator_id===me.id;
+  const priceLabel = s.price_cents ? fmtMoney(s.price_cents/100) + (s.price_type==='hourly'?'/hr':'') : 'Rate on request';
+  return '<div class="opp-card" data-service-id="'+s.id+'"><div class="opp-main"><div class="opp-title">'+escHtml(s.title)+'</div><div class="opp-meta">'+avatarHtml(creator,'sm')+'<span class="opp-meta-item">'+escHtml(creator?.name||'')+'</span>'+(s.delivery_days?'<span class="opp-meta-item">'+s.delivery_days+' day delivery</span>':'')+'</div><div class="opp-desc">'+escHtml(s.description)+'</div><div class="skill-tags mt-2">'+(s.skills||[]).map(sk=>'<span class="skill-tag">'+escHtml(sk)+'</span>').join('')+'</div></div><div class="opp-right"><div class="opp-value">'+priceLabel+'</div><div class="opp-posted">'+timeAgo(s.created_at)+'</div>'+(isOwner?'<button class="btn btn-ghost btn-xs mt-2" style="color:var(--red)" onclick="event.stopPropagation();deleteServiceAction(\''+s.id+'\',\''+escHtml(s.title).replace(/'/g,"\\\\'")+'\')">Delete</button>':'<button class="btn btn-teal btn-sm mt-2" onclick="event.stopPropagation();openDM(\''+s.creator_id+'\')">Message</button>')+'</div></div>';
+}
+
+async function renderServicesTab(el){
+  const q = pageParams.q || '';
+  const services = await fetchServices(q);
+  const creators = await Promise.all(services.map(s=>dmGetUser(s.creator_id)));
+  el.innerHTML='<div class="page-head"><div class="page-head-left"><h1 class="page-title">Opportunities</h1><p class="page-sub">'+services.length+' service'+(services.length===1?'':'s')+' offered</p></div><div class="page-actions"><button class="btn btn-teal" onclick="openModal(\'modal-create-service\')">'+icon('plus')+' Post a Service</button></div></div>'+
+  '<div class="tabs"><div class="tab-item" onclick="navigate(\'opportunities\',{view:\'requests\'})">Requests</div><div class="tab-item active" onclick="navigate(\'opportunities\',{view:\'services\'})">Services</div></div>'+
+  '<div class="filter-bar"><div style="position:relative;margin-left:auto"><svg style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--text-4);pointer-events:none" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input class="form-control" id="svc-search" placeholder="Search services..." value="'+escHtml(q)+'" style="padding-left:2.25rem;width:220px"></div></div>'+
+  '<div class="opp-list">'+(services.length?services.map((s,i)=>renderServiceCard(s,creators[i])).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F6E0;</div><div class="empty-title">No services listed yet</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-service\')">Post a Service</button></div>')+'</div>';
+  let st;$('#svc-search')?.addEventListener('input',e=>{clearTimeout(st);st=setTimeout(()=>navigate('opportunities',{view:'services',q:e.target.value}),300);});
+}
+
+window.deleteServiceAction = async (serviceId, serviceTitle) => {
+  if(!confirm('Delete "'+(serviceTitle||'this service')+'"? This cannot be undone.')) return;
+  const sb = getSb();
+  try {
+    const { error } = await sb.from('services').delete().eq('id', serviceId);
+    if(error) throw error;
+    toast('Service deleted', 'success');
+    navigate('opportunities', { view: 'services' });
+  } catch(e){ toast('Failed to delete: '+e.message, 'error'); }
+};
+
 
 function renderOppCard(o){
   const creator=store.getUser(o.creatorId);
@@ -1537,6 +1591,14 @@ async function renderProfile(){
   const me=store.getMe();
   const isMe = u.id === currentUserId;
   const myDeals=store.get('deals').filter(d=>d.sellerId===u.id||d.buyerId===u.id);
+  const myServices = await (async()=>{
+    const sb=getSb();
+    if(!sb) return [];
+    try {
+      const { data } = await sb.from('services').select('*').eq('creator_id',u.id).eq('status','open').order('created_at',{ascending:false});
+      return data||[];
+    } catch(e){ return []; }
+  })();
   const el=document.getElementById('page-profile');
   if(!el) return;
 
@@ -1585,8 +1647,9 @@ async function renderProfile(){
     '<button class="btn btn-teal" onclick="connectBankAccount()">&#x1F3E6; Connect Bank Account</button>'+
     '<div class="t-micro c-text4 mt-2">Secured by Stripe. Takes 2 minutes.</div>'
   )+'</div>':'')+
-'<div class="card mb-4"><h2 class="t-h2 mb-3">Skills</h2><div class="skill-tags">'+(u.skills||[]).map(s=>'<span class="skill-tag primary">'+escHtml(s)+'</span>').join('')+'</div>'+(isMe?'<input class="form-control mt-3" id="profile-skills" placeholder="Skills comma-separated" value="'+escHtml((u.skills||[]).join(', '))+'" style="margin-top:.75rem"><button class="btn btn-outline btn-sm mt-2" onclick="saveSkills()">Update Skills</button>':'')+
-  '</div><div class="card"><h2 class="t-h2 mb-3">Recent Deals</h2>'+(myDeals.slice(0,3).length?myDeals.slice(0,3).map(d=>{const other=store.getUser(d.buyerId===u.id?d.sellerId:d.buyerId);return '<div class="flex justify-between items-center mb-3">'+avatarHtml(other,'sm')+'<div class="flex-1" style="margin-left:.5rem"><div class="t-small" style="font-weight:600">'+escHtml(d.title)+'</div><div class="t-micro c-text4">'+timeAgo(d.createdAt)+'</div></div>'+dealStatusBadge(d.status)+'</div>';}).join(''):'<div class="t-body c-text3">No deals yet</div>')+
+'<div class="card mb-4"><h2 class="t-h2 mb-3">Skills</h2><div class="skill-tags">'+(u.skills||[]).map(s=>'<span class="skill-tag primary">'+escHtml(s)+'</span>').join('')+'</div>'+(isMe?'<input class="form-control mt-3" id="profile-skills" placeholder="Skills comma-separated" value="'+escHtml((u.skills||[]).join(', '))+'" style="margin-top:.75rem"><button class="btn btn-outline btn-sm mt-2" onclick="saveSkills()">Update Skills</button>':'')+'</div>'+
+  (myServices.length || isMe ? '<div class="card mb-4"><div class="flex justify-between items-center mb-3"><h2 class="t-h2" style="margin:0">Services</h2>'+(isMe?'<button class="btn btn-outline btn-xs" onclick="openModal(\'modal-create-service\')">+ Add</button>':'')+'</div>'+(myServices.length?myServices.map(s=>'<div class="card card-sm mb-2" style="background:var(--surface)"><div class="flex justify-between items-start"><div class="flex-1"><div class="t-h3 mb-1">'+escHtml(s.title)+'</div><div class="t-small c-text3 mb-1">'+escHtml(s.description)+'</div><div class="skill-tags mt-1">'+(s.skills||[]).map(sk=>'<span class="skill-tag">'+escHtml(sk)+'</span>').join('')+'</div></div><div style="text-align:right;flex-shrink:0;margin-left:.75rem"><div style="font-weight:800;color:var(--navy)">'+(s.price_cents?fmtMoney(s.price_cents/100)+(s.price_type==='hourly'?'/hr':''):'Rate on request')+'</div>'+(isMe?'<button class="btn btn-ghost btn-xs mt-1" style="color:var(--red)" onclick="deleteServiceAction(\''+s.id+'\',\''+escHtml(s.title).replace(/'/g,"\\\\'")+'\')">Delete</button>':'<button class="btn btn-teal btn-xs mt-1" onclick="openDM(\''+s.creator_id+'\')">Message</button>')+'</div></div></div>').join(''):'<div class="t-body c-text3">No services listed yet</div>')+'</div>':'')+
+  '<div class="card"><h2 class="t-h2 mb-3">Recent Deals</h2>'+(myDeals.slice(0,3).length?myDeals.slice(0,3).map(d=>{const other=store.getUser(d.buyerId===u.id?d.sellerId:d.buyerId);return '<div class="flex justify-between items-center mb-3">'+avatarHtml(other,'sm')+'<div class="flex-1" style="margin-left:.5rem"><div class="t-small" style="font-weight:600">'+escHtml(d.title)+'</div><div class="t-micro c-text4">'+timeAgo(d.createdAt)+'</div></div>'+dealStatusBadge(d.status)+'</div>';}).join(''):'<div class="t-body c-text3">No deals yet</div>')+
   '</div></div></div>';
 }
 
@@ -1953,6 +2016,7 @@ function buildModals(){
   return (
   '<div class="modal-overlay" id="modal-create-wheel"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Create a Wheel</span><button class="modal-close">x</button></div><div class="modal-body"><p class="t-small c-text3 mb-3">All Wheels on Fairriss are open and free to join.</p><div class="form-group mb-3"><label class="form-label">Start from a template:</label><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.5rem" id="wheel-templates">'+templateGrid+'</div></div><div class="divider"></div><div class="form-stack"><div class="form-group"><label class="form-label">Wheel Name *</label><input class="form-control" id="cw-name" placeholder="The Founders Circle"></div><div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="cw-desc" rows="3" placeholder="What is this Wheel about?"></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Category</label><select class="form-control" id="cw-cat"><option>Startup</option><option>Design</option><option>Marketing</option><option>Technology</option><option>Finance</option><option>Business</option><option>Events</option><option>Community</option><option>Talent</option><option>Other</option></select></div><div class="form-group"><label class="form-label">Accent Color</label><input class="form-control" id="cw-color" type="color" value="#00C9A7" style="height:40px;cursor:pointer"></div></div><label style="display:flex;align-items:center;gap:.625rem;cursor:pointer"><input type="checkbox" id="cw-is-event" style="width:18px;height:18px;accent-color:var(--teal)"><span class="t-body">This is an Event Wheel (enables ticket selling)</span></label></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-wheel-btn">Create Wheel</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-opp"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Post an Opportunity</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Type *</label><select class="form-control" id="co-type" onchange="document.getElementById(\'co-resume-row\').style.display=this.value===\'job\'?\'flex\':\'none\'"><option value="job">Job</option><option value="partnership">Partnership</option><option value="collaboration">Collaboration</option><option value="investment">Investment</option><option value="referral">Referral</option><option value="service">Service Request</option></select></div><div class="form-group"><label class="form-label">Title *</label><input class="form-control" id="co-title" placeholder="Head of Product at Acme Corp"></div><div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="co-desc" rows="4" placeholder="Tell members about this opportunity..."></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Location</label><input class="form-control" id="co-location" placeholder="Remote, New York..."></div><div class="form-group"><label class="form-label">Skills Required</label><input class="form-control" id="co-skills" placeholder="React, Design, Growth..."></div></div><div class="form-group"><label class="form-label">Compensation</label><input class="form-control" id="co-comp" placeholder="$120k - $150k or $500 bonus..."></div><label id="co-resume-row" style="display:flex;align-items:center;gap:.625rem;cursor:pointer;padding:.75rem;background:var(--surface);border-radius:8px"><input type="checkbox" id="co-require-resume" checked style="width:18px;height:18px;accent-color:var(--teal)"><span class="t-body">Require applicants to submit a resume</span></label></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-opp-btn">Post Opportunity</button></div></div></div>'+
+  '<div class="modal-overlay" id="modal-create-service"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Post a Service</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Title *</label><input class="form-control" id="sv-title" placeholder="Brand identity design for startups"></div><div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="sv-desc" rows="4" placeholder="What do you offer? What\'s included?"></textarea></div><div class="form-group"><label class="form-label">Skills</label><input class="form-control" id="sv-skills" placeholder="Branding, Figma, Illustration..."></div><div class="form-row"><div class="form-group"><label class="form-label">Pricing Type</label><select class="form-control" id="sv-price-type"><option value="fixed">Flat rate</option><option value="hourly">Hourly</option></select></div><div class="form-group"><label class="form-label">Price ($) <span>(optional)</span></label><input class="form-control" id="sv-price" type="number" min="0" placeholder="1500"></div></div><div class="form-group"><label class="form-label">Typical Delivery Time <span>(optional, in days)</span></label><input class="form-control" id="sv-delivery" type="number" min="1" placeholder="14"></div><div class="form-group"><label class="form-label">Portfolio Link <span>(optional)</span></label><input class="form-control" id="sv-portfolio" placeholder="https://..."></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-service-btn">Post Service</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-deal"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Create a Deal</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Deal Title *</label><input class="form-control" id="cd-title" placeholder="Website Redesign Project"></div><div class="form-group"><label class="form-label">Counterparty (Seller) *</label><select class="form-control" id="cd-seller"><option value="">Select member...</option></select></div><div class="form-group"><label class="form-label">Scope *</label><textarea class="form-control" id="cd-scope" rows="3" placeholder="Describe what you are buying..."></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Price ($) *</label><input class="form-control" id="cd-price" type="number" min="1" placeholder="5000"></div><div class="form-group"><label class="form-label">Payment Type</label><select class="form-control" id="cd-payment-type"><option value="lump_sum">Full Amount</option><option value="milestones">Milestones</option></select></div></div><div class="form-row"><div class="form-group"><label class="form-label">Start Date</label><input class="form-control" id="cd-start" type="date"></div><div class="form-group"><label class="form-label">End Date</label><input class="form-control" id="cd-end" type="date"></div></div><div class="form-group"><label class="form-label">Deliverables <span>one per line</span></label><textarea class="form-control" id="cd-deliverables" rows="3" placeholder="Discovery and wireframes&#10;High-fidelity mockups&#10;Developer handoff"></textarea></div><div class="form-group"><label class="form-label">Wheel</label><select class="form-control" id="cd-wheel"><option value="">None (direct deal)</option></select></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-deal-btn">Propose Deal</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-post"><div class="modal"><div class="modal-header"><span class="modal-title">New Post</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Type</label><select class="form-control" id="cp-type"><option value="post">Post</option><option value="announcement">Announcement</option><option value="referral">Referral</option></select></div><div class="form-group"><label class="form-label">Message</label><textarea class="form-control" id="cp-body" rows="3" placeholder="Share something with your Wheel... Use @name to mention someone"></textarea></div><div class="form-group"><label class="form-label">Link <span>(optional)</span></label><input class="form-control" id="cp-link" placeholder="https://..."></div><div class="form-group"><label class="form-label">Photo <span>(optional)</span></label><input type="file" id="cp-photo" accept="image/*" class="form-control" style="padding:.375rem" onchange="previewPostPhoto(event)"><div id="cp-photo-preview" style="margin-top:.5rem"></div></div><div class="form-group"><label class="form-label">Video <span>(optional)</span></label><input type="file" id="cp-video" accept="video/*" class="form-control" style="padding:.375rem" onchange="previewPostVideo(event)"><div id="cp-video-preview" style="margin-top:.5rem"></div></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-post-btn">Publish</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-event"><div class="modal"><div class="modal-header"><span class="modal-title">Create Event</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Event Title *</label><input class="form-control" id="ev-title" placeholder="Founders Dinner - Toronto"></div><div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="ev-desc" rows="3" placeholder="What is this event about?"></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Date *</label><input class="form-control" id="ev-date" type="date"></div><div class="form-group"><label class="form-label">Time</label><input class="form-control" id="ev-time" type="time"></div></div><div class="form-group"><label class="form-label">Location *</label><input class="form-control" id="ev-location" placeholder="Toronto, ON or Virtual"></div><div class="form-group"><label class="form-label">Capacity <span>(optional \u2014 defaults to 50 if left blank)</span></label><input class="form-control" id="ev-count" type="number" min="1" placeholder="50"></div><div class="form-group"><label class="form-label">Photo <span>(optional)</span></label><input type="file" id="ev-photo" accept="image/*" class="form-control" style="padding:.375rem" onchange="previewEventPhoto(event)"><div id="ev-photo-preview" style="margin-top:.5rem"></div></div><div class="form-group"><label class="form-label">Links <span>(optional, up to 3)</span></label><div style="display:flex;flex-direction:column;gap:.5rem"><input class="form-control" id="ev-link1" placeholder="https://..."><input class="form-control" id="ev-link2" placeholder="https://..."><input class="form-control" id="ev-link3" placeholder="https://..."></div></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-event-btn">Create Event</button></div></div></div>'+
@@ -1997,6 +2061,29 @@ function bindModalForms(){
       toast('Opportunity posted!','success');closeAllModals();navigate('opportunities');
     } catch(e){
       toast('Failed to post: '+e.message,'error'); btn.disabled=false; btn.textContent='Post Opportunity';
+    }
+  });
+  $('#create-service-btn')?.addEventListener('click', async ()=>{
+    const title=$('#sv-title').value.trim(),desc=$('#sv-desc').value.trim();
+    if(!title||!desc){toast('Title and description are required','error');return;}
+    const me=store.getMe();
+    const sb=getSb();
+    if(!sb){toast('Not connected. Please refresh and try again.','error');return;}
+    const btn=$('#create-service-btn'); btn.disabled=true; btn.textContent='Posting...';
+    try {
+      const priceVal=$('#sv-price').value.trim();
+      const { error } = await sb.from('services').insert({
+        creator_id: me.id, title, description: desc,
+        skills: $('#sv-skills').value.split(',').map(s=>s.trim()).filter(Boolean),
+        price_type: $('#sv-price-type').value,
+        price_cents: priceVal ? parseInt(priceVal)*100 : null,
+        delivery_days: $('#sv-delivery').value ? parseInt($('#sv-delivery').value) : null,
+        portfolio_url: $('#sv-portfolio').value.trim() || null,
+      });
+      if(error) throw error;
+      toast('Service posted!','success');closeAllModals();navigate('opportunities',{view:'services'});
+    } catch(e){
+      toast('Failed to post: '+e.message,'error'); btn.disabled=false; btn.textContent='Post Service';
     }
   });
   $('#create-deal-btn')?.addEventListener('click',()=>{
