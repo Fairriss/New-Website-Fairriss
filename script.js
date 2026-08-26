@@ -269,7 +269,7 @@ function renderTerms(){
   '<h2 style="color:#0F1F3D;margin-top:2rem">1. Acceptance of Terms</h2>'+
   '<p>By accessing or using Fairriss ("the Platform"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Platform.</p>'+
   '<h2 style="color:#0F1F3D;margin-top:2rem">2. Description of Service</h2>'+
-  '<p>Fairriss is a network-commerce platform that enables professionals to create private communities called "Wheels," post opportunities, and transact with each other through our escrow-based deal system.</p>'+
+  '<p>Fairriss is a network-commerce platform that enables professionals to create communities called "Wheels," post opportunities, and transact with each other through our escrow-based deal system.</p>'+
   '<h2 style="color:#0F1F3D;margin-top:2rem">3. User Accounts</h2>'+
   '<p>You must provide accurate information when creating an account. You are responsible for maintaining the confidentiality of your account credentials and for all activity under your account.</p>'+
   '<h2 style="color:#0F1F3D;margin-top:2rem">4. Payments and Fees</h2>'+
@@ -399,6 +399,36 @@ async function renderPublicProfile(username){
   '</div></div>';
 }
 
+// ── Public Wheel preview (shareable, no login required) ───────────────────
+async function renderPublicWheel(slug){
+  document.body.innerHTML = '<div style="min-height:100vh;background:var(--surface);display:flex;align-items:center;justify-content:center;padding:1.5rem"><div style="text-align:center;color:var(--text-3)">Loading...</div></div>';
+  let w = null;
+  try {
+    const sb = getSb() || window._supabase;
+    if(sb){
+      const { data } = await sb.from('public_wheels').select('*').eq('slug', slug).single();
+      if(data) w = data;
+    }
+  } catch(e){ console.warn('Public wheel fetch failed:', e.message); }
+
+  if(!w){
+    document.body.innerHTML = '<div style="min-height:100vh;background:var(--surface);display:flex;align-items:center;justify-content:center;padding:1.5rem"><div style="text-align:center"><h2 style="color:var(--navy)">This Wheel is no longer available</h2><p class="t-body c-text3 mb-4">It may have been deleted, or the link is incorrect.</p><a href="'+window.location.pathname+'" class="btn btn-primary">Go to Fairriss</a></div></div>';
+    return;
+  }
+
+  document.body.innerHTML =
+  '<div style="min-height:100vh;background:var(--surface)">'+
+  '<div style="background:'+(w.cover_gradient||'var(--navy)')+';padding:3rem 1.5rem;text-align:center">'+
+  '<div style="width:76px;height:76px;border-radius:50%;background:'+(w.hex_color||'#0F1F3D')+';display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1.75rem;margin:0 auto 1rem;box-shadow:0 6px 24px rgba(0,0,0,.3)">'+escHtml(w.name[0])+'</div>'+
+  '<h1 style="color:#fff;font-size:1.75rem;margin-bottom:.375rem">'+escHtml(w.name)+'</h1>'+
+  '<div style="color:rgba(255,255,255,.6);font-size:.875rem">'+fmt(w.member_count||0)+' members &middot; '+escHtml(w.category||'Community')+'</div>'+
+  '</div>'+
+  '<div style="max-width:560px;margin:0 auto;padding:2rem 1.5rem">'+
+  '<div class="card mb-4"><p class="t-body" style="color:var(--text-2);line-height:1.7">'+escHtml(w.description)+'</p></div>'+
+  '<div class="card" style="text-align:center;background:var(--navy)"><h2 style="color:var(--teal);margin-bottom:.5rem">Join Fairriss to see what\'s happening in '+escHtml(w.name)+'</h2><p style="color:rgba(255,255,255,.7);margin-bottom:1.25rem">Members, posts, opportunities, and deals are only visible once you join.</p><button class="btn btn-teal" style="justify-content:center;width:100%" onclick="window.location.href=window.location.pathname">Join Fairriss</button></div>'+
+  '</div></div>';
+}
+
 function renderAuth(){
   document.body.innerHTML = `
     <style>
@@ -452,7 +482,7 @@ function renderAuth(){
             <span style="color:#00C9A7;font-size:.8125rem;font-weight:600">The Network-Commerce Platform</span>
           </div>
           <h1>Your Network.<br>Your Community.<br><span style="color:#00C9A7">Your Income.</span></h1>
-          <p style="color:rgba(255,255,255,.8);font-size:1.1875rem;line-height:1.65;margin:0 0 2.5rem;max-width:520px">Build private Wheels where your network becomes your net worth. Post opportunities, close deals, and get paid all in one place.</p>
+          <p style="color:rgba(255,255,255,.8);font-size:1.1875rem;line-height:1.65;margin:0 0 2.5rem;max-width:520px">Build Wheels where your network becomes your net worth. Post opportunities, close deals, and get paid all in one place.</p>
           <div class="lp-btns">
             <button onclick="showAuthModal('signup')" style="background:#00C9A7;color:#0F1F3D;border:none;border-radius:10px;padding:1rem 2rem;font-size:1.0625rem;font-weight:800;cursor:pointer">Get Started Free</button>
             <button onclick="showAuthModal('login')" style="background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:10px;padding:1rem 2rem;font-size:1.0625rem;font-weight:700;cursor:pointer">Sign In</button>
@@ -475,7 +505,7 @@ function renderAuth(){
             <div style="padding:1.75rem 2rem;position:relative">
               <div style="position:absolute;top:1rem;right:1.5rem;font-size:3rem;font-weight:900;color:rgba(15,31,61,.06);line-height:1">1</div>
               <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Create or Join a Wheel</h3>
-              <p style="color:#64748B;line-height:1.6;margin:0;font-size:.9375rem">Build your private community or join an existing one. Wheels are spaces where real deals happen.</p>
+              <p style="color:#64748B;line-height:1.6;margin:0;font-size:.9375rem">Build your own community or join an existing one. Wheels are spaces where real deals happen.</p>
             </div>
           </div>
           <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(15,31,61,.06);text-align:left;position:relative">
@@ -528,7 +558,7 @@ function renderAuth(){
           <div>
             <p style="color:#00C9A7;font-weight:700;font-size:.875rem;letter-spacing:.08em;text-transform:uppercase;margin:0 0 .75rem">For Freelancers</p>
             <h2 style="color:#0F1F3D;font-size:2.25rem;font-weight:900;margin:0 0 1rem;letter-spacing:-.02em">Get hired. Get paid. Build your reputation.</h2>
-            <p style="color:#64748B;font-size:1rem;line-height:1.7;margin:0 0 1.5rem">Fairriss connects you directly with businesses and founders in private Wheels. No bidding wars. No race to the bottom. Just real opportunities from real people in your network.</p>
+            <p style="color:#64748B;font-size:1rem;line-height:1.7;margin:0 0 1.5rem">Fairriss connects you directly with businesses and founders in Wheels. No bidding wars. No race to the bottom. Just real opportunities from real people in your network.</p>
             <div style="display:flex;flex-direction:column;gap:.75rem;margin-bottom:2rem">
               <div style="display:flex;align-items:center;gap:.75rem"><span style="width:24px;height:24px;border-radius:50%;background:#00C9A7;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#0F1F3D;font-weight:900;font-size:.75rem">&#x2713;</span><span style="color:#374151;font-size:.9375rem">Secure payments held in escrow</span></div>
               <div style="display:flex;align-items:center;gap:.75rem"><span style="width:24px;height:24px;border-radius:50%;background:#00C9A7;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#0F1F3D;font-weight:900;font-size:.75rem">&#x2713;</span><span style="color:#374151;font-size:.9375rem">Build your Trust Score with every deal</span></div>
@@ -552,7 +582,7 @@ function renderAuth(){
           <div class="lp-grid-6">
             <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
               <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
-              <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Private Wheels</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Create invite-only communities for your network. Control who gets in.</p></div>
+              <div style="padding:1.5rem"><h3 style="color:#0F1F3D;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Wheels</h3><p style="color:#64748B;font-size:.9rem;line-height:1.6;margin:0">Create communities for your network. Anyone can join, or ask to be invited.</p></div>
             </div>
             <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(15,31,61,.08)">
               <img src="https://images.unsplash.com/photo-1573497620053-ea5300f94f21?w=600&q=80" style="width:100%;height:200px;object-fit:cover;display:block">
@@ -941,7 +971,7 @@ async function renderWheels(){
   const existingNames = (allWheels||[]).map(w=>w.name.toLowerCase());
   const popular=SUGGESTED_WHEELS.filter(s=>!existingNames.includes(s.name.toLowerCase())).slice(0,4);
   const el=document.getElementById('page-wheels');
-  let html='<div class="page-head"><div class="page-head-left"><h1 class="page-title">My Wheels</h1><p class="page-sub">Your private network communities</p></div><div class="page-actions"><button class="btn btn-primary" onclick="openModal(\'modal-create-wheel\')">'+icon('plus')+' Create Wheel</button></div></div>';
+  let html='<div class="page-head"><div class="page-head-left"><h1 class="page-title">My Wheels</h1><p class="page-sub">Your network communities</p></div><div class="page-actions"><button class="btn btn-primary" onclick="openModal(\'modal-create-wheel\')">'+icon('plus')+' Create Wheel</button></div></div>';
   if(myWheels.length)html+='<div class="wheel-grid">'+myWheels.map(w=>renderWheelCard(w)).join('')+'</div>';
 
   // Popular suggested wheels
@@ -994,7 +1024,7 @@ async function renderWheelDetail(){
   const isMember=store.isMember(wheel.id);
   const el=document.getElementById('page-wheel-detail');
   el.innerHTML=
-    '<div class="page-head"><div class="flex gap-3 items-center">'+hexBadge(wheel,44)+'<div><h1 class="page-title" style="margin-bottom:0">'+escHtml(wheel.name)+'</h1><p class="page-sub">'+escHtml(wheel.description)+'</p></div></div><div class="page-actions">'+(isCreator?'<button class="btn btn-outline btn-sm" onclick="openInviteModal(\''+wheel.id+'\')">'+icon('users')+' Invite</button><button class="btn btn-outline btn-sm" onclick="openModal(\'modal-create-event\')">+ Event</button><button class="btn btn-ghost btn-sm delete-wheel-btn" style="color:var(--red)" data-wheel-id="'+wheel.id+'" data-wheel-name="'+escHtml(wheel.name)+'">Delete Wheel</button>':(isMember?'<button class="btn btn-ghost btn-sm leave-wheel-btn" style="color:var(--red)" data-wheel-id="'+wheel.id+'" data-wheel-name="'+escHtml(wheel.name)+'">Leave Wheel</button>':''))+'<button class="btn btn-teal btn-sm" onclick="handlePostClick(\''+wheel.id+'\')">'+ icon('plus') +' Post</button></div></div>'+
+    '<div class="page-head"><div class="flex gap-3 items-center">'+hexBadge(wheel,44)+'<div><h1 class="page-title" style="margin-bottom:0">'+escHtml(wheel.name)+'</h1><p class="page-sub">'+escHtml(wheel.description)+'</p></div></div><div class="page-actions">'+(isCreator?'<button class="btn btn-outline btn-sm" onclick="openInviteModal(\''+wheel.id+'\')">'+icon('users')+' Invite</button><button class="btn btn-outline btn-sm" onclick="openModal(\'modal-create-event\')">+ Event</button>':'')+(isCreator||isMember?'<button class="btn btn-outline btn-sm" onclick="shareWheel(\''+escHtml(wheel.slug||'')+'\',\''+escHtml(wheel.name).replace(/'/g,"\\\\'")+'\')">'+icon('link')+' Share Wheel</button>':'')+(isCreator?'<button class="btn btn-ghost btn-sm delete-wheel-btn" style="color:var(--red)" data-wheel-id="'+wheel.id+'" data-wheel-name="'+escHtml(wheel.name)+'">Delete Wheel</button>':(isMember?'<button class="btn btn-ghost btn-sm leave-wheel-btn" style="color:var(--red)" data-wheel-id="'+wheel.id+'" data-wheel-name="'+escHtml(wheel.name)+'">Leave Wheel</button>':''))+'<button class="btn btn-teal btn-sm" onclick="handlePostClick(\''+wheel.id+'\')">'+ icon('plus') +' Post</button></div></div>'+
     '<div class="stats-grid" style="grid-template-columns:repeat(3,1fr)"><div class="stat-card"><span class="stat-label">Members</span><span class="stat-value">'+fmt(wheel.memberCount)+'</span></div><div class="stat-card"><span class="stat-label">Opportunities</span><span class="stat-value">'+opps.length+'</span></div><div class="stat-card"><span class="stat-label">Events</span><span class="stat-value">'+events.length+'</span></div></div>'+
     '<div class="tabs"><div class="tab-item active" data-tab="feed">Feed</div><div class="tab-item" data-tab="members">Members ('+members.length+')</div><div class="tab-item" data-tab="opportunities">Opportunities ('+opps.length+')</div><div class="tab-item" data-tab="events">Events ('+events.length+')</div></div>'+
     '<div class="tab-panel active" id="tab-feed">'+(posts.length?posts.map(renderFeedPost).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F4DD;</div><div class="empty-title">No posts yet</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-post\')">Post Something</button></div>')+'</div>'+
@@ -1568,6 +1598,17 @@ window.shareMyProfile = async (username) => {
     toast('Profile link copied!', 'success');
   } catch(e){
     prompt('Copy your profile link:', url);
+  }
+};
+
+window.shareWheel = async (slug, name) => {
+  if(!slug){ toast('This Wheel has no shareable link yet', 'error'); return; }
+  const url = window.location.origin + window.location.pathname + '?wheel=' + encodeURIComponent(slug);
+  try {
+    await navigator.clipboard.writeText(url);
+    toast((name||'Wheel')+' link copied!', 'success');
+  } catch(e){
+    prompt('Copy the Wheel link:', url);
   }
 };
 
@@ -2186,6 +2227,13 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   const publicUsername = new URLSearchParams(window.location.search).get('u');
   if(publicUsername){
     await renderPublicProfile(publicUsername);
+    return;
+  }
+
+  // Public shareable wheel link (?wheel=slug) — works without logging in
+  const publicWheelSlug = new URLSearchParams(window.location.search).get('wheel');
+  if(publicWheelSlug){
+    await renderPublicWheel(publicWheelSlug);
     return;
   }
 
