@@ -928,31 +928,88 @@ async function renderHome(){
   const activeDeals=(myDeals||[]).filter(d=>['in_progress','accepted'].includes(d.status));
   const postArrays = await Promise.all((wheels||[]).map(w=>store.getPosts(w.id)));
   const allPosts = postArrays.flat().sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,6);
+  const likedIds = await fetchMyLikedPostIds(allPosts.map(p=>p.id));
   const topOpps=(opps||[]).slice(0,3);
   const el=document.getElementById('page-home');
   el.innerHTML=
     '<div class="page-head"><div class="page-head-left"><h1 class="page-title">Good to see you, '+escHtml(me.name.split(' ')[0])+' &#x1F44B;</h1><p class="page-sub">Here is what is happening in your network.</p></div><div class="page-actions"><button class="btn btn-outline btn-sm" onclick="openModal(\'modal-create-wheel\')">'+icon('plus')+' New Wheel</button><button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-opp\')">'+icon('plus')+' Post Opportunity</button></div></div>'+
     '<div class="stats-grid"><div class="stat-card"><span class="stat-label">Wheels</span><span class="stat-value">'+wheels.length+'</span><span class="stat-change">Active communities</span></div><div class="stat-card"><span class="stat-label">Active Deals</span><span class="stat-value">'+activeDeals.length+'</span></div><div class="stat-card"><span class="stat-label">Trust Score</span><span class="stat-value">'+me.trustScore+'</span><span class="stat-change">/ 100</span></div><div class="stat-card"><span class="stat-label">Revenue</span><span class="stat-value">'+fmtMoney(me.revenue||0)+'</span></div></div>'+
     '<div class="two-col"><div><div class="flex justify-between items-center mb-3"><h2 class="t-h2">Network Feed</h2><button class="btn btn-ghost btn-sm" onclick="navigate(\'wheels\')">All Wheels</button></div>'+
-    (allPosts.length?allPosts.map(renderFeedPost).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F4EB;</div><div class="empty-title">Feed is quiet</div><div class="empty-desc">Join Wheels to see posts from your network</div></div>')+
+    (allPosts.length?allPosts.map(p=>renderFeedPost(p, likedIds.has(p.id))).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F4EB;</div><div class="empty-title">Feed is quiet</div><div class="empty-desc">Join Wheels to see posts from your network</div></div>')+
     '</div><div><div class="flex justify-between items-center mb-3"><h2 class="t-h2">Active Deals</h2><button class="btn btn-ghost btn-sm" onclick="navigate(\'deals\')">All</button></div>'+
     (activeDeals.length?activeDeals.map(renderDealCardCompact).join(''):'<div class="card"><div class="empty-state" style="padding:1.5rem"><div class="empty-icon">&#x1F91D;</div><div class="empty-title">No active deals</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-deal\')">Create Deal</button></div></div>')+
     '<div class="flex justify-between items-center mt-4 mb-3"><h2 class="t-h2">Fresh Opportunities</h2><button class="btn btn-ghost btn-sm" onclick="navigate(\'opportunities\')">All</button></div>'+
     topOpps.map(o=>'<div class="card card-sm mb-2" style="cursor:pointer" onclick="openModal(\'modal-opp-detail\');renderOppDetail(\''+o.id+'\')"><div class="flex gap-3 items-start"><div class="flex-1"><div class="t-h3 mb-1">'+escHtml(o.title)+'</div><div class="flex gap-2 items-center"><span class="type-badge type-'+o.type+'">'+o.type.replace('_',' ')+'</span><span class="t-micro c-text4">'+timeAgo(o.createdAt)+'</span></div></div><button class="btn btn-teal btn-xs" onclick="event.stopPropagation();applyToOpportunity(\''+o.id+'\',this)">Apply</button></div></div>').join('')+
     '</div></div>';
-  $$('.post-like-btn',el).forEach(btn=>btn.onclick=()=>{store.likePost(btn.dataset.postId);renderHome();});
+  $$('.post-like-btn',el).forEach(btn=>btn.onclick=()=>togglePostLike(btn.dataset.postId, btn));
 }
 
-function renderFeedPost(post){
+function renderFeedPost(post, iLiked){
   const author=store.getUser(post.authorId),wheel=store.get('wheels').find(w=>w.id===post.wheelId);
-  let h='<div class="feed-post"><div class="post-header">'+avatarHtml(author,'md')+'<div class="post-author-info"><div class="post-author-name">'+escHtml(author?.name||'')+'</div><div class="post-meta"><span>'+timeAgo(post.createdAt)+'</span>'+(wheel?'<span> - </span><span style="color:var(--teal-dim)">'+escHtml(wheel.name)+'</span>':'')+'</div></div><span class="type-badge '+(post.type==='announcement'?'type-job':post.type==='referral'?'type-partnership':'type-service')+'" style="margin-left:auto">'+post.type+'</span></div>';
+  let h='<div class="feed-post" data-post-wheel-id="'+(post.wheelId||'')+'"><div class="post-header">'+avatarHtml(author,'md')+'<div class="post-author-info"><div class="post-author-name">'+escHtml(author?.name||'')+'</div><div class="post-meta"><span>'+timeAgo(post.createdAt)+'</span>'+(wheel?'<span> - </span><span style="color:var(--teal-dim)">'+escHtml(wheel.name)+'</span>':'')+'</div></div><span class="type-badge '+(post.type==='announcement'?'type-job':post.type==='referral'?'type-partnership':'type-service')+'" style="margin-left:auto">'+post.type+'</span></div>';
   if(post.body)h+='<div class="post-body">'+renderPostBody(post.body)+'</div>';
   if(post.photo)h+='<div style="margin:.75rem 0"><img src="'+post.photo+'" style="width:100%;max-height:360px;object-fit:cover;border-radius:var(--radius-sm);display:block"></div>';
   if(post.video)h+='<div style="margin:.75rem 0"><video src="'+post.video+'" controls style="width:100%;max-height:320px;border-radius:var(--radius-sm);background:#000;display:block"></video></div>';
   if(post.link){const href=post.link.startsWith('http')?post.link:'https://'+post.link;const label=post.link.replace(/^https?:\/\//,'').replace(/\/$/,'');h+='<a href="'+escHtml(href)+'" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:.5rem;padding:.625rem .875rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--teal);font-size:.875rem;font-weight:500;text-decoration:none;margin:.75rem 0">'+icon('link')+escHtml(label)+'</a>';}
-  h+='<div class="post-actions"><button class="post-action-btn post-like-btn" data-post-id="'+post.id+'"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> '+post.likes+'</button></div></div>';
+  h+='<div class="post-actions"><button class="post-action-btn post-like-btn" data-post-id="'+post.id+'" data-liked="'+(iLiked?'1':'0')+'" style="'+(iLiked?'color:var(--red)':'')+'"><svg width="14" height="14" fill="'+(iLiked?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>'+(post.likes>0?'<span class="post-action-btn" style="cursor:pointer" onclick="showPostLikers(\''+post.id+'\')">'+post.likes+' like'+(post.likes===1?'':'s')+'</span>':'<span class="post-action-btn" style="opacity:.5">0 likes</span>')+'<button class="post-action-btn reply-toggle-btn" data-post-id="'+post.id+'" onclick="togglePostReplies(\''+post.id+'\')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Reply</button></div>'+
+  '<div class="post-replies" id="post-replies-'+post.id+'" style="display:none"></div>'+
+  '</div>';
   return h;
 }
+
+async function togglePostReplies(postId){
+  const container = document.getElementById('post-replies-'+postId);
+  if(!container) return;
+  const isOpen = container.style.display !== 'none';
+  if(isOpen){ container.style.display='none'; return; }
+  container.style.display='block';
+  if(container.dataset.loaded === '1') return; // already loaded once, just re-showing
+  container.dataset.loaded = '1';
+  const postEl = container.closest('.feed-post');
+  const wheelId = postEl?.dataset.postWheelId || '';
+  container.innerHTML = '<div class="t-small c-text3" style="padding:.75rem">Loading replies...</div>';
+  const sb = getSb();
+  let replies = [];
+  try {
+    const { data, error } = await sb.from('post_replies').select('*').eq('post_id', postId).order('created_at', { ascending: true });
+    if(error) throw error;
+    replies = data || [];
+  } catch(e){ console.warn('Replies fetch failed:', e.message); }
+  const authors = await Promise.all(replies.map(r=>dmGetUser(r.author_id)));
+  const replyInputId = 'reply-input-'+postId;
+  container.innerHTML =
+    '<div style="border-top:1px solid var(--border);margin-top:.75rem;padding-top:.75rem">'+
+    (replies.length ? replies.map((r,i)=>'<div class="flex gap-2 items-start mb-2">'+avatarHtml(authors[i],'sm')+'<div class="flex-1" style="background:var(--surface);border-radius:8px;padding:.5rem .75rem"><div class="t-small" style="font-weight:600">'+escHtml(authors[i]?.name||'Unknown')+'</div><div class="t-small" style="color:var(--text-2)">'+renderPostBody(r.body)+'</div><div class="t-micro c-text4 mt-1">'+timeAgo(r.created_at)+'</div></div></div>').join('') : '<div class="t-small c-text4 mb-2">No replies yet</div>')+
+    '<div style="display:flex;gap:.5rem;align-items:flex-end;margin-top:.5rem"><input class="form-control" id="'+replyInputId+'" placeholder="Write a reply... use @name to mention someone" style="flex:1"><button class="btn btn-teal btn-sm" onclick="submitPostReply(\''+postId+'\',\''+wheelId+'\')">Send</button></div>'+
+    '</div>';
+  initMentionAutocomplete(replyInputId, wheelId || null);
+  document.getElementById(replyInputId)?.addEventListener('keydown', e => { if(e.key==='Enter') submitPostReply(postId, wheelId); });
+}
+
+window.submitPostReply = async (postId, wheelId) => {
+  const me = store.getMe();
+  const sb = getSb();
+  const input = document.getElementById('reply-input-'+postId);
+  const body = input?.value.trim();
+  if(!body || !me || !sb) return;
+  input.disabled = true;
+  try {
+    const { error } = await sb.from('post_replies').insert({ post_id: postId, author_id: me.id, body });
+    if(error) throw error;
+    // Notify any @mentioned wheel members, same pattern used for post creation
+    const mentions = [...body.matchAll(/@(\w+)/g)].map(m=>m[1].toLowerCase());
+    if(mentions.length && wheelId){
+      const members = store.getWheelMembers ? await store.getWheelMembers(wheelId) : [];
+      (members||[]).forEach(m=>{
+        if(mentions.includes((m.username||m.name.split(' ')[0]).toLowerCase()) && m.id!==me.id){
+          store.addNotif(m.id, 'mention', '<strong>'+escHtml(me.name)+'</strong> mentioned you in a reply');
+        }
+      });
+    }
+    const container = document.getElementById('post-replies-'+postId);
+    if(container){ container.dataset.loaded='0'; container.style.display='none'; togglePostReplies(postId); }
+  } catch(e){ toast('Failed to reply: '+e.message, 'error'); input.disabled=false; }
+};
 
 function renderDealCardCompact(d){
   const STAGES=['proposed','negotiating','accepted','in_progress','completed','paid'],si=STAGES.indexOf(d.status);
@@ -978,7 +1035,7 @@ async function renderWheels(){
   if(popular.length){
     html+='<h2 class="t-h2 mb-1 mt-4">Popular Wheels to Join</h2><p class="t-small c-text3 mb-3">Suggested communities based on what people are building</p><div class="wheel-grid">';
     popular.forEach((s,idx)=>{
-      html+='<div class="wheel-card popular-card" data-sidx="'+idx+'" style="cursor:pointer"><div class="wheel-card-cover" style="background:linear-gradient(135deg,'+s.hex+'cc,'+s.hex+')"></div><div class="wheel-card-body"><div style="width:48px;height:48px;border-radius:50%;background:'+s.hex+';display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1.25rem;margin-top:-1.5rem;margin-bottom:.75rem;box-shadow:0 4px 12px rgba(0,0,0,.25)">'+s.emoji+'</div><div class="wheel-card-name">'+escHtml(s.name)+'</div><div class="wheel-card-desc">'+escHtml(s.desc)+'</div><div class="wheel-card-meta"><span class="wheel-meta-item">'+s.category+'</span></div></div><div class="wheel-card-footer"><span class="tier-badge tier-free">Open - Free</span><button class="btn btn-teal btn-sm pop-create-btn" data-sidx="'+idx+'">Create</button></div></div>';
+      html+='<div class="wheel-card popular-card" data-sidx="'+idx+'" style="cursor:pointer"><div class="wheel-card-cover" style="background:linear-gradient(135deg,'+s.hex+'cc,'+s.hex+')"></div><div class="wheel-card-body"><div style="width:48px;height:48px;border-radius:50%;background:'+s.hex+';display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1.25rem;margin-top:-1.5rem;margin-bottom:.75rem;box-shadow:0 4px 12px rgba(0,0,0,.25)">'+s.emoji+'</div><div class="wheel-card-name">'+escHtml(s.name)+'</div><div class="wheel-card-desc">'+escHtml(s.desc)+'</div><div class="wheel-card-meta"><span class="wheel-meta-item">'+s.category+'</span></div></div><div class="wheel-card-footer"><span class="tier-badge tier-free">Open</span><button class="btn btn-teal btn-sm pop-create-btn" data-sidx="'+idx+'">Create</button></div></div>';
     });
     html+='</div>';
   }
@@ -1005,7 +1062,7 @@ function createFromTemplate(s){
 }
 
 function renderWheelCard(w,discover=false){
-  return '<div class="wheel-card" data-wheel-id="'+w.id+'"><div class="wheel-card-cover" style="background:'+(w.coverGradient||'var(--navy)')+'"></div><div class="wheel-card-body">'+hexBadge(w,48)+'<div class="wheel-card-name">'+escHtml(w.name)+'</div><div class="wheel-card-desc">'+escHtml(w.description)+'</div><div class="wheel-card-meta"><span class="wheel-meta-item">'+icon('users')+' '+fmt(w.memberCount)+'</span><span class="wheel-meta-item">'+escHtml(w.category)+'</span>'+(w.isEventWheel?'<span class="type-badge type-partnership" style="font-size:.6rem">Events</span>':'')+'</div></div><div class="wheel-card-footer"><span class="tier-badge tier-free">Open - Free</span>'+(discover?'<button class="btn btn-teal btn-sm join-wheel-btn" data-wheel-id="'+w.id+'">Join</button>':'')+'</div></div>';
+  return '<div class="wheel-card" data-wheel-id="'+w.id+'"><div class="wheel-card-cover" style="background:'+(w.coverGradient||'var(--navy)')+'"></div><div class="wheel-card-body">'+hexBadge(w,48)+'<div class="wheel-card-name">'+escHtml(w.name)+'</div><div class="wheel-card-desc">'+escHtml(w.description)+'</div><div class="wheel-card-meta"><span class="wheel-meta-item">'+icon('users')+' '+fmt(w.memberCount)+'</span><span class="wheel-meta-item">'+escHtml(w.category)+'</span>'+(w.isEventWheel?'<span class="type-badge type-partnership" style="font-size:.6rem">Events</span>':'')+'</div></div><div class="wheel-card-footer"><span class="tier-badge tier-free">Open</span>'+(discover?'<button class="btn btn-teal btn-sm join-wheel-btn" data-wheel-id="'+w.id+'">Join</button>':'')+'</div></div>';
 }
 
 // ── Wheel Detail ───────────────────────────────────────────────────────────
@@ -1020,6 +1077,7 @@ async function renderWheelDetail(){
     store.getEvents ? store.getEvents(wheel.id) : Promise.resolve([]),
   ]);
   const attendeesByEvent = await fetchAttendeesForEvents(events.map(e=>e.id));
+  const likedIds = await fetchMyLikedPostIds(posts.map(p=>p.id));
   const isCreator=wheel.creatorId===store.getMe()?.id;
   const isMember=store.isMember(wheel.id);
   const el=document.getElementById('page-wheel-detail');
@@ -1027,12 +1085,12 @@ async function renderWheelDetail(){
     '<div class="page-head"><div class="flex gap-3 items-center">'+hexBadge(wheel,44)+'<div><h1 class="page-title" style="margin-bottom:0">'+escHtml(wheel.name)+'</h1><p class="page-sub">'+escHtml(wheel.description)+'</p></div></div><div class="page-actions">'+(isCreator?'<button class="btn btn-outline btn-sm" onclick="openInviteModal(\''+wheel.id+'\')">'+icon('users')+' Invite</button><button class="btn btn-outline btn-sm" onclick="openModal(\'modal-create-event\')">+ Event</button>':'')+(isCreator||isMember?'<button class="btn btn-outline btn-sm" onclick="shareWheel(\''+escHtml(wheel.slug||'')+'\',\''+escHtml(wheel.name).replace(/'/g,"\\\\'")+'\')">'+icon('link')+' Share Wheel</button>':'')+(isCreator?'<button class="btn btn-ghost btn-sm delete-wheel-btn" style="color:var(--red)" data-wheel-id="'+wheel.id+'" data-wheel-name="'+escHtml(wheel.name)+'">Delete Wheel</button>':(isMember?'<button class="btn btn-ghost btn-sm leave-wheel-btn" style="color:var(--red)" data-wheel-id="'+wheel.id+'" data-wheel-name="'+escHtml(wheel.name)+'">Leave Wheel</button>':''))+'<button class="btn btn-teal btn-sm" onclick="handlePostClick(\''+wheel.id+'\')">'+ icon('plus') +' Post</button></div></div>'+
     '<div class="stats-grid" style="grid-template-columns:repeat(3,1fr)"><div class="stat-card"><span class="stat-label">Members</span><span class="stat-value">'+fmt(wheel.memberCount)+'</span></div><div class="stat-card"><span class="stat-label">Opportunities</span><span class="stat-value">'+opps.length+'</span></div><div class="stat-card"><span class="stat-label">Events</span><span class="stat-value">'+events.length+'</span></div></div>'+
     '<div class="tabs"><div class="tab-item active" data-tab="feed">Feed</div><div class="tab-item" data-tab="members">Members ('+members.length+')</div><div class="tab-item" data-tab="opportunities">Opportunities ('+opps.length+')</div><div class="tab-item" data-tab="events">Events ('+events.length+')</div></div>'+
-    '<div class="tab-panel active" id="tab-feed">'+(posts.length?posts.map(renderFeedPost).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F4DD;</div><div class="empty-title">No posts yet</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-post\')">Post Something</button></div>')+'</div>'+
+    '<div class="tab-panel active" id="tab-feed">'+(posts.length?posts.map(p=>renderFeedPost(p, likedIds.has(p.id))).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F4DD;</div><div class="empty-title">No posts yet</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-post\')">Post Something</button></div>')+'</div>'+
     '<div class="tab-panel" id="tab-members"><div class="member-grid">'+members.map(u=>renderMemberCard(u)).join('')+'</div></div>'+
     '<div class="tab-panel" id="tab-opportunities"><div class="flex justify-between items-center mb-3"><span class="t-body c-text3">'+opps.length+' open</span><button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-opp\')">'+icon('plus')+' Post</button></div><div class="opp-list">'+(opps.length?opps.map(renderOppCard).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F3AF;</div><div class="empty-title">No opportunities yet</div></div>')+'</div></div>'+
     '<div class="tab-panel" id="tab-events"><div class="flex justify-between items-center mb-3"><span class="t-body c-text3">'+events.length+' events</span>'+(isCreator?'<button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-event\')">'+icon('plus')+' Create Event</button>':'')+'</div>'+(events.length?events.map(ev=>renderEventCard(ev, attendeesByEvent[ev.id]||[])).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F39F;</div><div class="empty-title">No events yet</div></div>')+'</div>';
   $$('.tab-item',el).forEach(tab=>tab.onclick=()=>{$$('.tab-item',el).forEach(t=>t.classList.remove('active'));$$('.tab-panel',el).forEach(p=>p.classList.remove('active'));tab.classList.add('active');document.getElementById('tab-'+tab.dataset.tab)?.classList.add('active');});
-  $$('.post-like-btn',el).forEach(btn=>btn.onclick=()=>{store.likePost(btn.dataset.postId);renderWheelDetail();});
+  $$('.post-like-btn',el).forEach(btn=>btn.onclick=()=>togglePostLike(btn.dataset.postId, btn));
   $$('.member-card',el).forEach(c=>c.onclick=()=>navigate('profile',{userId:c.dataset.userId}));
   $$('.opp-card',el).forEach(c=>c.onclick=()=>{openModal('modal-opp-detail');renderOppDetail(c.dataset.oppId);});
   $$('.delete-opp-btn',el).forEach(btn=>btn.onclick=()=>deleteOpportunityAction(btn.dataset.oppId, btn.dataset.oppTitle));
@@ -1089,6 +1147,66 @@ function renderEventCard(ev, attendeeIds){
   h+='</div>';
   return h;
 }
+
+async function fetchMyLikedPostIds(postIds){
+  const me = store.getMe();
+  const sb = getSb();
+  if(!me || !sb || !postIds.length) return new Set();
+  try {
+    const { data, error } = await sb.from('post_likes').select('post_id').eq('user_id', me.id).in('post_id', postIds);
+    if(error) throw error;
+    return new Set((data||[]).map(r=>r.post_id));
+  } catch(e){ console.warn('Liked-posts fetch failed:', e.message); return new Set(); }
+}
+
+window.togglePostLike = async (postId, btnEl) => {
+  const me = store.getMe();
+  const sb = getSb();
+  if(!me || !sb) return;
+  const wasLiked = btnEl.dataset.liked === '1';
+  const countEl = btnEl.nextElementSibling;
+  try {
+    if(wasLiked){
+      await sb.from('post_likes').delete().eq('post_id', postId).eq('user_id', me.id);
+      await sb.rpc('decrement_post_likes', { post_id_param: postId });
+    } else {
+      await sb.from('post_likes').upsert({ post_id: postId, user_id: me.id });
+      await sb.rpc('increment_post_likes', { post_id_param: postId });
+    }
+    // Reflect the change immediately without a full re-render
+    btnEl.dataset.liked = wasLiked ? '0' : '1';
+    btnEl.style.color = wasLiked ? '' : 'var(--red)';
+    const svg = btnEl.querySelector('svg');
+    if(svg) svg.setAttribute('fill', wasLiked ? 'none' : 'currentColor');
+    if(countEl && countEl.classList.contains('post-action-btn')){
+      const current = parseInt(countEl.textContent) || 0;
+      const next = wasLiked ? Math.max(0, current-1) : current+1;
+      countEl.textContent = next + ' like' + (next===1?'':'s');
+      countEl.style.opacity = next>0 ? '1' : '.5';
+      countEl.style.cursor = next>0 ? 'pointer' : 'default';
+      countEl.onclick = next>0 ? (()=>showPostLikers(postId)) : null;
+    }
+  } catch(e){ toast('Failed to update like: '+e.message, 'error'); }
+};
+
+window.showPostLikers = async (postId) => {
+  openModal('modal-post-likers');
+  const bodyEl = document.getElementById('post-likers-body');
+  bodyEl.innerHTML = '<div class="t-small c-text3" style="padding:1rem">Loading...</div>';
+  const sb = getSb();
+  if(!sb) return;
+  try {
+    const { data, error } = await sb.from('post_likes').select('user_id').eq('post_id', postId);
+    if(error) throw error;
+    if(!data || !data.length){
+      bodyEl.innerHTML = '<div class="empty-state" style="padding:1.5rem"><div class="empty-title">No likes yet</div></div>';
+      return;
+    }
+    const users = await Promise.all(data.map(row=>dmGetUser(row.user_id)));
+    bodyEl.innerHTML = users.map(u=>'<div class="flex items-center gap-3 mb-2" style="padding:.625rem;border:1px solid var(--border);border-radius:var(--radius-sm)">'+avatarHtml(u,'sm')+'<div class="flex-1"><div class="t-small" style="font-weight:600">'+escHtml(u?.name||'Unknown')+'</div></div></div>').join('');
+  } catch(e){ bodyEl.innerHTML = '<div class="t-small c-red" style="padding:1rem">Failed to load likes.</div>'; }
+};
+
 
 window.showEventAttendees = async (eventId, eventTitle) => {
   openModal('modal-event-attendees');
@@ -1660,8 +1778,41 @@ async function renderProfile(){
 '<div class="card mb-4"><h2 class="t-h2 mb-3">Skills</h2><div class="skill-tags">'+(u.skills||[]).map(s=>'<span class="skill-tag primary">'+escHtml(s)+'</span>').join('')+'</div>'+(isMe?'<input class="form-control mt-3" id="profile-skills" placeholder="Skills comma-separated" value="'+escHtml((u.skills||[]).join(', '))+'" style="margin-top:.75rem"><button class="btn btn-outline btn-sm mt-2" onclick="saveSkills()">Update Skills</button>':'')+'</div>'+
   (myServices.length || isMe ? '<div class="card mb-4"><div class="flex justify-between items-center mb-3"><h2 class="t-h2" style="margin:0">Services</h2>'+(isMe?'<button class="btn btn-outline btn-xs" onclick="openModal(\'modal-create-service\')">+ Add</button>':'')+'</div>'+(myServices.length?myServices.map(s=>'<div class="card card-sm mb-2" style="background:var(--surface)"><div class="flex justify-between items-start"><div class="flex-1"><div class="t-h3 mb-1">'+escHtml(s.title)+'</div><div class="t-small c-text3 mb-1">'+escHtml(s.description)+'</div><div class="skill-tags mt-1">'+(s.skills||[]).map(sk=>'<span class="skill-tag">'+escHtml(sk)+'</span>').join('')+'</div></div><div style="text-align:right;flex-shrink:0;margin-left:.75rem"><div style="font-weight:800;color:var(--navy)">'+(s.price_cents?fmtMoney(s.price_cents/100)+(s.price_type==='hourly'?'/hr':''):'Rate on request')+'</div>'+(isMe?'<button class="btn btn-ghost btn-xs mt-1" style="color:var(--red)" onclick="deleteServiceAction(\''+s.id+'\',\''+escHtml(s.title).replace(/'/g,"\\\\'")+'\')">Delete</button>':'<button class="btn btn-teal btn-xs mt-1" onclick="openDM(\''+s.creator_id+'\')">Message</button>')+'</div></div></div>').join(''):'<div class="t-body c-text3">No services listed yet</div>')+'</div>':'')+
   '<div class="card"><h2 class="t-h2 mb-3">Recent Deals</h2>'+(myDeals.slice(0,3).length?myDeals.slice(0,3).map(d=>{const other=store.getUser(d.buyerId===u.id?d.sellerId:d.buyerId);return '<div class="flex justify-between items-center mb-3">'+avatarHtml(other,'sm')+'<div class="flex-1" style="margin-left:.5rem"><div class="t-small" style="font-weight:600">'+escHtml(d.title)+'</div><div class="t-micro c-text4">'+timeAgo(d.createdAt)+'</div></div>'+dealStatusBadge(d.status)+'</div>';}).join(''):'<div class="t-body c-text3">No deals yet</div>')+
-  '</div></div></div>';
+  '</div>'+
+  '</div></div>';
 }
+
+window.confirmDeleteAccount = async () => {
+  const checkbox = $('#delete-account-confirm-checkbox');
+  if(!checkbox || !checkbox.checked){
+    toast('Please confirm the checkbox to continue', 'error');
+    return;
+  }
+  const btn = $('#delete-account-submit-btn');
+  btn.disabled = true; btn.textContent = 'Deleting...';
+  const sb = getSb();
+  try {
+    if(!sb) throw new Error('Not connected. Please refresh and try again.');
+    const { data: { session } } = await sb.auth.getSession();
+    const res = await fetch('https://kpzrvpokasqwmfeuypxv.supabase.co/functions/v1/delete-account', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + session?.access_token,
+      },
+    });
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+    toast('Account deleted. Goodbye for now.', 'success');
+    try { await sb.auth.signOut(); } catch(e){}
+    store.data.currentUser = null;
+    store._save();
+    setTimeout(()=>{ window.location.href = window.location.pathname; }, 1200);
+  } catch(e){
+    toast('Failed to delete account: '+e.message, 'error');
+    btn.disabled = false; btn.textContent = 'Permanently Delete Account';
+  }
+};
 
 window.shareMyProfile = async (username) => {
   if(!username){ toast('Set a username in your profile first', 'error'); return; }
@@ -2040,7 +2191,9 @@ function buildModals(){
     '</div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="send-invites-btn">Send Invites</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-payment"><div class="modal"><div class="modal-header"><span class="modal-title">Complete Payment</span><button class="modal-close">x</button></div><div class="modal-body" id="payment-modal-body"><div style="text-align:center;padding:2rem;color:var(--text-3)">Loading payment...</div></div></div></div>'+
   '<div class="modal-overlay" id="modal-opp-detail"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title" id="modal-opp-title">Opportunity</span><button class="modal-close">x</button></div><div class="modal-body" id="modal-opp-body"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Close</button><button class="btn btn-teal" onclick="applyToOpportunity(getActiveOppId(), this)">Apply Now</button></div></div></div>'+
-  '<div class="modal-overlay" id="modal-event-attendees"><div class="modal"><div class="modal-header"><span class="modal-title">Attendees</span><button class="modal-close">x</button></div><div class="modal-body" id="event-attendees-body"></div></div></div>'
+  '<div class="modal-overlay" id="modal-event-attendees"><div class="modal"><div class="modal-header"><span class="modal-title">Attendees</span><button class="modal-close">x</button></div><div class="modal-body" id="event-attendees-body"></div></div></div>'+
+  '<div class="modal-overlay" id="modal-post-likers"><div class="modal"><div class="modal-header"><span class="modal-title">Liked by</span><button class="modal-close">x</button></div><div class="modal-body" id="post-likers-body"></div></div></div>'+
+  '<div class="modal-overlay" id="modal-delete-account"><div class="modal"><div class="modal-header"><span class="modal-title" style="color:var(--red)">Delete Your Account</span><button class="modal-close">x</button></div><div class="modal-body"><p class="t-body mb-3" style="color:var(--text-2)">This permanently deletes your Fairriss account, including your profile, messages, service listings, and deal history. <strong>This cannot be undone.</strong></p><label style="display:flex;align-items:flex-start;gap:.625rem;cursor:pointer;padding:.75rem;background:var(--surface);border-radius:8px"><input type="checkbox" id="delete-account-confirm-checkbox" style="width:18px;height:18px;accent-color:var(--red);margin-top:.125rem" onchange="document.getElementById(\'delete-account-submit-btn\').disabled=!this.checked"><span class="t-body">I understand this is permanent and cannot be undone.</span></label></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn" style="background:var(--red);color:#fff" id="delete-account-submit-btn" onclick="confirmDeleteAccount()" disabled>Permanently Delete Account</button></div></div></div>'
   );
 }
 
@@ -2634,7 +2787,11 @@ function renderSupport(){
     '<a href="mailto:hello@fairriss.com" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:.5rem">'+
     '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>'+
     'hello@fairriss.com</a>'+
-    '</div></div>'+
+    '</div>'+
+
+    // Delete account (only shown to logged-in users)
+    (store.getMe()?'<div class="card mt-4" style="border-color:var(--red)"><h3 class="t-h2 mb-2" style="color:var(--red)">Delete Account</h3><p class="t-small c-text3 mb-3">Permanently delete your Fairriss account, including your profile, messages, service listings, and deal history. This cannot be undone.</p><button class="btn btn-outline btn-sm" style="color:var(--red);border-color:var(--red)" onclick="openModal(\'modal-delete-account\')">Delete My Account</button></div>':'')+
+    '</div>'+
 
     // FAQ
     '<div><div class="card"><h2 class="t-h2 mb-4">Frequently Asked Questions</h2>'+
