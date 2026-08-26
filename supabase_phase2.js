@@ -22,6 +22,7 @@ function dbWheel(w) {
     monthlyPrice: w.monthly_price || 0,
     dealCommission: w.deal_commission || 2.5,
     isEventWheel: w.is_event_wheel || false,
+    location: w.location || '',
     createdAt: w.created_at,
   };
 }
@@ -255,6 +256,7 @@ const LiveStore = {
         hex_color: color,
         deal_commission: fields.dealCommission || 2.5,
         is_event_wheel: fields.isEventWheel || false,
+        location: fields.location || null,
       })
       .select().single();
     if (error) throw error;
