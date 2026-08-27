@@ -915,7 +915,7 @@ async function updateShellDynamic(me){
 
 function renderNotifPanel(){
   const notifs=store.getMyNotifs();
-  const icons={deal_message:'&#x1F4AC;',new_member:'&#x1F464;',deal_completed:'&#x2705;',new_opportunity:'&#x1F3AF;',wheel_invite:'&#x1F517;',mention:'@',event_reminder:'&#x1F39F;'};
+  const icons={deal_message:'&#x1F4AC;',new_member:'&#x1F464;',deal_completed:'&#x2705;',new_opportunity:'&#x1F3AF;',wheel_invite:'&#x1F517;',mention:'@',event_reminder:'&#x1F39F;',dm:'&#x2709;'};
   $('#notif-panel').innerHTML='<div class="notif-panel-head"><span class="notif-panel-title">Notifications</span></div>'+
   (notifs.length?notifs.map(n=>'<div class="notif-item '+(n.read?'':'unread')+'"><div class="notif-icon">'+(icons[n.type]||'&#x1F514;')+'</div><div><div class="notif-text">'+n.text+'</div><div class="notif-time">'+timeAgo(n.createdAt)+'</div></div></div>').join(''):'<div class="empty-state" style="padding:1.5rem">No notifications yet</div>');
 }
@@ -1006,7 +1006,7 @@ window.submitPostReply = async (postId, wheelId) => {
       const members = store.getWheelMembers ? await store.getWheelMembers(wheelId) : [];
       (members||[]).forEach(m=>{
         if(mentions.includes((m.username||m.name.split(' ')[0]).toLowerCase()) && m.id!==me.id){
-          store.addNotif(m.id, 'mention', '<strong>'+escHtml(me.name)+'</strong> mentioned you in a reply');
+          notifyUser(m.id, 'mention', '<strong>'+escHtml(me.name)+'</strong> mentioned you in a reply');
         }
       });
     }
@@ -1916,6 +1916,17 @@ function getSb(){
   return window._supabase || window.SupabaseStore?._supabase || window.supabaseClient || null;
 }
 
+// Real, persisted notification for another user — unlike store.addNotif,
+// which only ever saved to the sender's own local browser storage and
+// never actually reached the recipient.
+async function notifyUser(userId, type, text){
+  const sb = getSb();
+  if(!sb || !userId) return;
+  try {
+    await sb.from('notifications').insert({ user_id: userId, type, text, read: false });
+  } catch(e){ console.warn('Notify failed:', e.message); }
+}
+
 // Get a user's profile, falling back to a live Supabase fetch if not cached locally.
 async function dmGetUser(id){
   let u = store.getUser(id);
@@ -1991,6 +2002,7 @@ async function dmSend(otherUserId, body, attachment){
   if(attachment){ row.attachment_url = attachment.url; row.attachment_name = attachment.name; }
   const { error } = await sb.from('direct_messages').insert(row);
   if(error){ toast('Failed to send: '+error.message, 'error'); return false; }
+  notifyUser(otherUserId, 'dm', '<strong>'+escHtml(me.name)+'</strong> sent you a message');
   // A new message un-hides the conversation for both people, so it doesn't
   // stay lost just because one side had previously removed it.
   try {
@@ -2166,7 +2178,7 @@ window.openInviteModal=wheelId=>{
     if(!selected.length){toast('Select at least one person to invite','error');return;}
     const me=store.getMe();
     selected.forEach(userId=>{
-      store.addNotif(userId,'wheel_invite',
+      notifyUser(userId,'wheel_invite',
         '<strong>'+escHtml(me.name)+'</strong> invited you to join <strong>'+escHtml(wheel.name)+'</strong> &mdash; <span class="notif-accept-btn" data-wid="'+wheelId+'" style="color:var(--teal);cursor:pointer;font-weight:600" onclick="acceptWheelInvite(this)">Accept</span>'
       );
     });
@@ -2296,7 +2308,7 @@ function bindModalForms(){
     if(!title||!scope||!price||!sellerId){toast('Please fill all required fields','error');return;}
     const deliverables=$('#cd-deliverables').value.trim().split('\n').filter(Boolean).map(l=>({id:uid(),title:l.trim(),done:false}));
     const d=store.createDeal({title,scope,sellerId,priceCents:price*100,currency:'USD',paymentType:$('#cd-payment-type').value,startDate:$('#cd-start').value,endDate:$('#cd-end').value,wheelId:$('#cd-wheel').value||null,deliverables});
-    store.addNotif(sellerId,'deal_message','<strong>'+store.getMe().name+'</strong> proposed a deal: '+escHtml(title));
+    notifyUser(sellerId,'deal_message','<strong>'+store.getMe().name+'</strong> proposed a deal: '+escHtml(title));
     toast('Deal proposed!','success');closeAllModals();navigate('deal-detail',{dealId:d.id});
   });
   document.getElementById('modal-create-deal')?.addEventListener('click', async ()=>{
@@ -2316,7 +2328,7 @@ function bindModalForms(){
     const doPost=(photo,video)=>{
       store.createPost({wheelId,body,type:$('#cp-type').value,link:link||null,photo:photo||null,video:video||null});
       const mentions=[...body.matchAll(/@(\w+)/g)].map(m=>m[1].toLowerCase());
-      if(mentions.length){store.getWheelMembers(wheelId).forEach(m=>{if(mentions.includes(m.username?.toLowerCase()||m.name.split(' ')[0].toLowerCase())&&m.id!==store.getMe().id)store.addNotif(m.id,'mention','<strong>'+escHtml(store.getMe().name)+'</strong> mentioned you in a post');});}
+      if(mentions.length){store.getWheelMembers(wheelId).forEach(m=>{if(mentions.includes(m.username?.toLowerCase()||m.name.split(' ')[0].toLowerCase())&&m.id!==store.getMe().id)notifyUser(m.id,'mention','<strong>'+escHtml(store.getMe().name)+'</strong> mentioned you in a post');});}
       toast('Post published!','success');closeAllModals();renderWheelDetail();
     };
     if(photoFile){const r=new FileReader();r.onload=ev=>{if(videoFile){const r2=new FileReader();r2.onload=ev2=>doPost(ev.target.result,ev2.target.result);r2.readAsDataURL(videoFile);}else doPost(ev.target.result,null);};r.readAsDataURL(photoFile);}
