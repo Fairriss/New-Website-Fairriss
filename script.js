@@ -352,6 +352,7 @@ function sbToLocal(p){
     availability:p.availability||'available',
     skills:p.skills||[], links:p.links||[], wantTo:p.want_to||[],
     profilePics:p.profile_pics||[], introVideo:p.intro_video||'',
+    videos:p.videos||[], featuredPhotos:p.featured_photos||[], contactEmail:p.contact_email||'',
     resume:p.resume||'', trustScore:p.trust_score||0,
     deals:p.deals_count||0, revenue:p.revenue||0,
     referralsSent:p.referrals_sent||0, referralsConverted:p.referrals_converted||0,
@@ -1705,6 +1706,40 @@ async function renderDealDetail(){
 window.updateDealStatus=async(id,status)=>{await store.updateDeal(id,{status});toast('Deal moved to '+status.replace('_',' '),'success');updateShellDynamic(store.getMe());renderDealDetail();};
 
 // ── Profile ────────────────────────────────────────────────────────────────
+function renderFeaturedPhotosCard(u, isMe){
+  const pics = u.featuredPhotos || [];
+  if(!isMe && !pics.filter(Boolean).length) return '';
+  let h = '<div class="card mb-4"><h2 class="t-h2 mb-3">'+icon('camera')+' Featured</h2><div style="display:flex;gap:.75rem;flex-wrap:wrap">';
+  for(let i=0;i<2;i++){
+    const pic = pics[i];
+    if(pic){
+      h += '<div style="position:relative"><img src="'+pic+'" style="width:130px;height:130px;border-radius:var(--radius-sm);object-fit:cover;border:1px solid var(--border);cursor:pointer" onclick="openLightbox(\''+pic+'\')">'+(isMe?'<label style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);border-radius:var(--radius-sm);opacity:0;cursor:pointer" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0" onclick="event.stopPropagation()">'+icon('camera')+'<input type="file" accept="image/*" style="display:none" onchange="uploadFeaturedPhoto(event,'+i+')"></label>':'')+'</div>';
+    } else if(isMe){
+      h += '<label style="width:130px;height:130px;border-radius:var(--radius-sm);border:2px dashed var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--text-4);font-size:.75rem;gap:.375rem">'+icon('camera')+'<span>Photo '+(i+1)+'</span><input type="file" accept="image/*" style="display:none" onchange="uploadFeaturedPhoto(event,'+i+')"></label>';
+    }
+  }
+  h += '</div></div>';
+  return h;
+}
+
+function renderVideosCard(u, isMe){
+  // Fall back to the old single introVideo field for anyone who uploaded before this change
+  const vids = (u.videos && u.videos.length) ? u.videos : (u.introVideo ? [u.introVideo] : []);
+  if(!isMe && !vids.filter(Boolean).length) return '';
+  let h = '<div class="card mb-4"><h2 class="t-h2 mb-3">'+icon('video')+' Video</h2>';
+  for(let i=0;i<2;i++){
+    const v = vids[i];
+    if(v){
+      h += '<video src="'+v+'" controls style="width:100%;border-radius:var(--radius-sm);background:#000;max-height:220px;margin-bottom:.75rem"></video>';
+      if(isMe) h += '<label class="btn btn-ghost btn-xs" style="cursor:pointer;margin-bottom:.75rem;display:inline-block">Replace<input type="file" accept="video/*" style="display:none" onchange="uploadVideo(event,'+i+')"></label>';
+    } else if(isMe){
+      h += '<label class="btn btn-outline btn-sm" style="cursor:pointer;margin-bottom:.75rem;display:inline-block">'+icon('video')+' Upload Video '+(i+1)+'<input type="file" accept="video/*" style="display:none" onchange="uploadVideo(event,'+i+')"></label><br>';
+    }
+  }
+  h += '</div>';
+  return h;
+}
+
 function renderAboutCard(u,isMe){
   let h='<div class="card mb-4"><h2 class="t-h2 mb-3">About</h2>';
   if(isMe){
@@ -1715,18 +1750,23 @@ function renderAboutCard(u,isMe){
     h+='<div class="form-group mb-2" id="profile-other-row" style="display:'+(isCustomRole?'block':'none')+'"><label class="form-label">Tell us what you do</label><input class="form-control" id="profile-other-input" value="'+escHtml(isCustomRole?u.userType:'')+'" placeholder="e.g. Consultant, Student, Recruiter..."></div>';
     h+='<textarea class="form-control mb-2" id="profile-bio" rows="3">'+escHtml(u.bio||'')+'</textarea>';
     h+='<div class="form-row mb-2"><div class="form-group"><label class="form-label">Job Title</label><input class="form-control" id="profile-title" value="'+escHtml(u.jobTitle||'')+'" placeholder="CEO, Designer..."></div><div class="form-group"><label class="form-label">Company</label><input class="form-control" id="profile-company" value="'+escHtml(u.company||'')+'" placeholder="Acme Corp..."></div></div>';
+    h+='<div class="form-group mb-2"><label class="form-label">Location <span>(city or country)</span></label><input class="form-control" id="profile-location" value="'+escHtml(u.location||'')+'" placeholder="Toronto, ON or Canada"></div>';
     h+='<div class="form-group mb-3"><label class="form-label">Website / Link</label><input class="form-control" id="profile-website" value="'+escHtml(u.website||'')+'" placeholder="yoursite.com or linkedin.com/in/you"></div>';
     h+='<div class="form-group mb-3"><label class="form-label">Additional Links <span>(portfolio, social, etc.)</span></label><div id="profile-links-list" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:.625rem">';
     (u.links||[]).forEach((lnk,i)=>{h+='<div style="display:flex;gap:.5rem;align-items:center"><input class="form-control profile-link-input" value="'+escHtml(lnk)+'" placeholder="https://..." style="flex:1"><button class="btn btn-ghost btn-xs" onclick="removeLink('+i+')" style="color:var(--red)">Remove</button></div>';});
     h+='</div><button class="btn btn-outline btn-xs" onclick="addLinkField()">+ Add Link</button></div>';
+    h+='<div class="form-group mb-3"><label class="form-label">Contact Email <span>(optional \u2014 shown to other members)</span></label><input class="form-control" id="profile-contact-email" type="email" value="'+escHtml(u.contactEmail||'')+'" placeholder="you@example.com"></div>';
     h+='<button class="btn btn-outline btn-sm" onclick="saveProfileInfo()">Save</button>';
   }else{
     h+='<p class="t-body mb-3" style="color:var(--text-2);line-height:1.7">'+escHtml(u.bio||'No bio yet.')+'</p>';
     const links=(u.links||[]).filter(Boolean);
     if(links.length){
-      h+='<div style="display:flex;flex-direction:column;gap:.5rem">';
+      h+='<div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:.5rem">';
       links.forEach(lnk=>{const href=lnk.startsWith('http')?lnk:'https://'+lnk;const label=lnk.replace(/^https?:\/\//,'').replace(/\/$/,'');h+='<a href="'+escHtml(href)+'" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:.5rem;color:var(--teal);font-size:.875rem;font-weight:500;text-decoration:none">'+icon('link')+escHtml(label)+'</a>';});
       h+='</div>';
+    }
+    if(u.contactEmail){
+      h+='<a href="mailto:'+escHtml(u.contactEmail)+'" style="display:flex;align-items:center;gap:.5rem;color:var(--teal);font-size:.875rem;font-weight:500;text-decoration:none"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>'+escHtml(u.contactEmail)+'</a>';
     }
   }
   h+='</div>';return h;
@@ -1795,11 +1835,11 @@ async function renderProfile(){
   '<div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,.1)"><div style="font-size:.6875rem;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.07em;text-transform:uppercase;margin-bottom:.625rem">Photos</div>'+picSlots+'</div></div>'+
   (!isMe?'<div class="flex gap-2 mb-4"><button class="btn btn-primary" onclick="openModal(\'modal-create-deal\')">Create Deal</button><button class="btn btn-outline" onclick="openDM(\''+u.id+'\')">Message</button></div>':'<div class="flex gap-2 mb-4"><button class="btn btn-outline" onclick="shareMyProfile(\''+escHtml(u.username||'')+'\')">'+icon('link')+' Share Profile</button></div>')+
   '<div class="two-col"><div>'+renderAboutCard(u,isMe)+
-  (u.introVideo?'<div class="card mb-4"><h2 class="t-h2 mb-3">'+icon('video')+' Intro Video</h2><video src="'+u.introVideo+'" controls style="width:100%;border-radius:var(--radius-sm);background:#000;max-height:240px"></video>'+(isMe?'<div class="mt-2"><label class="btn btn-ghost btn-sm" style="cursor:pointer">Replace<input type="file" accept="video/*" style="display:none" onchange="uploadVideo(event)"></label></div>':'')+'</div>':
-  (isMe?'<div class="card mb-4"><h2 class="t-h2 mb-3">'+icon('video')+' Intro Video</h2><p class="t-small c-text3 mb-3">Add a short intro video so people can get to know you.</p><label class="btn btn-outline btn-sm" style="cursor:pointer">'+icon('video')+' Upload Video<input type="file" accept="video/*" style="display:none" onchange="uploadVideo(event)"></label></div>':''))+
+  renderFeaturedPhotosCard(u,isMe)+
+  renderVideosCard(u,isMe)+
   '<div class="card mb-4"><h2 class="t-h2 mb-3">'+icon('briefcase')+' Work History</h2>'+
-  (u.workHistory||[]).map((j,i)=>'<div style="padding:.875rem;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.625rem"><div class="flex justify-between items-start"><div><div class="t-h3">'+escHtml(j.title)+'</div><div class="t-small c-text3">'+escHtml(j.company)+' - '+escHtml(j.from)+' to '+escHtml(j.to)+'</div></div>'+(isMe?'<button class="btn btn-ghost btn-xs" onclick="removeJob('+i+')">Remove</button>':'')+'</div>'+(j.desc?'<p class="t-small c-text3 mt-1">'+escHtml(j.desc)+'</p>':'')+'</div>').join('')+
-  (isMe?'<div style="border:1.5px dashed var(--border);border-radius:var(--radius-sm);padding:.875rem;margin-top:.5rem"><div class="form-row mb-2"><div class="form-group"><label class="form-label">Title</label><input class="form-control" id="job-title" placeholder="Product Manager"></div><div class="form-group"><label class="form-label">Company</label><input class="form-control" id="job-company" placeholder="Acme Corp"></div></div><div class="form-row mb-2"><div class="form-group"><label class="form-label">From</label><input class="form-control" id="job-from" placeholder="2022"></div><div class="form-group"><label class="form-label">To</label><input class="form-control" id="job-to" placeholder="Present"></div></div><div class="form-group mb-2"><label class="form-label">Description</label><input class="form-control" id="job-desc" placeholder="What did you do?"></div><button class="btn btn-outline btn-sm" onclick="addJob()">+ Add Position</button></div>':'')+
+  (u.workHistory||[]).map((j,i)=>'<div style="padding:.875rem;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.625rem"><div class="flex justify-between items-start"><div><div class="t-h3">'+escHtml(j.title)+'</div><div class="t-small c-text3">'+escHtml(j.company)+(j.city?' &middot; '+escHtml(j.city):'')+' - '+escHtml(j.from)+' to '+escHtml(j.to)+'</div></div>'+(isMe?'<button class="btn btn-ghost btn-xs" onclick="removeJob('+i+')">Remove</button>':'')+'</div>'+(j.desc?'<p class="t-small c-text3 mt-1">'+escHtml(j.desc)+'</p>':'')+'</div>').join('')+
+  (isMe?'<div style="border:1.5px dashed var(--border);border-radius:var(--radius-sm);padding:.875rem;margin-top:.5rem"><div class="form-row mb-2"><div class="form-group"><label class="form-label">Title</label><input class="form-control" id="job-title" placeholder="Product Manager"></div><div class="form-group"><label class="form-label">Company</label><input class="form-control" id="job-company" placeholder="Acme Corp"></div></div><div class="form-row mb-2"><div class="form-group"><label class="form-label">City</label><input class="form-control" id="job-city" placeholder="Toronto, ON"></div><div class="form-group"><label class="form-label">From</label><input class="form-control" id="job-from" placeholder="2022"></div></div><div class="form-group mb-2"><label class="form-label">To</label><input class="form-control" id="job-to" placeholder="Present"></div><div class="form-group mb-2"><label class="form-label">Description</label><input class="form-control" id="job-desc" placeholder="What did you do?"></div><button class="btn btn-outline btn-sm" onclick="addJob()">+ Add Position</button></div>':'')+
   '</div>'+
   (isMe||u.resume?'<div class="card mb-4"><h2 class="t-h2 mb-3">'+icon('file')+' Resume</h2>'+(u.resume?'<div class="flex gap-2 items-center"><span class="t-small c-green">Resume uploaded</span><a href="'+u.resume+'" target="_blank" class="btn btn-outline btn-sm">View</a>'+(isMe?'<label class="btn btn-ghost btn-sm" style="cursor:pointer">Replace<input type="file" accept=".pdf,.doc,.docx" style="display:none" onchange="uploadResume(event)"></label>':'')+'</div>':'<label class="btn btn-outline btn-sm" style="cursor:pointer">'+icon('file')+' Upload Resume<input type="file" accept=".pdf,.doc,.docx" style="display:none" onchange="uploadResume(event)"></label>')+'</div>':'')+
   '</div><div>'+
@@ -1883,7 +1923,7 @@ window.saveProfileInfo=async()=>{
     if(!custom){ toast('Please tell us what you do, or pick "Not set"', 'error'); return; }
     userType=custom;
   }
-  const fields={bio:$('#profile-bio').value.trim(),jobTitle:$('#profile-title').value.trim(),company:$('#profile-company').value.trim(),website:$('#profile-website')?.value.trim()||'',userType,links};
+  const fields={bio:$('#profile-bio').value.trim(),jobTitle:$('#profile-title').value.trim(),company:$('#profile-company').value.trim(),website:$('#profile-website')?.value.trim()||'',userType,links,location:$('#profile-location')?.value.trim()||'',contactEmail:$('#profile-contact-email')?.value.trim()||''};
   const btn = event?.target;
   if(btn){ btn.disabled=true; btn.textContent='Saving...'; }
   try {
@@ -1902,7 +1942,7 @@ window.addJob=async()=>{
   const title=$('#job-title').value.trim(),company=$('#job-company').value.trim();
   if(!title||!company){toast('Title and company required','error');return;}
   const me=store.getMe();
-  const history=[...(me.workHistory||[]),{id:uid(),title,company,from:$('#job-from').value.trim()||'',to:$('#job-to').value.trim()||'Present',desc:$('#job-desc').value.trim()}];
+  const history=[...(me.workHistory||[]),{id:uid(),title,company,city:$('#job-city').value.trim()||'',from:$('#job-from').value.trim()||'',to:$('#job-to').value.trim()||'Present',desc:$('#job-desc').value.trim()}];
   const btn = event?.target;
   if(btn){ btn.disabled=true; btn.textContent='Adding...'; }
   try {
