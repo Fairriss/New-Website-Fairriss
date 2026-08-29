@@ -12,7 +12,6 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 
 // Both values are in: Supabase Dashboard → Project Settings → API
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-window._supabase = _supabase;
 
 // ================================================================
 // 2. AUTH
@@ -127,6 +126,9 @@ const Users = {
       intro_video:   fields.introVideo,
       resume:        fields.resume,
       work_history:  fields.workHistory,
+      videos:         fields.videos,
+      featured_photos: fields.featuredPhotos,
+      contact_email:  fields.contactEmail,
     };
     // Remove undefined keys
     Object.keys(mapped).forEach(k => mapped[k] === undefined && delete mapped[k]);
