@@ -497,10 +497,21 @@ const LiveStore = {
     return url;
   },
 
-  async uploadVideo(file) {
+  async uploadVideo(slotIndex, file) {
     const ext = file.name.split('.').pop();
-    const url = await this.uploadFile('avatars', `${this._currentUserId}/intro.${ext}`, file);
-    await this.updateMe({ introVideo: url });
+    const url = await this.uploadFile('avatars', `${this._currentUserId}/video_${slotIndex}.${ext}`, file);
+    const vids = [...(this._profile?.videos || [])];
+    vids[slotIndex] = url;
+    await this.updateMe({ videos: vids });
+    return url;
+  },
+
+  async uploadFeaturedPhoto(slotIndex, file) {
+    const ext = file.name.split('.').pop();
+    const url = await this.uploadFile('avatars', `${this._currentUserId}/featured_${slotIndex}.${ext}`, file);
+    const pics = [...(this._profile?.featuredPhotos || [])];
+    pics[slotIndex] = url;
+    await this.updateMe({ featuredPhotos: pics });
     return url;
   },
 
@@ -705,18 +716,30 @@ async function patchStoreWithLive() {
     }
   };
 
-  window.uploadVideo = async (e) => {
+  window.uploadVideo = async (e, slotIndex) => {
+    slotIndex = slotIndex || 0;
     const file = e.target.files[0]; if (!file) return;
     if (file.size > 50 * 1024 * 1024) { toast('Video must be under 50MB', 'error'); return; }
     try {
       toast('Uploading video...', 'default');
-      await LiveStore.uploadVideo(file);
+      await LiveStore.uploadVideo(slotIndex, file);
       toast('Video uploaded!', 'success');
       renderProfile();
     } catch(err) {
-      const r = new FileReader();
-      r.onload = ev => { store.updateMe({ introVideo: ev.target.result }); renderProfile(); };
-      r.readAsDataURL(file);
+      toast('Video upload failed: ' + err.message, 'error');
+    }
+  };
+
+  window.uploadFeaturedPhoto = async (e, slotIndex) => {
+    slotIndex = slotIndex || 0;
+    const file = e.target.files[0]; if (!file) return;
+    try {
+      toast('Uploading photo...', 'default');
+      await LiveStore.uploadFeaturedPhoto(slotIndex, file);
+      toast('Photo uploaded!', 'success');
+      renderProfile();
+    } catch(err) {
+      toast('Photo upload failed: ' + err.message, 'error');
     }
   };
 
@@ -728,9 +751,7 @@ async function patchStoreWithLive() {
       toast('Resume uploaded!', 'success');
       renderProfile();
     } catch(err) {
-      const r = new FileReader();
-      r.onload = ev => { store.updateMe({ resume: ev.target.result }); renderProfile(); };
-      r.readAsDataURL(file);
+      toast('Resume upload failed: ' + err.message, 'error');
     }
   };
 
