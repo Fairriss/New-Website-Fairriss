@@ -4,6 +4,7 @@ const $$ = (s, ctx=document) => [...ctx.querySelectorAll(s)];
 const uid = () => Math.random().toString(36).slice(2)+Date.now().toString(36);
 const fmt = n => new Intl.NumberFormat('en-US').format(n);
 const fmtMoney = (n,cur='USD') => new Intl.NumberFormat('en-US',{style:'currency',currency:cur,maximumFractionDigits:0}).format(n);
+const fullDateTime = iso => new Date(iso).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
 const timeAgo = iso => {
   const diff=Date.now()-new Date(iso).getTime(),m=Math.floor(diff/60000),h=Math.floor(m/60),d=Math.floor(h/24);
   if(m<2)return 'just now';if(m<60)return m+'m ago';if(h<24)return h+'h ago';if(d<7)return d+'d ago';
@@ -777,7 +778,12 @@ function renderAuth(){
       else renderPage();
     } catch(e){
       clearTimeout(timeout);
-      showAuthError('auth-error', e.message||'Sign in failed. Check your email and password.');
+      const msg = (e.message||'').toLowerCase();
+      if(msg.includes('invalid login credentials')){
+        showAuthError('auth-error', "That's not the right password.");
+      } else {
+        showAuthError('auth-error', e.message||'Sign in failed. Check your email and password.');
+      }
       btn.textContent='Sign In';btn.disabled=false;
     }
   };
@@ -1687,8 +1693,8 @@ async function renderDealDetail(){
   '<div class="card mb-3"><h3 class="t-h2 mb-3">Deliverables</h3>'+(deal.deliverables?.map(del=>'<div class="deliverable-item '+(del.done?'done':'')+'"><div class="deliverable-check '+(del.done?'checked':'')+'">'+( del.done?icon('check'):'')+'</div><div class="deliverable-title" style="'+(del.done?'text-decoration:line-through;opacity:.6':'')+'">'+escHtml(del.title)+'</div></div>').join('')||'<div class="t-body c-text3">No deliverables</div>')+'</div>'+
   '<div class="card card-sm" style="background:var(--surface)"><div class="t-label c-text4 mb-2">Fee Breakdown</div><div class="flex justify-between mb-1"><span class="t-small c-text3">Deal value</span><span class="t-small">'+fmtMoney(deal.priceCents/100)+'</span></div><div class="flex justify-between mb-2"><span class="t-small c-text3">Fairriss fee (10%)</span><span class="t-small c-red">-'+fmtMoney(fees)+'</span></div><div class="divider" style="margin:.5rem 0"></div><div class="flex justify-between"><span class="t-body" style="font-weight:700">Seller receives</span><span class="t-body c-green" style="font-weight:700">'+fmtMoney(sellerGets)+'</span></div></div></div>'+
   '<div><div class="card card-flush"><div class="notif-panel-head" style="padding:.875rem 1rem"><h3 class="t-h2">Messages</h3></div><div class="message-thread" id="deal-messages">'+
-  (deal.messages?.map(msg=>{const isMe2=msg.senderId===me.id,sender=store.getUser(msg.senderId);return '<div class="message-item '+(isMe2?'mine':'')+'">'+(!isMe2?avatarHtml(sender,'sm'):'')+'<div><div class="message-bubble">'+escHtml(msg.body)+'</div><div class="message-time">'+timeAgo(msg.createdAt)+'</div></div></div>';}).join('')||'<div class="empty-state" style="padding:1.5rem">No messages yet</div>')+
-  '</div><div class="message-input-row"><input class="message-input" id="deal-msg-input" placeholder="Write a message..."><button class="btn btn-teal btn-sm" id="deal-msg-send">'+icon('send')+'</button></div></div></div></div>';
+  (deal.messages?.map(msg=>{const isMe2=msg.senderId===me.id,sender=store.getUser(msg.senderId);return '<div class="message-item '+(isMe2?'mine':'')+'">'+(!isMe2?avatarHtml(sender,'sm'):'')+'<div><div class="message-bubble">'+escHtml(msg.body)+'</div><div class="message-time">'+timeAgo(msg.createdAt)+' &middot; '+fullDateTime(msg.createdAt)+'</div></div></div>';}).join('')||'<div class="empty-state" style="padding:1.5rem">No messages yet</div>')+
+  '</div><div class="message-input-row" style="position:relative"><button type="button" class="btn btn-ghost btn-sm" style="padding:.5rem;font-size:1.125rem" onclick="toggleEmojiPicker(\'deal-msg-input\',this)">&#x1F642;</button><input class="message-input" id="deal-msg-input" placeholder="Write a message..."><button class="btn btn-teal btn-sm" id="deal-msg-send">'+icon('send')+'</button></div></div></div></div>';
   const sendMsg=()=>{const input=$('#deal-msg-input'),body=input.value.trim();if(!body)return;store.addDealMessage(deal.id,body);input.value='';renderDealDetail();const t=$('#deal-messages');if(t)t.scrollTop=t.scrollHeight;};
   $('#deal-msg-send').onclick=sendMsg;$('#deal-msg-input').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}};
   const t=$('#deal-messages');if(t)t.scrollTop=t.scrollHeight;
@@ -1927,6 +1933,35 @@ async function notifyUser(userId, type, text){
   } catch(e){ console.warn('Notify failed:', e.message); }
 }
 
+// ── Emoji picker ─────────────────────────────────────────────────────────
+const EMOJI_SET = ['😀','😂','😍','😊','🙌','👍','👏','🎉','🔥','💯','🙏','😅','😎','🤔','😢','❤️','💰','🤝','✅','👀'];
+window.toggleEmojiPicker = (inputId, btnEl) => {
+  const existing = document.getElementById('emoji-popover');
+  if(existing){ existing.remove(); if(existing.dataset.forInput===inputId) return; }
+  const rect = btnEl.getBoundingClientRect();
+  const pop = document.createElement('div');
+  pop.id = 'emoji-popover';
+  pop.dataset.forInput = inputId;
+  pop.style.cssText = 'position:fixed;left:'+rect.left+'px;bottom:'+(window.innerHeight-rect.top+6)+'px;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);padding:.5rem;display:grid;grid-template-columns:repeat(5,1fr);gap:.25rem;z-index:9999';
+  pop.innerHTML = EMOJI_SET.map(e=>'<button type="button" style="font-size:1.25rem;background:none;border:none;cursor:pointer;padding:.25rem;border-radius:6px" onmouseover="this.style.background=\'var(--surface)\'" onmouseout="this.style.background=\'none\'" onclick="insertEmoji(\''+inputId+'\',\''+e+'\')">'+e+'</button>').join('');
+  document.body.appendChild(pop);
+  setTimeout(()=>{
+    document.addEventListener('click', function closeOnce(ev){
+      if(!pop.contains(ev.target) && ev.target!==btnEl){ pop.remove(); document.removeEventListener('click', closeOnce); }
+    });
+  }, 0);
+};
+window.insertEmoji = (inputId, emoji) => {
+  const input = document.getElementById(inputId);
+  if(!input) return;
+  const pos = input.selectionStart ?? input.value.length;
+  input.value = input.value.slice(0,pos) + emoji + input.value.slice(pos);
+  input.focus();
+  const newPos = pos + emoji.length;
+  input.setSelectionRange(newPos, newPos);
+  document.getElementById('emoji-popover')?.remove();
+};
+
 // Get a user's profile, falling back to a live Supabase fetch if not cached locally.
 async function dmGetUser(id){
   let u = store.getUser(id);
@@ -2073,16 +2108,21 @@ async function renderMessages(){
     panel.innerHTML = '<div class="notif-panel-head" style="padding:.875rem 1rem;display:flex;align-items:center;gap:.625rem"><button class="dm-back-btn" onclick="navigate(\'messages\')" aria-label="Back to conversations"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>'+avatarHtml(other,'sm')+'<h3 class="t-h2" style="margin:0">'+escHtml(other?.name||'Unknown')+'</h3><button class="btn btn-ghost btn-xs" style="margin-left:auto;color:var(--red)" onclick="if(confirm(\'Remove this conversation from your Inbox? It will come back if either of you messages again.\'))hideConversation(\''+withUserId+'\')">Delete</button></div>'+
     '<div class="message-thread" id="dm-messages" style="flex:1;overflow-y:auto"></div>'+
     '<div id="dm-attach-preview" style="display:none;padding:.5rem 1rem 0;font-size:.8125rem;color:var(--text-3)"></div>'+
-    '<div class="message-input-row"><label class="btn btn-ghost btn-sm" style="cursor:pointer;padding:.5rem" title="Attach a file"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg><input type="file" id="dm-file" style="display:none"></label><input class="message-input" id="dm-input" placeholder="Write a message..."><button class="btn btn-teal btn-sm" id="dm-send">'+icon('send')+'</button></div>';
+    '<div class="message-input-row" style="position:relative"><label class="btn btn-ghost btn-sm" style="cursor:pointer;padding:.5rem" title="Attach a file"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg><input type="file" id="dm-file" style="display:none"></label><button type="button" class="btn btn-ghost btn-sm" style="padding:.5rem;font-size:1.125rem" onclick="toggleEmojiPicker(\'dm-input\',this)">&#x1F642;</button><input class="message-input" id="dm-input" placeholder="Write a message..."><button class="btn btn-teal btn-sm" id="dm-send">'+icon('send')+'</button></div>';
 
     const thread = await dmFetchThread(withUserId);
     const msgsEl = document.getElementById('dm-messages');
     msgsEl.innerHTML = thread.length ? thread.map(m=>{
       const isMine = m.sender_id === me.id;
       const sender = isMine ? me : other;
-      const attach = m.attachment_url ? '<a href="'+escHtml(m.attachment_url)+'" target="_blank" rel="noopener" class="message-attachment">'+icon('file')+' '+escHtml(m.attachment_name||'Attachment')+'</a>' : '';
+      const isImage = m.attachment_url && /\.(jpe?g|png|gif|webp|svg)(\?|$)/i.test(m.attachment_url);
+      const attach = m.attachment_url
+        ? (isImage
+            ? '<a href="'+escHtml(m.attachment_url)+'" target="_blank" rel="noopener" style="display:block;margin-top:.375rem"><img src="'+escHtml(m.attachment_url)+'" style="max-width:220px;max-height:260px;border-radius:8px;display:block;object-fit:cover;cursor:pointer"></a>'
+            : '<a href="'+escHtml(m.attachment_url)+'" target="_blank" rel="noopener" class="message-attachment">'+icon('file')+' '+escHtml(m.attachment_name||'Attachment')+'</a>')
+        : '';
       const bodyHtml = m.body ? '<div class="message-bubble">'+escHtml(m.body)+attach+'</div>' : (attach?'<div class="message-bubble">'+attach+'</div>':'');
-      return '<div class="message-item '+(isMine?'mine':'')+'">'+(!isMine?avatarHtml(sender,'sm'):'')+'<div>'+bodyHtml+'<div class="message-time">'+timeAgo(m.created_at)+'</div></div></div>';
+      return '<div class="message-item '+(isMine?'mine':'')+'">'+(!isMine?avatarHtml(sender,'sm'):'')+'<div>'+bodyHtml+'<div class="message-time">'+timeAgo(m.created_at)+' &middot; '+fullDateTime(m.created_at)+'</div></div></div>';
     }).join('') : '<div class="empty-state" style="padding:1.5rem">No messages yet. Say hello!</div>';
     msgsEl.scrollTop = msgsEl.scrollHeight;
 
