@@ -12,6 +12,7 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 
 // Both values are in: Supabase Dashboard → Project Settings → API
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+window._supabase = _supabase; // expose globally — script.js's getSb() reads this
 
 // ================================================================
 // 2. AUTH
