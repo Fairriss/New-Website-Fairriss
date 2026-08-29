@@ -189,7 +189,7 @@ function avatarHtml(u,size='md'){
   return '<div class="avatar avatar-'+size+'" style="background:'+getColor(u.id)+';color:#fff;width:'+px+'px;height:'+px+'px">'+initials(u.name||'?')+'</div>';
 }
 function profilePhotoHtml(u){
-  if(u.profilePics&&u.profilePics[0])return '<img src="'+u.profilePics[0]+'" style="width:130px;height:130px;min-width:130px;border-radius:50%;object-fit:cover;border:4px solid rgba(255,255,255,.3);box-shadow:0 6px 24px rgba(0,0,0,.4);display:block">';
+  if(u.profilePics&&u.profilePics[0])return '<img src="'+u.profilePics[0]+'" style="width:130px;height:130px;min-width:130px;border-radius:50%;object-fit:cover;border:4px solid rgba(255,255,255,.3);box-shadow:0 6px 24px rgba(0,0,0,.4);display:block;cursor:pointer" onclick="openLightbox(\''+u.profilePics[0]+'\')">';
   return '<div class="profile-avatar-lg">'+initials(u.name)+'</div>';
 }
 function hexBadge(w,size=48){
@@ -1772,7 +1772,7 @@ async function renderProfile(){
   let picSlots='<div style="display:flex;gap:.625rem;flex-wrap:wrap">';
   for(let i=1;i<=4;i++){
     const pic=(u.profilePics||[])[i];
-    if(pic){picSlots+='<div style="position:relative"><img src="'+pic+'" style="width:90px;height:90px;border-radius:var(--radius-sm);object-fit:cover;border:2px solid rgba(255,255,255,.2)">'+(isMe?'<label style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);border-radius:var(--radius-sm);opacity:0;cursor:pointer" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">'+icon('camera')+'<input type="file" accept="image/*" style="display:none" onchange="uploadPic(event,'+i+')"></label>':'')+'</div>';}
+    if(pic){picSlots+='<div style="position:relative"><img src="'+pic+'" style="width:90px;height:90px;border-radius:var(--radius-sm);object-fit:cover;border:2px solid rgba(255,255,255,.2);cursor:pointer" onclick="openLightbox(\''+pic+'\')">'+(isMe?'<label style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);border-radius:var(--radius-sm);opacity:0;cursor:pointer" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0" onclick="event.stopPropagation()">'+icon('camera')+'<input type="file" accept="image/*" style="display:none" onchange="uploadPic(event,'+i+')"></label>':'')+'</div>';}
     else if(isMe){picSlots+='<label style="width:90px;height:90px;border-radius:var(--radius-sm);border:2px dashed rgba(255,255,255,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.5);font-size:.625rem;gap:.25rem">'+icon('camera')+'<span>Photo '+(i+1)+'</span><input type="file" accept="image/*" style="display:none" onchange="uploadPic(event,'+i+')"></label>';}
   }
   picSlots+='</div>';
@@ -1884,19 +1884,37 @@ window.saveProfileInfo=async()=>{
     userType=custom;
   }
   const fields={bio:$('#profile-bio').value.trim(),jobTitle:$('#profile-title').value.trim(),company:$('#profile-company').value.trim(),website:$('#profile-website')?.value.trim()||'',userType,links};
-  // Save to local store
-  store.updateMe(fields);
-  // Save to Supabase if connected
-  if(window.SupabaseStore && store.data.currentUser){
-    try { await window.SupabaseStore.updateMe(fields); } catch(e){ console.warn('Supabase profile save failed:',e.message); }
+  const btn = event?.target;
+  if(btn){ btn.disabled=true; btn.textContent='Saving...'; }
+  try {
+    await store.updateMe(fields);
+    toast('Profile updated','success');
+    renderProfile();
+  } catch(e){
+    toast('Failed to save: '+e.message, 'error');
+    if(btn){ btn.disabled=false; btn.textContent='Save'; }
   }
-  toast('Profile updated','success');renderProfile();
 };
 window.saveSkills=async()=>{await store.updateMe({skills:$('#profile-skills').value.split(',').map(s=>s.trim()).filter(Boolean)});toast('Skills updated','success');renderProfile();};
 window.addLinkField=()=>{const list=document.getElementById('profile-links-list');if(!list)return;const div=document.createElement('div');div.style.cssText='display:flex;gap:.5rem;align-items:center';div.innerHTML='<input class="form-control profile-link-input" placeholder="https://..." style="flex:1"><button class="btn btn-ghost btn-xs" onclick="this.parentElement.remove()" style="color:var(--red)">Remove</button>';list.appendChild(div);};
-window.removeLink=(i)=>{const me=store.getMe(),links=[...(me.links||[])];links.splice(i,1);store.updateMe({links});toast('Link removed','success');renderProfile();};
-window.addJob=()=>{const title=$('#job-title').value.trim(),company=$('#job-company').value.trim();if(!title||!company){toast('Title and company required','error');return;}const me=store.getMe();const history=[...(me.workHistory||[]),{id:uid(),title,company,from:$('#job-from').value.trim()||'',to:$('#job-to').value.trim()||'Present',desc:$('#job-desc').value.trim()}];store.updateMe({workHistory:history});toast('Position added','success');renderProfile();};
-window.removeJob=(i)=>{const me=store.getMe(),history=[...(me.workHistory||[])];history.splice(i,1);store.updateMe({workHistory:history});toast('Removed','success');renderProfile();};
+window.removeLink=async(i)=>{const me=store.getMe(),links=[...(me.links||[])];links.splice(i,1);try{await store.updateMe({links});toast('Link removed','success');renderProfile();}catch(e){toast('Failed to remove: '+e.message,'error');}};
+window.addJob=async()=>{
+  const title=$('#job-title').value.trim(),company=$('#job-company').value.trim();
+  if(!title||!company){toast('Title and company required','error');return;}
+  const me=store.getMe();
+  const history=[...(me.workHistory||[]),{id:uid(),title,company,from:$('#job-from').value.trim()||'',to:$('#job-to').value.trim()||'Present',desc:$('#job-desc').value.trim()}];
+  const btn = event?.target;
+  if(btn){ btn.disabled=true; btn.textContent='Adding...'; }
+  try {
+    await store.updateMe({workHistory:history});
+    toast('Position added','success');
+    renderProfile();
+  } catch(e){
+    toast('Failed to add: '+e.message, 'error');
+    if(btn){ btn.disabled=false; btn.textContent='+ Add Position'; }
+  }
+};
+window.removeJob=async(i)=>{const me=store.getMe(),history=[...(me.workHistory||[])];history.splice(i,1);try{await store.updateMe({workHistory:history});toast('Removed','success');renderProfile();}catch(e){toast('Failed to remove: '+e.message,'error');}};
 window.uploadPic=(e,slot)=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{const me=store.getMe(),pics=[...(me.profilePics||[])];pics[slot]=ev.target.result;store.updateMe({profilePics:pics});toast('Photo uploaded','success');renderProfile();};r.readAsDataURL(file);};
 window.uploadVideo=(e)=>{const file=e.target.files[0];if(!file)return;if(file.size>50*1024*1024){toast('Video must be under 50MB','error');return;}const r=new FileReader();r.onload=ev=>{store.updateMe({introVideo:ev.target.result});toast('Video uploaded','success');renderProfile();};r.readAsDataURL(file);};
 window.uploadResume=(e)=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{store.updateMe({resume:ev.target.result});toast('Resume uploaded','success');renderProfile();};r.readAsDataURL(file);};
@@ -1938,6 +1956,18 @@ async function notifyUser(userId, type, text){
 
 // ── Emoji picker ─────────────────────────────────────────────────────────
 const EMOJI_SET = ['😀','😂','😍','😊','🙌','👍','👏','🎉','🔥','💯','🙏','😅','😎','🤔','😢','❤️','💰','🤝','✅','👀'];
+window.openLightbox = (imgUrl) => {
+  let box = document.getElementById('photo-lightbox');
+  if(!box){
+    box = document.createElement('div');
+    box.id = 'photo-lightbox';
+    box.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:10000;display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:2rem';
+    box.onclick = () => box.remove();
+    document.body.appendChild(box);
+  }
+  box.innerHTML = '<img src="'+imgUrl+'" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.6)"><button onclick="event.stopPropagation();document.getElementById(\'photo-lightbox\').remove()" style="position:absolute;top:1.5rem;right:1.5rem;background:rgba(255,255,255,.15);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:1.5rem;cursor:pointer;display:flex;align-items:center;justify-content:center">&times;</button>';
+};
+
 window.toggleEmojiPicker = (inputId, btnEl) => {
   const existing = document.getElementById('emoji-popover');
   if(existing){ existing.remove(); if(existing.dataset.forInput===inputId) return; }
