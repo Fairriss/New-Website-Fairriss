@@ -210,6 +210,9 @@ const LiveStore = {
     if (fields.introVideo !== undefined) mapped.intro_video = fields.introVideo;
     if (fields.resume !== undefined)     mapped.resume = fields.resume;
     if (fields.workHistory !== undefined) mapped.work_history = fields.workHistory;
+    if (fields.videos !== undefined)      mapped.videos = fields.videos;
+    if (fields.featuredPhotos !== undefined) mapped.featured_photos = fields.featuredPhotos;
+    if (fields.contactEmail !== undefined) mapped.contact_email = fields.contactEmail;
     const { data, error } = await window._supabase
       .from('users').update(mapped).eq('id', this._currentUserId).select().single();
     if (error) throw error;
