@@ -31,12 +31,12 @@ const SUGGESTED_WHEELS=[
 const DEFAULT_DATA={
   currentUser:null,
   users:[
-    {id:'u1',name:'Alex Chen',username:'alexchen',role:'creator',userType:'Founder',wantTo:['Post Opportunities','Network'],bio:'Business coach and community builder. I help founders scale from 0 to 1.',jobTitle:'Founder and CEO',company:'Founder Collective',location:'San Francisco, CA',website:'founderco.com',skills:['Coaching','Strategy','Fundraising','Community'],links:[],availability:'available',trustScore:94,avatar:null,profilePics:[],introVideo:null,resume:null,workHistory:[{id:'j1',title:'CEO',company:'Founder Collective',from:'2020',to:'Present',desc:'Building community-led businesses.'}],deals:18,revenue:87400,referralsSent:22,referralsConverted:18,reviewAvg:4.9,joinedAt:'2024-01-15T00:00:00Z'},
-    {id:'u2',name:'Marcus Osei',username:'marcusosei',role:'member',userType:'Freelancer',wantTo:['Find Work','Network'],bio:'Senior UX designer with 8 years shaping digital products for fintech and consumer apps.',jobTitle:'Senior UX Designer',company:'Self-employed',location:'Lagos, Nigeria',website:'marcus.design',skills:['UX Design','Figma','Design Systems','User Research'],links:['behance.net/marcusosei','linkedin.com/in/marcusosei'],availability:'available',trustScore:87,avatar:null,profilePics:[],introVideo:null,resume:null,workHistory:[{id:'j2',title:'Senior UX Designer',company:'Verve.io',from:'2021',to:'2024',desc:'Led design for core product.'}],deals:24,revenue:41200,referralsSent:12,referralsConverted:9,reviewAvg:4.9,joinedAt:'2024-02-03T00:00:00Z'},
-    {id:'u3',name:'Priya Singh',username:'priyasingh',role:'member',userType:'Freelancer',wantTo:['Find Work','Hire People'],bio:'Full-stack engineer specialising in React, Node.js, and scalable APIs.',jobTitle:'Full-Stack Engineer',company:'Self-employed',location:'Bangalore, India',website:'',skills:['React','Node.js','TypeScript','PostgreSQL'],links:[],availability:'limited',trustScore:79,avatar:null,profilePics:[],introVideo:null,resume:null,workHistory:[],deals:11,revenue:28600,referralsSent:6,referralsConverted:4,reviewAvg:4.7,joinedAt:'2024-03-12T00:00:00Z'},
-    {id:'u4',name:'Jordan Lee',username:'jordanlee',role:'member',userType:'Owner',wantTo:['Hire People','Network'],bio:'Growth marketer obsessed with CAC and retention.',jobTitle:'Head of Growth',company:'Nova SaaS',location:'New York, NY',website:'',skills:['Growth','Paid Ads','Analytics','SEO'],links:[],availability:'unavailable',trustScore:72,avatar:null,profilePics:[],introVideo:null,resume:null,workHistory:[],deals:8,revenue:19800,referralsSent:14,referralsConverted:7,reviewAvg:4.5,joinedAt:'2024-04-01T00:00:00Z'},
-    {id:'u5',name:'Nova SaaS',username:'novasaas',role:'brand',userType:'Owner',wantTo:['Hire People','Post Opportunities'],bio:'B2B workflow automation platform.',jobTitle:'Brand Account',company:'Nova SaaS',location:'Austin, TX',website:'novasaas.io',skills:['SaaS','B2B','Automation'],links:[],availability:'available',trustScore:83,avatar:null,profilePics:[],introVideo:null,resume:null,workHistory:[],deals:5,revenue:0,referralsSent:2,referralsConverted:1,reviewAvg:4.6,joinedAt:'2024-02-20T00:00:00Z'},
-    {id:'u6',name:'Sarah Kim',username:'sarahkim',role:'member',userType:'Freelancer',wantTo:['Find Work','Post Opportunities'],bio:'Brand designer and strategist. I create visual identities that make companies unforgettable.',jobTitle:'Brand Designer',company:'Self-employed',location:'Seoul, South Korea',website:'sarahkim.co',skills:['Brand Design','Illustration','Motion','Art Direction'],links:['dribbble.com/sarahkim'],availability:'available',trustScore:91,avatar:null,profilePics:[],introVideo:null,resume:null,workHistory:[],deals:31,revenue:62300,referralsSent:19,referralsConverted:15,reviewAvg:5.0,joinedAt:'2024-01-28T00:00:00Z'},
+    {id:'u1',name:'Alex Chen',username:'alexchen',role:'creator',userType:'Founder',wantTo:['Post Opportunities','Network'],bio:'Business coach and community builder. I help founders scale from 0 to 1.',jobTitle:'Founder and CEO',company:'Founder Collective',location:'San Francisco, CA',website:'founderco.com',skills:['Coaching','Strategy','Fundraising','Community'],links:[],availability:'available',avatar:null,profilePics:[],introVideo:null,resume:null,workHistory:[{id:'j1',title:'CEO',company:'Founder Collective',from:'2020',to:'Present',desc:'Building community-led businesses.'}],deals:18,revenue:87400,referralsSent:22,referralsConverted:18,reviewAvg:4.9,joinedAt:'2024-01-15T00:00:00Z'},
+    {id:'u2',name:'Marcus Osei',username:'marcusosei',role:'member',userType:'Freelancer',wantTo:['Find Work','Network'],bio:'Senior UX designer with 8 years shaping digital products for fintech and consumer apps.',jobTitle:'Senior UX Designer',company:'Self-employed',location:'Lagos, Nigeria',website:'marcus.design',skills:['UX Design','Figma','Design Systems','User Research'],links:['behance.net/marcusosei','linkedin.com/in/marcusosei'],availability:'available',avatar:null,profilePics:[],introVideo:null,resume:null,workHistory:[{id:'j2',title:'Senior UX Designer',company:'Verve.io',from:'2021',to:'2024',desc:'Led design for core product.'}],deals:24,revenue:41200,referralsSent:12,referralsConverted:9,reviewAvg:4.9,joinedAt:'2024-02-03T00:00:00Z'},
+    {id:'u3',name:'Priya Singh',username:'priyasingh',role:'member',userType:'Freelancer',wantTo:['Find Work','Hire People'],bio:'Full-stack engineer specialising in React, Node.js, and scalable APIs.',jobTitle:'Full-Stack Engineer',company:'Self-employed',location:'Bangalore, India',website:'',skills:['React','Node.js','TypeScript','PostgreSQL'],links:[],availability:'limited',avatar:null,profilePics:[],introVideo:null,resume:null,workHistory:[],deals:11,revenue:28600,referralsSent:6,referralsConverted:4,reviewAvg:4.7,joinedAt:'2024-03-12T00:00:00Z'},
+    {id:'u4',name:'Jordan Lee',username:'jordanlee',role:'member',userType:'Owner',wantTo:['Hire People','Network'],bio:'Growth marketer obsessed with CAC and retention.',jobTitle:'Head of Growth',company:'Nova SaaS',location:'New York, NY',website:'',skills:['Growth','Paid Ads','Analytics','SEO'],links:[],availability:'unavailable',avatar:null,profilePics:[],introVideo:null,resume:null,workHistory:[],deals:8,revenue:19800,referralsSent:14,referralsConverted:7,reviewAvg:4.5,joinedAt:'2024-04-01T00:00:00Z'},
+    {id:'u5',name:'Nova SaaS',username:'novasaas',role:'brand',userType:'Owner',wantTo:['Hire People','Post Opportunities'],bio:'B2B workflow automation platform.',jobTitle:'Brand Account',company:'Nova SaaS',location:'Austin, TX',website:'novasaas.io',skills:['SaaS','B2B','Automation'],links:[],availability:'available',avatar:null,profilePics:[],introVideo:null,resume:null,workHistory:[],deals:5,revenue:0,referralsSent:2,referralsConverted:1,reviewAvg:4.6,joinedAt:'2024-02-20T00:00:00Z'},
+    {id:'u6',name:'Sarah Kim',username:'sarahkim',role:'member',userType:'Freelancer',wantTo:['Find Work','Post Opportunities'],bio:'Brand designer and strategist. I create visual identities that make companies unforgettable.',jobTitle:'Brand Designer',company:'Self-employed',location:'Seoul, South Korea',website:'sarahkim.co',skills:['Brand Design','Illustration','Motion','Art Direction'],links:['dribbble.com/sarahkim'],availability:'available',avatar:null,profilePics:[],introVideo:null,resume:null,workHistory:[],deals:31,revenue:62300,referralsSent:19,referralsConverted:15,reviewAvg:5.0,joinedAt:'2024-01-28T00:00:00Z'},
   ],
   wheels:[
     {id:'w1',name:'The Founders Circle',slug:'founders-circle',creatorId:'u1',description:'A private community for early-stage founders to share deals, referrals, and hard-won insights.',category:'Startup',coverGradient:'linear-gradient(135deg,#0F1F3D,#243B6B)',hexColor:'#0F1F3D',memberCount:142,status:'active',membershipMode:'open',monthlyPrice:0,dealCommission:2.5,isEventWheel:false,createdAt:'2024-01-20T00:00:00Z'},
@@ -92,7 +92,7 @@ class Store {
   login(id){this.data.currentUser=id;this._save();}
   logout(){this.data.currentUser=null;this._save();}
   updateMe(f){const i=this.data.users.findIndex(u=>u.id===this.data.currentUser);if(i!==-1){Object.assign(this.data.users[i],f);this._save();}}
-  createUser(d){const u={id:uid(),trustScore:0,deals:0,revenue:0,referralsSent:0,referralsConverted:0,reviewAvg:0,avatar:null,profilePics:[],introVideo:null,resume:null,workHistory:[],links:[],website:'',joinedAt:new Date().toISOString(),...d};this.data.users.push(u);this._save();return u;}
+  createUser(d){const u={id:uid(),deals:0,revenue:0,referralsSent:0,referralsConverted:0,reviewAvg:0,avatar:null,profilePics:[],introVideo:null,resume:null,workHistory:[],links:[],website:'',joinedAt:new Date().toISOString(),...d};this.data.users.push(u);this._save();return u;}
   getMyWheels(){const me=this.data.currentUser;const ids=this.data.wheelMembers.filter(m=>m.userId===me&&m.status==='active').map(m=>m.wheelId);return this.data.wheels.filter(w=>ids.includes(w.id));}
   getWheelMembers(wid){const ids=this.data.wheelMembers.filter(m=>m.wheelId===wid&&m.status==='active').map(m=>m.userId);return this.data.users.filter(u=>ids.includes(u.id));}
   createWheel(d){const w={id:uid(),creatorId:this.data.currentUser,memberCount:1,status:'active',membershipMode:'open',monthlyPrice:0,createdAt:new Date().toISOString(),...d};this.data.wheels.push(w);this.data.wheelMembers.push({wheelId:w.id,userId:this.data.currentUser,status:'active',joinedAt:new Date().toISOString()});this._save();return w;}
@@ -182,11 +182,34 @@ function icon(n){
 // ── Avatars & Badges ───────────────────────────────────────────────────────
 const PALETTE=['#0F1F3D','#6D28D9','#047857','#C2410C','#0369A1','#BE185D','#374151'];
 function getColor(id){if(!id)return PALETTE[0];return PALETTE[(parseInt((id+'').replace(/\D/g,'')||'0'))%PALETTE.length];}
+async function usersByIdMap(ids){
+  const unique=[...new Set(ids.filter(Boolean))];
+  const map={};
+  await Promise.all(unique.map(async id=>{
+    try{ map[id]=await store.getUser(id); }catch(e){ map[id]=null; }
+  }));
+  return map;
+}
+
 function avatarHtml(u,size='md'){
   const px={sm:32,md:44,lg:64,xl:80}[size]||44;
   if(!u||!u.id)return '<div class="avatar avatar-'+size+'" style="background:#ddd;width:'+px+'px;height:'+px+'px"></div>';
   if(u.profilePics&&u.profilePics[0])return '<img src="'+u.profilePics[0]+'" style="width:'+px+'px;height:'+px+'px;border-radius:50%;object-fit:cover;display:block;flex-shrink:0">';
   return '<div class="avatar avatar-'+size+'" style="background:'+getColor(u.id)+';color:#fff;width:'+px+'px;height:'+px+'px">'+initials(u.name||'?')+'</div>';
+}
+function starIcon(filled){return '<svg width="14" height="14" viewBox="0 0 24 24" fill="'+(filled?'var(--amber)':'none')+'" stroke="var(--amber)" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';}
+function starRow(avg,size){
+  const s=size||14;
+  let out='<span style="display:inline-flex;gap:1px;vertical-align:middle">';
+  for(let i=1;i<=5;i++){
+    const filled=avg>=i-0.25;
+    out+='<span style="display:inline-flex">'+starIcon(filled).replace('width="14" height="14"','width="'+s+'" height="'+s+'"')+'</span>';
+  }
+  return out+'</span>';
+}
+function reviewSummaryHtml(avg,count){
+  if(!count) return '<span class="t-micro c-text4">No reviews yet</span>';
+  return starRow(avg)+' <span style="font-weight:600;margin-left:2px">'+avg+'</span> <span class="t-micro c-text4">('+count+' review'+(count===1?'':'s')+')</span>';
 }
 function profilePhotoHtml(u){
   if(u.profilePics&&u.profilePics[0])return '<img src="'+u.profilePics[0]+'" style="width:130px;height:130px;min-width:130px;border-radius:50%;object-fit:cover;border:4px solid rgba(255,255,255,.3);box-shadow:0 6px 24px rgba(0,0,0,.4);display:block;cursor:pointer" onclick="openLightbox(\''+u.profilePics[0]+'\')">';
@@ -353,10 +376,10 @@ function sbToLocal(p){
     skills:p.skills||[], links:p.links||[], wantTo:p.want_to||[],
     profilePics:p.profile_pics||[], introVideo:p.intro_video||'',
     videos:p.videos||[], featuredPhotos:p.featured_photos||[], contactEmail:p.contact_email||'',
-    resume:p.resume||'', trustScore:p.trust_score||0,
+    resume:p.resume||'',
     deals:p.deals_count||0, revenue:p.revenue||0,
     referralsSent:p.referrals_sent||0, referralsConverted:p.referrals_converted||0,
-    reviewAvg:p.review_avg||0, workHistory:p.work_history||[],
+    reviewAvg:p.review_avg||0, reviewCount:0, workHistory:p.work_history||[],
     stripeAccountId:p.stripe_account_id||'',
     joinedAt:p.created_at
   };
@@ -379,6 +402,12 @@ async function renderPublicProfile(username){
     document.body.innerHTML = '<div style="min-height:100vh;background:var(--surface);display:flex;align-items:center;justify-content:center;padding:1.5rem"><div style="text-align:center"><h2 style="color:var(--navy)">Profile not found</h2><p class="t-body c-text3 mb-4">This profile doesn\'t exist or the link is incorrect.</p><a href="'+window.location.pathname+'" class="btn btn-primary">Go to Fairriss</a></div></div>';
     return;
   }
+  let reviewAvg=0, reviewCount=0;
+  try{
+    const stats = await (window.LiveStore?.getReviewStats?.([u.id]) || {});
+    const s = stats[u.id];
+    if(s){ reviewAvg=s.avg; reviewCount=s.count; }
+  }catch(e){}
 
   const initialsStr = (u.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
   const photoHtml = (u.profile_pics && u.profile_pics[0])
@@ -396,11 +425,11 @@ async function renderPublicProfile(username){
   (u.user_type?'<div style="color:rgba(255,255,255,.55);font-size:.8125rem;margin-bottom:.75rem">'+escHtml(u.user_type)+'</div>':'')+
   (u.location?'<span style="color:rgba(255,255,255,.6);font-size:.8125rem">'+icon('map')+' '+escHtml(u.location)+'</span>':'')+
   '</div>'+
-  '<div style="text-align:center"><div class="trust-score-circle" style="--pct:'+(u.trust_score||0)+'%;width:76px;height:76px"><div class="trust-score-inner" style="width:58px;height:58px"><div class="trust-score-num-lg" style="font-size:1.25rem">'+(u.trust_score||0)+'</div><div class="trust-score-label">Trust</div></div></div></div>'+
+  '<div style="text-align:center;color:rgba(255,255,255,.9)">'+(reviewCount?starRow(reviewAvg)+' <div style="font-size:.8125rem;margin-top:.25rem">'+reviewAvg+' ('+reviewCount+')</div>':'<div style="font-size:.75rem;opacity:.7">No reviews yet</div>')+'</div>'+
   '</div></div>'+
   '<div style="max-width:720px;margin:0 auto;padding:1.5rem">'+
   (u.bio?'<div class="card mb-4"><h2 class="t-h2 mb-3">About</h2><p class="t-body" style="color:var(--text-2);line-height:1.7">'+escHtml(u.bio)+'</p></div>':'')+
-  '<div class="card mb-4"><h2 class="t-h2 mb-3">Reputation</h2><div class="reputation-grid"><div class="rep-item"><div class="rep-value">'+(u.deals_count||0)+'</div><div class="rep-label">Deals Done</div></div><div class="rep-item"><div class="rep-value">'+(u.referrals_sent||0)+'</div><div class="rep-label">Referrals</div></div><div class="rep-item"><div class="rep-value">'+(u.referrals_converted||0)+'</div><div class="rep-label">Converted</div></div><div class="rep-item"><div class="rep-value">'+(u.review_avg?u.review_avg+'*':'-')+'</div><div class="rep-label">Avg Review</div></div></div></div>'+
+  '<div class="card mb-4"><h2 class="t-h2 mb-3">Reputation</h2><div class="reputation-grid"><div class="rep-item"><div class="rep-value">'+(u.deals_count||0)+'</div><div class="rep-label">Deals Done</div></div><div class="rep-item"><div class="rep-value">'+(u.referrals_sent||0)+'</div><div class="rep-label">Referrals</div></div><div class="rep-item"><div class="rep-value">'+(u.referrals_converted||0)+'</div><div class="rep-label">Converted</div></div><div class="rep-item"><div class="rep-value">'+(reviewCount?reviewAvg:'-')+'</div><div class="rep-label">Avg Review</div></div></div></div>'+
   (u.skills&&u.skills.length?'<div class="card mb-4"><h2 class="t-h2 mb-3">Skills</h2><div class="skill-tags">'+u.skills.map(s=>'<span class="skill-tag primary">'+escHtml(s)+'</span>').join('')+'</div></div>':'')+
   '<div class="card" style="text-align:center;background:var(--navy)"><h2 style="color:var(--teal);margin-bottom:.5rem">Join Fairriss to connect with '+escHtml(u.name.split(' ')[0])+'</h2><p style="color:rgba(255,255,255,.7);margin-bottom:1.25rem">The platform where professional networks become commerce engines.</p><button class="btn btn-teal" style="justify-content:center;width:100%" onclick="window.location.href=window.location.pathname">Join Fairriss</button></div>'+
   '</div></div>';
@@ -869,7 +898,7 @@ window.ob2Finish=()=>{const wantTo=[...$$('label input[type=checkbox]:checked')]
 // ── Shell ──────────────────────────────────────────────────────────────────
 function renderShell(me){
   if($('.shell')){updateShellDynamic(me);return;}
-  document.body.innerHTML='<div class="shell"><header class="header"><div class="header-logo"><div class="header-logo-mark" onclick="navigate(\'home\')" style="cursor:pointer">F</div><span class="header-logo-text" onclick="navigate(\'home\')" style="cursor:pointer">Fairriss</span></div><div class="header-search"><svg class="header-search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search members, deals, opportunities..." id="global-search"></div><div class="header-actions"><button class="header-btn mobile-search-btn" onclick="navigate(\'members\',{focus:true})" aria-label="Search"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button><div style="position:relative"><button class="header-btn" id="notif-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-dot" id="notif-dot" style="display:none"></span></button><div class="notif-panel" id="notif-panel"></div></div><div class="header-avatar" id="header-avatar" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+initials(me.name)+'</div></div></header><aside class="sidebar"><div class="sidebar-section"><div class="sidebar-label">Navigation</div><nav><div class="nav-item" data-page="home" onclick="navigate(\'home\')">'+icon('home')+' Home</div><div class="nav-item" data-page="wheels" onclick="navigate(\'wheels\')">'+icon('wheel')+' My Wheels</div><div class="nav-item" data-page="opportunities" onclick="navigate(\'opportunities\')">'+icon('opp')+' Opportunities</div><div class="nav-item" data-page="deals" onclick="navigate(\'deals\')">'+icon('deal')+' Deals <span class="nav-badge" id="deal-badge" style="display:none"></span></div><div class="nav-item" data-page="messages" onclick="navigate(\'messages\')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Inbox <span class="nav-badge" id="dm-badge" style="display:none"></span></div><div class="nav-item" data-page="members" onclick="navigate(\'members\')">'+icon('members')+' Find People</div><div class="nav-item" data-page="analytics" onclick="navigate(\'analytics\')">'+icon('analytics')+' Analytics</div>'+'<div class="nav-item" data-page="support" onclick="navigate(\'support\')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Support</div>'+'<div class="nav-item" onclick="handleLogout()" style="color:var(--red)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Log Out</div></nav></div><div class="sidebar-section"><div class="sidebar-label">My Wheels</div><div class="sidebar-wheels" id="sidebar-wheels"></div></div><div class="sidebar-bottom"><div class="sidebar-user" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+avatarHtml(me,'sm')+'<div class="sidebar-user-info"><div class="sidebar-user-name">'+escHtml(me.name)+'</div><div class="sidebar-user-role">'+(me.userType||me.role)+' - Trust '+me.trustScore+'</div></div></div><div style="padding:.625rem 1.25rem;border-top:1px solid var(--border);display:flex;gap:1rem"><a href="#" onclick="renderTerms()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Terms</a><a href="#" onclick="renderPrivacy()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Privacy</a></div></div></aside><main class="main" id="main-content">'+PAGES.map(p=>'<div class="page fade-in" id="page-'+p+'"></div>').join('')+'</main>'+
+  document.body.innerHTML='<div class="shell"><header class="header"><div class="header-logo"><div class="header-logo-mark" onclick="navigate(\'home\')" style="cursor:pointer">F</div><span class="header-logo-text" onclick="navigate(\'home\')" style="cursor:pointer">Fairriss</span></div><div class="header-search"><svg class="header-search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search members, deals, opportunities..." id="global-search"></div><div class="header-actions"><button class="header-btn mobile-search-btn" onclick="navigate(\'members\',{focus:true})" aria-label="Search"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button><div style="position:relative"><button class="header-btn" id="notif-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-dot" id="notif-dot" style="display:none"></span></button><div class="notif-panel" id="notif-panel"></div></div><div class="header-avatar" id="header-avatar" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+initials(me.name)+'</div></div></header><aside class="sidebar"><div class="sidebar-section"><div class="sidebar-label">Navigation</div><nav><div class="nav-item" data-page="home" onclick="navigate(\'home\')">'+icon('home')+' Home</div><div class="nav-item" data-page="wheels" onclick="navigate(\'wheels\')">'+icon('wheel')+' My Wheels</div><div class="nav-item" data-page="opportunities" onclick="navigate(\'opportunities\')">'+icon('opp')+' Opportunities</div><div class="nav-item" data-page="deals" onclick="navigate(\'deals\')">'+icon('deal')+' Deals <span class="nav-badge" id="deal-badge" style="display:none"></span></div><div class="nav-item" data-page="messages" onclick="navigate(\'messages\')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Inbox <span class="nav-badge" id="dm-badge" style="display:none"></span></div><div class="nav-item" data-page="members" onclick="navigate(\'members\')">'+icon('members')+' Find People</div><div class="nav-item" data-page="analytics" onclick="navigate(\'analytics\')">'+icon('analytics')+' Analytics</div>'+'<div class="nav-item" data-page="support" onclick="navigate(\'support\')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Support</div>'+'<div class="nav-item" onclick="handleLogout()" style="color:var(--red)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Log Out</div></nav></div><div class="sidebar-section"><div class="sidebar-label">My Wheels</div><div class="sidebar-wheels" id="sidebar-wheels"></div></div><div class="sidebar-bottom"><div class="sidebar-user" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+avatarHtml(me,'sm')+'<div class="sidebar-user-info"><div class="sidebar-user-name">'+escHtml(me.name)+'</div><div class="sidebar-user-role">'+(me.userType||me.role)+(me.reviewCount?' - '+me.reviewAvg+' \u2605 ('+me.reviewCount+')':'')+'</div></div></div><div style="padding:.625rem 1.25rem;border-top:1px solid var(--border);display:flex;gap:1rem"><a href="#" onclick="renderTerms()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Terms</a><a href="#" onclick="renderPrivacy()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Privacy</a></div></div></aside><main class="main" id="main-content">'+PAGES.map(p=>'<div class="page fade-in" id="page-'+p+'"></div>').join('')+'</main>'+
   // Mobile bottom navigation
   '<nav class="mobile-nav" style="display:none" id="mobile-nav">'+
   '<div class="mobile-nav-item" data-page="home" onclick="navigate(\'home\')">'+
@@ -940,13 +969,14 @@ async function renderHome(){
   const postArrays = await Promise.all((wheels||[]).map(w=>store.getPosts(w.id)));
   const allPosts = postArrays.flat().sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,6);
   const likedIds = await fetchMyLikedPostIds(allPosts.map(p=>p.id));
+  const postAuthors = await usersByIdMap(allPosts.map(p=>p.authorId));
   const topOpps=(opps||[]).slice(0,3);
   const el=document.getElementById('page-home');
   el.innerHTML=
     '<div class="page-head"><div class="page-head-left"><h1 class="page-title">Good to see you, '+escHtml(me.name.split(' ')[0])+' &#x1F44B;</h1><p class="page-sub">Here is what is happening in your network.</p></div><div class="page-actions"><button class="btn btn-outline btn-sm" onclick="openModal(\'modal-create-wheel\')">'+icon('plus')+' New Wheel</button><button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-opp\')">'+icon('plus')+' Post Opportunity</button></div></div>'+
-    '<div class="stats-grid"><div class="stat-card"><span class="stat-label">Wheels</span><span class="stat-value">'+wheels.length+'</span><span class="stat-change">Active communities</span></div><div class="stat-card"><span class="stat-label">Active Deals</span><span class="stat-value">'+activeDeals.length+'</span></div><div class="stat-card"><span class="stat-label">Trust Score</span><span class="stat-value">'+me.trustScore+'</span><span class="stat-change">/ 100</span></div><div class="stat-card"><span class="stat-label">Revenue</span><span class="stat-value">'+fmtMoney(me.revenue||0)+'</span></div></div>'+
+    '<div class="stats-grid"><div class="stat-card"><span class="stat-label">Wheels</span><span class="stat-value">'+wheels.length+'</span><span class="stat-change">Active communities</span></div><div class="stat-card"><span class="stat-label">Active Deals</span><span class="stat-value">'+activeDeals.length+'</span></div><div class="stat-card"><span class="stat-label">Reviews</span><span class="stat-value">'+(me.reviewCount?me.reviewAvg:'-')+'</span><span class="stat-change">'+(me.reviewCount?me.reviewCount+' review'+(me.reviewCount===1?'':'s'):'No reviews yet')+'</span></div><div class="stat-card"><span class="stat-label">Revenue</span><span class="stat-value">'+fmtMoney(me.revenue||0)+'</span></div></div>'+
     '<div class="two-col"><div><div class="flex justify-between items-center mb-3"><h2 class="t-h2">Network Feed</h2><button class="btn btn-ghost btn-sm" onclick="navigate(\'wheels\')">All Wheels</button></div>'+
-    (allPosts.length?allPosts.map(p=>renderFeedPost(p, likedIds.has(p.id))).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F4EB;</div><div class="empty-title">Feed is quiet</div><div class="empty-desc">Join Wheels to see posts from your network</div></div>')+
+    (allPosts.length?allPosts.map(p=>renderFeedPost(p, likedIds.has(p.id), postAuthors)).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F4EB;</div><div class="empty-title">Feed is quiet</div><div class="empty-desc">Join Wheels to see posts from your network</div></div>')+
     '</div><div><div class="flex justify-between items-center mb-3"><h2 class="t-h2">Active Deals</h2><button class="btn btn-ghost btn-sm" onclick="navigate(\'deals\')">All</button></div>'+
     (activeDeals.length?activeDeals.map(renderDealCardCompact).join(''):'<div class="card"><div class="empty-state" style="padding:1.5rem"><div class="empty-icon">&#x1F91D;</div><div class="empty-title">No active deals</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-deal\')">Create Deal</button></div></div>')+
     '<div class="flex justify-between items-center mt-4 mb-3"><h2 class="t-h2">Fresh Opportunities</h2><button class="btn btn-ghost btn-sm" onclick="navigate(\'opportunities\')">All</button></div>'+
@@ -955,8 +985,8 @@ async function renderHome(){
   $$('.post-like-btn',el).forEach(btn=>btn.onclick=()=>togglePostLike(btn.dataset.postId, btn));
 }
 
-function renderFeedPost(post, iLiked){
-  const author=store.getUser(post.authorId),wheel=store.get('wheels').find(w=>w.id===post.wheelId);
+function renderFeedPost(post, iLiked, usersById){
+  const author=(usersById&&usersById[post.authorId])||null,wheel=store.get('wheels').find(w=>w.id===post.wheelId);
   let h='<div class="feed-post" data-post-wheel-id="'+(post.wheelId||'')+'"><div class="post-header">'+avatarHtml(author,'md')+'<div class="post-author-info"><div class="post-author-name">'+escHtml(author?.name||'')+'</div><div class="post-meta"><span>'+timeAgo(post.createdAt)+'</span>'+(wheel?'<span> - </span><span style="color:var(--teal-dim)">'+escHtml(wheel.name)+'</span>':'')+'</div></div><span class="type-badge '+(post.type==='announcement'?'type-job':post.type==='referral'?'type-partnership':'type-service')+'" style="margin-left:auto">'+post.type+'</span></div>';
   if(post.body)h+='<div class="post-body">'+renderPostBody(post.body)+'</div>';
   if(post.photo)h+='<div style="margin:.75rem 0"><img src="'+post.photo+'" style="width:100%;max-height:360px;object-fit:cover;border-radius:var(--radius-sm);display:block"></div>';
@@ -1022,9 +1052,9 @@ window.submitPostReply = async (postId, wheelId) => {
   } catch(e){ toast('Failed to reply: '+e.message, 'error'); input.disabled=false; }
 };
 
-function renderDealCardCompact(d){
+function renderDealCardCompact(d, otherUser){
   const STAGES=['proposed','negotiating','accepted','in_progress','completed','paid'],si=STAGES.indexOf(d.status);
-  const other=store.getUser(d.buyerId===store.getMe()?.id?d.sellerId:d.buyerId);
+  const other=otherUser;
   return '<div class="deal-card" onclick="navigate(\'deal-detail\',{dealId:\''+d.id+'\'})"><div class="deal-card-top"><div><div class="deal-title">'+escHtml(d.title)+'</div><div class="deal-parties">'+avatarHtml(other,'sm')+' '+escHtml(other?.name||'?')+'</div></div><div><div class="deal-amount">'+fmtMoney(d.priceCents/100,d.currency)+'</div>'+dealStatusBadge(d.status)+'</div></div><div class="deal-stages">'+STAGES.map((s,i)=>'<div class="deal-stage-dot '+(i<si?'done':i===si?'current':'')+'"></div>').join('')+'</div><div class="deal-card-footer"><span class="deal-due">'+icon('clock')+' '+(d.endDate||'TBD')+'</span><span class="t-micro c-text3">'+timeAgo(d.createdAt)+'</span></div></div>';
 }
 
@@ -1112,7 +1142,9 @@ async function renderWheelDetail(){
     store.getEvents ? store.getEvents(wheel.id) : Promise.resolve([]),
   ]);
   const attendeesByEvent = await fetchAttendeesForEvents(events.map(e=>e.id));
+  const attendeeUsers = await usersByIdMap(Object.values(attendeesByEvent).flat());
   const likedIds = await fetchMyLikedPostIds(posts.map(p=>p.id));
+  const postAuthors = await usersByIdMap(posts.map(p=>p.authorId));
   const isCreator=wheel.creatorId===store.getMe()?.id;
   const isMember=store.isMember(wheel.id);
   const creatorUser = await dmGetUser(wheel.creatorId);
@@ -1121,10 +1153,10 @@ async function renderWheelDetail(){
     '<div class="page-head"><div class="flex gap-3 items-center">'+hexBadge(wheel,44)+'<div><h1 class="page-title" style="margin-bottom:0">'+escHtml(wheel.name)+'</h1><p class="page-sub">'+escHtml(wheel.description)+'</p>'+(creatorUser&&creatorUser.role!=='admin'?'<p class="t-body c-text2 mt-1">Created by <a href="javascript:void(0)" onclick="navigate(\'profile\',{userId:\''+creatorUser.id+'\'})" style="color:var(--teal);font-weight:700;text-decoration:none">'+escHtml(creatorUser.name)+'</a></p>':'')+'</div></div><div class="page-actions">'+(isCreator?'<button class="btn btn-outline btn-sm" onclick="openInviteModal(\''+wheel.id+'\')">'+icon('users')+' Invite</button><button class="btn btn-outline btn-sm" onclick="openModal(\'modal-create-event\')">+ Event</button>':'')+(isCreator||isMember?'<button class="btn btn-outline btn-sm" onclick="shareWheel(\''+escHtml(wheel.slug||'')+'\',\''+escHtml(wheel.name).replace(/'/g,"\\\\'")+'\')">'+icon('link')+' Share Wheel</button>':'')+(isCreator?'<button class="btn btn-ghost btn-sm delete-wheel-btn" style="color:var(--red)" data-wheel-id="'+wheel.id+'" data-wheel-name="'+escHtml(wheel.name)+'">Delete Wheel</button>':(isMember?'<button class="btn btn-ghost btn-sm leave-wheel-btn" style="color:var(--red)" data-wheel-id="'+wheel.id+'" data-wheel-name="'+escHtml(wheel.name)+'">Leave Wheel</button>':''))+'<button class="btn btn-teal btn-sm" onclick="handlePostClick(\''+wheel.id+'\')">'+ icon('plus') +' Post</button></div></div>'+
     '<div class="stats-grid" style="grid-template-columns:repeat(3,1fr)"><div class="stat-card"><span class="stat-label">Members</span><span class="stat-value">'+fmt(wheel.memberCount)+'</span></div><div class="stat-card"><span class="stat-label">Opportunities</span><span class="stat-value">'+opps.length+'</span></div><div class="stat-card"><span class="stat-label">Events</span><span class="stat-value">'+events.length+'</span></div></div>'+
     '<div class="tabs"><div class="tab-item active" data-tab="feed">Feed</div><div class="tab-item" data-tab="members">Members ('+members.length+')</div><div class="tab-item" data-tab="opportunities">Opportunities ('+opps.length+')</div><div class="tab-item" data-tab="events">Events ('+events.length+')</div></div>'+
-    '<div class="tab-panel active" id="tab-feed">'+(posts.length?posts.map(p=>renderFeedPost(p, likedIds.has(p.id))).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F4DD;</div><div class="empty-title">No posts yet</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-post\')">Post Something</button></div>')+'</div>'+
+    '<div class="tab-panel active" id="tab-feed">'+(posts.length?posts.map(p=>renderFeedPost(p, likedIds.has(p.id), postAuthors)).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F4DD;</div><div class="empty-title">No posts yet</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-post\')">Post Something</button></div>')+'</div>'+
     '<div class="tab-panel" id="tab-members"><div class="member-grid">'+members.map(u=>renderMemberCard(u)).join('')+'</div></div>'+
     '<div class="tab-panel" id="tab-opportunities"><div class="flex justify-between items-center mb-3"><span class="t-body c-text3">'+opps.length+' open</span><button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-opp\')">'+icon('plus')+' Post</button></div><div class="opp-list">'+(opps.length?opps.map(renderOppCard).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F3AF;</div><div class="empty-title">No opportunities yet</div></div>')+'</div></div>'+
-    '<div class="tab-panel" id="tab-events"><div class="flex justify-between items-center mb-3"><span class="t-body c-text3">'+events.length+' events</span>'+(isCreator?'<button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-event\')">'+icon('plus')+' Create Event</button>':'')+'</div>'+(events.length?events.map(ev=>renderEventCard(ev, attendeesByEvent[ev.id]||[])).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F39F;</div><div class="empty-title">No events yet</div></div>')+'</div>';
+    '<div class="tab-panel" id="tab-events"><div class="flex justify-between items-center mb-3"><span class="t-body c-text3">'+events.length+' events</span>'+(isCreator?'<button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-event\')">'+icon('plus')+' Create Event</button>':'')+'</div>'+(events.length?events.map(ev=>renderEventCard(ev, attendeesByEvent[ev.id]||[], attendeeUsers)).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F39F;</div><div class="empty-title">No events yet</div></div>')+'</div>';
   $$('.tab-item',el).forEach(tab=>tab.onclick=()=>{$$('.tab-item',el).forEach(t=>t.classList.remove('active'));$$('.tab-panel',el).forEach(p=>p.classList.remove('active'));tab.classList.add('active');document.getElementById('tab-'+tab.dataset.tab)?.classList.add('active');});
   $$('.post-like-btn',el).forEach(btn=>btn.onclick=()=>togglePostLike(btn.dataset.postId, btn));
   $$('.member-card',el).forEach(c=>c.onclick=()=>navigate('profile',{userId:c.dataset.userId}));
@@ -1150,13 +1182,14 @@ async function fetchAttendeesForEvents(eventIds){
   return result;
 }
 
-function renderEventCard(ev, attendeeIds){
+function renderEventCard(ev, attendeeIds, usersById){
   attendeeIds = attendeeIds || [];
+  usersById = usersById || {};
   const me = store.getMe();
   const isGoing = me && attendeeIds.includes(me.id);
   const cap = ev.ticketCount || null;
   const full = cap && attendeeIds.length >= cap;
-  const attendees = attendeeIds.slice(0, 6).map(id=>store.getUser(id)).filter(Boolean);
+  const attendees = attendeeIds.slice(0, 6).map(id=>usersById[id]).filter(Boolean);
   const avatarsHtml = attendees.length
     ? '<div style="display:flex;align-items:center;flex-shrink:0">'+attendees.map((u,i)=>'<div style="margin-left:'+(i?'-.5rem':'0')+';border-radius:50%;border:2px solid var(--white)">'+avatarHtml(u,'sm')+'</div>').join('')+'</div>'
     : '<span class="t-small c-text4">No one yet — be the first!</span>';
@@ -1380,7 +1413,7 @@ async function renderMembers(){
 
 function renderMemberCard(u){
   const dotClass={available:'avail-available',limited:'avail-limited',unavailable:'avail-unavailable'}[u.availability]||'avail-unavailable';
-  return '<div class="member-card" data-user-id="'+u.id+'"><div class="member-card-top"><div class="member-avatar-wrap">'+avatarHtml(u,'lg')+'<span class="member-avail-dot '+dotClass+'"></span></div><div class="flex-1"><div class="member-name">'+escHtml(u.name)+'</div><div class="member-title">'+escHtml(u.jobTitle||(u.skills||[])[0]||u.role)+'</div>'+(u.company?'<div class="t-micro c-text4">'+escHtml(u.company)+'</div>':'')+(u.location?'<div class="t-micro c-text4">'+icon('map')+' '+escHtml(u.location)+'</div>':'')+'<div class="member-trust"><div class="trust-bar-wrap"><div class="trust-bar-fill" style="width:'+u.trustScore+'%"></div></div><span class="trust-score-num">'+u.trustScore+'</span></div></div></div>'+(u.skills?.length?'<div class="skill-tags">'+u.skills.slice(0,4).map((s,i)=>'<span class="skill-tag'+(i===0?' primary':'')+'">'+escHtml(s)+'</span>').join('')+'</div>':'')+'<div class="member-card-footer"><span class="avail-badge '+(u.availability||'unavailable')+'">'+(u.availability==='available'?'Available':u.availability==='limited'?'Limited':'Unavailable')+'</span><button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openModal(\'modal-create-deal\')">Deal</button></div></div>';
+  return '<div class="member-card" data-user-id="'+u.id+'"><div class="member-card-top"><div class="member-avatar-wrap">'+avatarHtml(u,'lg')+'<span class="member-avail-dot '+dotClass+'"></span></div><div class="flex-1"><div class="member-name">'+escHtml(u.name)+'</div><div class="member-title">'+escHtml(u.jobTitle||(u.skills||[])[0]||u.role)+'</div>'+(u.company?'<div class="t-micro c-text4">'+escHtml(u.company)+'</div>':'')+(u.location?'<div class="t-micro c-text4">'+icon('map')+' '+escHtml(u.location)+'</div>':'')+'<div class="member-trust">'+reviewSummaryHtml(u.reviewAvg||0,u.reviewCount||0)+'</div></div></div>'+(u.skills?.length?'<div class="skill-tags">'+u.skills.slice(0,4).map((s,i)=>'<span class="skill-tag'+(i===0?' primary':'')+'">'+escHtml(s)+'</span>').join('')+'</div>':'')+'<div class="member-card-footer"><span class="avail-badge '+(u.availability||'unavailable')+'">'+(u.availability==='available'?'Available':u.availability==='limited'?'Limited':'Unavailable')+'</span><button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openModal(\'modal-create-deal\')">Deal</button></div></div>';
 }
 
 // ── Opportunities ──────────────────────────────────────────────────────────
@@ -1406,10 +1439,11 @@ async function renderOpportunities(){
       (o.location||'').toLowerCase().includes(ql)
     );
   }
+  const oppCreators = await usersByIdMap(opps.map(o=>o.creatorId));
   el.innerHTML='<div class="page-head"><div class="page-head-left"><h1 class="page-title">Opportunities</h1><p class="page-sub">'+opps.length+' open across your Wheels</p></div><div class="page-actions"><button class="btn btn-teal" onclick="openModal(\'modal-create-opp\')">'+icon('plus')+' Post Opportunity</button></div></div>'+
   '<div class="tabs"><div class="tab-item active" onclick="navigate(\'opportunities\',{view:\'requests\'})">Requests</div><div class="tab-item" onclick="navigate(\'opportunities\',{view:\'services\'})">Services</div></div>'+
   '<div class="filter-bar">'+['all','job','collaboration','investment','service'].map(t=>'<button class="filter-pill opp-filter-btn '+(filter===t?'active':'')+'" data-type="'+t+'"><span class="type-badge type-'+t+'" style="'+(t==='all'?'background:none;color:inherit;font-size:.8125rem;font-weight:500;padding:0':'')+'">'+t.replace('_',' ')+'</span></button>').join('')+'<div style="position:relative;margin-left:auto"><svg style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--text-4);pointer-events:none" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input class="form-control" id="opp-search" placeholder="Search title, description, or city..." value="'+escHtml(q)+'" style="padding-left:2.25rem;width:220px"></div></div>'+
-  '<div class="opp-list">'+(opps.length?opps.map(renderOppCard).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F3AF;</div><div class="empty-title">No opportunities found</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-opp\')">Post One</button></div>')+'</div>';
+  '<div class="opp-list">'+(opps.length?opps.map(o=>renderOppCard(o,oppCreators)).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F3AF;</div><div class="empty-title">No opportunities found</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-opp\')">Post One</button></div>')+'</div>';
   let st;$('#opp-search')?.addEventListener('input',e=>{clearTimeout(st);st=setTimeout(()=>navigate('opportunities',{type:filter,q:e.target.value}),300);});
   $$('.opp-filter-btn',el).forEach(btn=>btn.addEventListener('click',()=>navigate('opportunities',{type:btn.dataset.type,q})));
   $$('.opp-card',el).forEach(c=>c.onclick=()=>{openModal('modal-opp-detail');renderOppDetail(c.dataset.oppId);});
@@ -1462,8 +1496,8 @@ window.deleteServiceAction = async (serviceId, serviceTitle) => {
 };
 
 
-function renderOppCard(o){
-  const creator=store.getUser(o.creatorId);
+function renderOppCard(o, usersById){
+  const creator=(usersById&&usersById[o.creatorId])||null;
   const isCreator = store.getMe()?.id === o.creatorId;
   const valMap={job:(o.metadata?.value?o.metadata.value:'TBD'),partnership:'Equity: '+(o.metadata?.equity||'TBD'),collaboration:'Equity: '+(o.metadata?.equity||'TBD'),investment:'Ticket: '+(o.metadata?.ticketSize||'TBD'),referral:'Bonus: '+(o.metadata?.bonus?fmtMoney(o.metadata.bonus):'TBD'),service:'Budget: '+(o.metadata?.budgetMin?fmtMoney(o.metadata.budgetMin)+' - '+fmtMoney(o.metadata.budgetMax):'TBD'),service_request:'TBD'};
   return '<div class="opp-card" data-opp-id="'+o.id+'"><div class="opp-main"><div class="opp-title">'+escHtml(o.title)+'</div><div class="opp-meta"><span class="type-badge type-'+o.type+'">'+o.type.replace('_',' ')+'</span>'+avatarHtml(creator,'sm')+'<span class="opp-meta-item">'+escHtml(creator?.name||'')+'</span>'+(o.remoteOk?'<span class="opp-meta-item">Remote OK</span>':'')+'<span class="opp-meta-item">'+o.applicationCount+' applied</span></div><div class="opp-desc">'+escHtml(o.description)+'</div><div class="skill-tags mt-2">'+(o.skills||[]).map(s=>'<span class="skill-tag">'+escHtml(s)+'</span>').join('')+'</div></div><div class="opp-right"><div class="opp-value">'+(valMap[o.type]||'')+'</div><div class="opp-posted">'+timeAgo(o.createdAt)+'</div>'+(isCreator?'<button class="btn btn-ghost btn-xs mt-2 delete-opp-btn" style="color:var(--red)" data-opp-id="'+o.id+'" data-opp-title="'+escHtml(o.title)+'" onclick="event.stopPropagation()">Delete</button>':'<button class="btn btn-teal btn-sm mt-2" onclick="event.stopPropagation();applyToOpportunity(\''+o.id+'\',this)">Apply</button>')+'</div></div>';
@@ -1515,7 +1549,7 @@ window.applyToOpportunity = async (oppId, btnEl) => {
 async function renderOppDetail(oppId){
   const o=store.get('opportunities').find(x=>x.id===oppId);if(!o)return;
   _activeOppId = oppId;
-  const creator=store.getUser(o.creatorId);
+  const creator=await store.getUser(o.creatorId);
   const me=store.getMe();
   const isCreator = me && o.creatorId===me.id;
   $('#modal-opp-detail .modal-title').textContent=o.title;
@@ -1661,11 +1695,12 @@ async function renderDeals(){
   const me=store.getMe(),filter=pageParams.status||'all';
   const filtered=filter==='all'?deals:deals.filter(d=>d.status===filter);
   const STAGES=['proposed','negotiating','accepted','in_progress','completed','paid'];
+  const dealUsers = await usersByIdMap(filtered.map(d=>d.buyerId===me.id?d.sellerId:d.buyerId));
   const el=document.getElementById('page-deals');
   el.innerHTML='<div class="page-head"><div class="page-head-left"><h1 class="page-title">Deals</h1><p class="page-sub">'+deals.length+' total</p></div><div class="page-actions"><button class="btn btn-teal" onclick="openModal(\'modal-create-deal\')">'+icon('plus')+' Create Deal</button></div></div>'+
   '<div class="filter-bar">'+['all','proposed','in_progress','completed','paid'].map(s=>{const cnt=s==='all'?deals.length:deals.filter(d=>d.status===s).length;return cnt>0||s==='all'?'<button class="filter-pill deal-filter-btn '+(filter===s?'active':'')+'" data-status="'+s+'">'+s.replace('_',' ')+' ('+cnt+')</button>':'';}).join('')+'</div>'+
   '<div class="deal-list">'+(filtered.length?filtered.map(d=>{
-    const other=store.getUser(d.buyerId===me.id?d.sellerId:d.buyerId),si=STAGES.indexOf(d.status);
+    const other=dealUsers[d.buyerId===me.id?d.sellerId:d.buyerId],si=STAGES.indexOf(d.status);
     const isDone = d.status==='paid' || d.status==='completed';
     return '<div class="deal-card" data-deal-id="'+d.id+'" onclick="navigate(\'deal-detail\',{dealId:\''+d.id+'\'})"><div class="deal-card-top"><div><div class="deal-title">'+escHtml(d.title)+'</div><div class="deal-parties">'+avatarHtml(other,'sm')+' '+escHtml(other?.name||'?')+' - '+(d.buyerId===me.id?'You are Buyer':'You are Seller')+'</div></div><div style="text-align:right"><div class="deal-amount">'+fmtMoney(d.priceCents/100,d.currency)+'</div>'+dealStatusBadge(d.status)+'</div></div><div class="deal-stages">'+STAGES.map((s,i)=>'<div class="deal-stage-dot '+(i<si?'done':i===si?'current':'')+'"></div>').join('')+'</div><div class="deal-card-footer"><span class="deal-due">'+icon('clock')+' '+(d.endDate||'TBD')+'</span><span class="flex items-center gap-2"><span class="t-micro c-text3">'+(d.messages?.length||0)+' messages</span>'+(isDone?'<button class="btn btn-ghost btn-xs delete-deal-btn" style="color:var(--red)" data-deal-id="'+d.id+'" data-deal-title="'+escHtml(d.title)+'" onclick="event.stopPropagation()">Delete</button>':'')+'</span></div></div>';
   }).join(''):'<div class="empty-state"><div class="empty-icon">&#x1F91D;</div><div class="empty-title">No deals yet</div><button class="btn btn-primary btn-sm" onclick="openModal(\'modal-create-deal\')">Create Deal</button></div>')+'</div>';
@@ -1677,7 +1712,15 @@ async function renderDealDetail(){
   let deal;
   try { deal=await store.getDeal(pageParams.dealId); } catch(e){ deal=null; }
   if(!deal){navigate('deals');return;}
-  const me=store.getMe(),buyer=store.getUser(deal.buyerId),seller=store.getUser(deal.sellerId),isBuyer=deal.buyerId===me.id;
+  const me=store.getMe(),buyer=await store.getUser(deal.buyerId),seller=await store.getUser(deal.sellerId),isBuyer=deal.buyerId===me.id;
+  const otherParty=isBuyer?seller:buyer;
+  const isFinished=['completed','paid'].includes(deal.status);
+  const withinReviewWindow=deal.completedAt && (Date.now()-new Date(deal.completedAt).getTime())<14*24*60*60*1000;
+  let myReview=null;
+  if(isFinished){
+    try{ myReview=await store.getMyReviewForDeal(deal.id, me.id); }catch(e){ myReview=null; }
+  }
+  const canReview=isFinished && withinReviewWindow && !myReview;
   const STAGES=['proposed','negotiating','accepted','in_progress','completed','paid'],si=STAGES.indexOf(deal.status);
   const fairrissFee=10,fees=fairrissFee/100*deal.priceCents/100,sellerGets=deal.priceCents/100-fees;
   const actions={
@@ -1694,17 +1737,30 @@ async function renderDealDetail(){
   '<div class="deal-stages mb-4">'+STAGES.map((s,i)=>'<div class="deal-stage-dot '+(i<si?'done':i===si?'current':'')+'" title="'+s+'"></div>').join('')+'</div>'+
   '<div class="two-col-equal"><div class="card card-sm" style="background:var(--surface)"><div class="t-label c-text4 mb-2">Buyer</div><div class="flex gap-2 items-center">'+avatarHtml(buyer,'md')+'<div class="t-h3">'+escHtml(buyer?.name||'?')+'</div></div></div><div class="card card-sm" style="background:var(--surface)"><div class="t-label c-text4 mb-2">Seller</div><div class="flex gap-2 items-center">'+avatarHtml(seller,'md')+'<div class="t-h3">'+escHtml(seller?.name||'?')+'</div></div></div></div>'+
   (actions[deal.status]?.length?'<div class="flex gap-2 mt-4">'+actions[deal.status].map(a=>'<button class="btn '+a.cls+'" onclick="'+a.fn+'">'+a.label+'</button>').join('')+'</div>':'')+(['paid','completed'].includes(deal.status)?'<div class="mt-3"><button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteDealAction(\''+deal.id+'\',\''+escHtml(deal.title).replace(/'/g,"\\\\'")+'\')">Delete Deal</button></div>':'')+'</div>'+
+  (canReview?'<div class="card mb-4"><h3 class="t-h2 mb-2">Leave a review for '+escHtml(otherParty?.name||'this user')+'</h3><p class="t-small c-text3 mb-3">You have 14 days after a deal completes to leave a review.</p><div id="deal-review-stars" style="display:flex;gap:4px;margin-bottom:.75rem" data-rating="0">'+[1,2,3,4,5].map(n=>'<button type="button" class="deal-review-star" data-n="'+n+'" style="background:none;border:none;cursor:pointer;padding:2px" onclick="setDealReviewStar('+n+')">'+starIcon(false).replace(/width="14" height="14"/,'width="24" height="24"')+'</button>').join('')+'</div><textarea class="form-control mb-2" id="deal-review-comment" rows="2" placeholder="Optional \u2014 what was it like working with them?"></textarea><button class="btn btn-teal btn-sm" onclick="submitDealReview(\''+deal.id+'\',\''+otherParty?.id+'\')">Submit Review</button></div>':'')+
+  (myReview?'<div class="card mb-4"><h3 class="t-h2 mb-2">Your review</h3>'+starRow(myReview.rating,18)+(myReview.comment?'<p class="t-small mt-2" style="color:var(--text-2)">'+escHtml(myReview.comment)+'</p>':'')+'</div>':'')+
   '<div class="two-col"><div><div class="card mb-3"><h3 class="t-h2 mb-2">Scope</h3><p class="t-body" style="line-height:1.7;color:var(--text-2)">'+escHtml(deal.scope)+'</p></div>'+
   '<div class="card mb-3"><h3 class="t-h2 mb-3">Deliverables</h3>'+(deal.deliverables?.map(del=>'<div class="deliverable-item '+(del.done?'done':'')+'"><div class="deliverable-check '+(del.done?'checked':'')+'">'+( del.done?icon('check'):'')+'</div><div class="deliverable-title" style="'+(del.done?'text-decoration:line-through;opacity:.6':'')+'">'+escHtml(del.title)+'</div></div>').join('')||'<div class="t-body c-text3">No deliverables</div>')+'</div>'+
   '<div class="card card-sm" style="background:var(--surface)"><div class="t-label c-text4 mb-2">Fee Breakdown</div><div class="flex justify-between mb-1"><span class="t-small c-text3">Deal value</span><span class="t-small">'+fmtMoney(deal.priceCents/100)+'</span></div><div class="flex justify-between mb-2"><span class="t-small c-text3">Fairriss fee (10%)</span><span class="t-small c-red">-'+fmtMoney(fees)+'</span></div><div class="divider" style="margin:.5rem 0"></div><div class="flex justify-between"><span class="t-body" style="font-weight:700">Seller receives</span><span class="t-body c-green" style="font-weight:700">'+fmtMoney(sellerGets)+'</span></div></div></div>'+
   '<div><div class="card card-flush"><div class="notif-panel-head" style="padding:.875rem 1rem"><h3 class="t-h2">Messages</h3></div><div class="message-thread" id="deal-messages">'+
-  (deal.messages?.map(msg=>{const isMe2=msg.senderId===me.id,sender=store.getUser(msg.senderId);return '<div class="message-item '+(isMe2?'mine':'')+'">'+(!isMe2?avatarHtml(sender,'sm'):'')+'<div><div class="message-bubble">'+escHtml(msg.body)+'</div><div class="message-time">'+timeAgo(msg.createdAt)+' &middot; '+fullDateTime(msg.createdAt)+'</div></div></div>';}).join('')||'<div class="empty-state" style="padding:1.5rem">No messages yet</div>')+
+  (deal.messages?.map(msg=>{const isMe2=msg.senderId===me.id,sender=msg.senderId===buyer?.id?buyer:seller;return '<div class="message-item '+(isMe2?'mine':'')+'">'+(!isMe2?avatarHtml(sender,'sm'):'')+'<div><div class="message-bubble">'+escHtml(msg.body)+'</div><div class="message-time">'+timeAgo(msg.createdAt)+' &middot; '+fullDateTime(msg.createdAt)+'</div></div></div>';}).join('')||'<div class="empty-state" style="padding:1.5rem">No messages yet</div>')+
   '</div><div class="message-input-row" style="position:relative"><button type="button" class="btn btn-ghost btn-sm" style="padding:.5rem;font-size:1.125rem" onclick="toggleEmojiPicker(\'deal-msg-input\',this)">&#x1F642;</button><input class="message-input" id="deal-msg-input" placeholder="Write a message..."><button class="btn btn-teal btn-sm" id="deal-msg-send">'+icon('send')+'</button></div></div></div></div>';
   const sendMsg=()=>{const input=$('#deal-msg-input'),body=input.value.trim();if(!body)return;store.addDealMessage(deal.id,body);input.value='';renderDealDetail();const t=$('#deal-messages');if(t)t.scrollTop=t.scrollHeight;};
   $('#deal-msg-send').onclick=sendMsg;$('#deal-msg-input').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}};
   const t=$('#deal-messages');if(t)t.scrollTop=t.scrollHeight;
 }
-window.updateDealStatus=async(id,status)=>{await store.updateDeal(id,{status});toast('Deal moved to '+status.replace('_',' '),'success');updateShellDynamic(store.getMe());renderDealDetail();};
+window.updateDealStatus=async(id,status)=>{
+  const fields={status};
+  if(status==='completed'||status==='paid'){
+    let d=null;
+    try{ d=await store.getDeal(id); }catch(e){}
+    if(!d?.completedAt) fields.completedAt=new Date().toISOString();
+  }
+  await store.updateDeal(id,fields);
+  toast('Deal moved to '+status.replace('_',' '),'success');
+  updateShellDynamic(store.getMe());
+  renderDealDetail();
+};
 
 // ── Profile ────────────────────────────────────────────────────────────────
 function renderFeaturedPhotosCard(u, isMe){
@@ -1773,6 +1829,25 @@ function renderAboutCard(u,isMe){
   h+='</div>';return h;
 }
 
+function renderReviewItem(r, viewerId){
+  const reviewerUser = {id:r.reviewerId, name:r.reviewer?.name||'Fairriss user', profilePics:r.reviewer?.profilePics||[]};
+  const withinReplyWindow = (Date.now()-new Date(r.createdAt).getTime()) < 28*24*60*60*1000;
+  const canReply = viewerId===r.revieweeId && !r.reply && withinReplyWindow;
+  const canReport = viewerId && viewerId!==r.reviewerId && !r.reported;
+  return '<div style="padding:.875rem;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.625rem">'+
+    '<div class="flex justify-between items-start">'+
+      '<div class="flex gap-2 items-center">'+avatarHtml(reviewerUser,'sm')+
+        '<div><div class="t-small" style="font-weight:600">'+escHtml(reviewerUser.name)+'</div>'+starRow(r.rating,12)+'</div>'+
+      '</div>'+
+      '<span class="t-micro c-text4">'+timeAgo(r.createdAt)+'</span>'+
+    '</div>'+
+    (r.comment?'<p class="t-small mt-2" style="color:var(--text-2)">'+escHtml(r.comment)+'</p>':'')+
+    (r.reply?'<div style="margin-top:.625rem;padding-left:.75rem;border-left:2px solid var(--border)"><div class="t-micro c-text3" style="font-weight:600;margin-bottom:.125rem">Reply</div><p class="t-small" style="color:var(--text-2)">'+escHtml(r.reply)+'</p></div>':'')+
+    (canReply?'<div style="margin-top:.625rem"><textarea class="form-control review-reply-input" id="reply-input-'+r.id+'" rows="2" placeholder="Add context to this review (one-time, cannot be edited later)"></textarea><button class="btn btn-outline btn-xs mt-2" onclick="submitReviewReply(\''+r.id+'\')">Post Reply</button></div>':'')+
+    (canReport?'<button class="btn btn-ghost btn-xs mt-2" style="color:var(--text-4)" onclick="reportReviewPrompt(\''+r.id+'\')">Report</button>':(r.reported?'<span class="t-micro c-text4 mt-2" style="display:block">Reported for review</span>':''))+
+  '</div>';
+}
+
 async function renderProfile(){
   const userId=pageParams.userId||store.getMe()?.id;
   if(!userId){navigate('home');return;}
@@ -1802,6 +1877,7 @@ async function renderProfile(){
   const me=store.getMe();
   const isMe = u.id === currentUserId;
   const myDeals=store.get('deals').filter(d=>d.sellerId===u.id||d.buyerId===u.id);
+  const recentDealUsers = await usersByIdMap(myDeals.slice(0,3).map(d=>d.buyerId===u.id?d.sellerId:d.buyerId));
   const myServices = await (async()=>{
     const sb=getSb();
     if(!sb) return [];
@@ -1810,6 +1886,8 @@ async function renderProfile(){
       return data||[];
     } catch(e){ return []; }
   })();
+  let profileReviews = [];
+  try { profileReviews = await store.getReviewsForUser(u.id); } catch(e){ profileReviews = []; }
   const el=document.getElementById('page-profile');
   if(!el) return;
 
@@ -1835,7 +1913,7 @@ async function renderProfile(){
   '<span class="avail-badge '+(u.availability||'unavailable')+'" style="font-size:.75rem">'+(u.availability==='available'?'Available':u.availability==='limited'?'Limited':'Unavailable')+'</span>'+
   (u.website?'<a href="'+(u.website.startsWith('http')?u.website:'https://'+u.website)+'" target="_blank" rel="noopener" style="color:var(--teal);font-size:.8125rem;display:flex;align-items:center;gap:.3rem;text-decoration:none;font-weight:500">'+icon('link')+' '+escHtml(u.website.replace(/^https?:\/\//,'').replace(/\/$/,''))+'</a>':'')+
   '</div></div>'+
-  '<div style="flex-shrink:0;text-align:center;margin-left:auto"><div class="trust-score-circle" style="--pct:'+u.trustScore+'%;width:76px;height:76px"><div class="trust-score-inner" style="width:58px;height:58px"><div class="trust-score-num-lg" style="font-size:1.25rem">'+u.trustScore+'</div><div class="trust-score-label">Trust</div></div></div></div>'+
+  '<div style="flex-shrink:0;text-align:right;margin-left:auto">'+(u.reviewCount?starRow(u.reviewAvg,16)+' <div style="margin-top:.25rem;font-weight:600">'+u.reviewAvg+' <span class="t-micro c-text3" style="font-weight:400">('+u.reviewCount+')</span></div>':'<div class="t-micro c-text4">No reviews yet</div>')+'</div>'+
   '</div>'+
   '<div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,.1)"><div style="font-size:.6875rem;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.07em;text-transform:uppercase;margin-bottom:.625rem">Photos</div>'+picSlots+'</div></div>'+
   (!isMe?'<div class="flex gap-2 mb-4"><button class="btn btn-primary" onclick="openModal(\'modal-create-deal\')">Create Deal</button><button class="btn btn-outline" onclick="openDM(\''+u.id+'\')">Message</button></div>':'<div class="flex gap-2 mb-4"><button class="btn btn-outline" onclick="shareMyProfile(\''+escHtml(u.username||'')+'\')">'+icon('link')+' Share Profile</button></div>')+
@@ -1853,7 +1931,10 @@ async function renderProfile(){
   (isMe||u.resume?'<div class="card mb-4"><h2 class="t-h2 mb-3">'+icon('file')+' Resume</h2>'+(u.resume?'<div class="flex gap-2 items-center"><span class="t-small c-green">Resume uploaded</span><a href="'+u.resume+'" target="_blank" class="btn btn-outline btn-sm">View</a>'+(isMe?'<label class="btn btn-ghost btn-sm" style="cursor:pointer">Replace<input type="file" accept=".pdf,.doc,.docx" style="display:none" onchange="uploadResume(event)"></label>':'')+'</div>':'<label class="btn btn-outline btn-sm" style="cursor:pointer">'+icon('file')+' Upload Resume<input type="file" accept=".pdf,.doc,.docx" style="display:none" onchange="uploadResume(event)"></label>')+'</div>':'')+
   '</div><div>'+
   '<div class="card mb-4"><h2 class="t-h2 mb-3">Reputation</h2><div class="reputation-grid"><div class="rep-item"><div class="rep-value">'+(u.deals||0)+'</div><div class="rep-label">Deals Done</div></div>'+(isMe?'<div class="rep-item"><div class="rep-value">'+fmtMoney(u.revenue||0)+'</div><div class="rep-label">Revenue</div></div>':'')+
-  '<div class="rep-item"><div class="rep-value">'+(u.referralsSent||0)+'</div><div class="rep-label">Referrals</div></div><div class="rep-item"><div class="rep-value">'+(u.referralsConverted||0)+'</div><div class="rep-label">Converted</div></div><div class="rep-item"><div class="rep-value">'+(u.reviewAvg?u.reviewAvg+'*':'-')+'</div><div class="rep-label">Avg Review</div></div><div class="rep-item"><div class="rep-value">'+u.trustScore+'</div><div class="rep-label">Trust Score</div></div></div></div>'+
+  '<div class="rep-item"><div class="rep-value">'+(u.referralsSent||0)+'</div><div class="rep-label">Referrals</div></div><div class="rep-item"><div class="rep-value">'+(u.referralsConverted||0)+'</div><div class="rep-label">Converted</div></div><div class="rep-item"><div class="rep-value">'+(u.reviewCount?u.reviewAvg:'-')+'</div><div class="rep-label">Avg Review</div></div><div class="rep-item"><div class="rep-value">'+(u.reviewCount||0)+'</div><div class="rep-label">Reviews</div></div></div></div>'+
+  '<div class="card mb-4"><h2 class="t-h2 mb-3">Reviews</h2>'+
+  (profileReviews.length?profileReviews.map(r=>renderReviewItem(r,currentUserId)).join(''):'<p class="t-body c-text3">No reviews yet.</p>')+
+  '</div>'+
   (isMe?'<div class="card mb-4"><h2 class="t-h2 mb-3">Payouts</h2>'+
   '<p class="t-small c-text3 mb-3">Connect your bank account to receive payments when deals are completed.</p>'+
   (me.stripeAccountId?
@@ -1864,7 +1945,7 @@ async function renderProfile(){
   )+'</div>':'')+
 '<div class="card mb-4"><h2 class="t-h2 mb-3">Skills</h2><div class="skill-tags">'+(u.skills||[]).map(s=>'<span class="skill-tag primary">'+escHtml(s)+'</span>').join('')+'</div>'+(isMe?'<input class="form-control mt-3" id="profile-skills" placeholder="Skills comma-separated" value="'+escHtml((u.skills||[]).join(', '))+'" style="margin-top:.75rem"><button class="btn btn-outline btn-sm mt-2" onclick="saveSkills()">Update Skills</button>':'')+'</div>'+
   (myServices.length || isMe ? '<div class="card mb-4"><div class="flex justify-between items-center mb-3"><h2 class="t-h2" style="margin:0">Services</h2>'+(isMe?'<button class="btn btn-outline btn-xs" onclick="openModal(\'modal-create-service\')">+ Add</button>':'')+'</div>'+(myServices.length?myServices.map(s=>'<div class="card card-sm mb-2" style="background:var(--surface)"><div class="flex justify-between items-start"><div class="flex-1"><div class="t-h3 mb-1">'+escHtml(s.title)+'</div><div class="t-small c-text3 mb-1">'+escHtml(s.description)+'</div><div class="skill-tags mt-1">'+(s.skills||[]).map(sk=>'<span class="skill-tag">'+escHtml(sk)+'</span>').join('')+'</div></div><div style="text-align:right;flex-shrink:0;margin-left:.75rem"><div style="font-weight:800;color:var(--navy)">'+(s.price_cents?fmtMoney(s.price_cents/100)+(s.price_type==='hourly'?'/hr':''):'Rate on request')+'</div>'+(isMe?'<button class="btn btn-ghost btn-xs mt-1" style="color:var(--red)" onclick="deleteServiceAction(\''+s.id+'\',\''+escHtml(s.title).replace(/'/g,"\\\\'")+'\')">Delete</button>':'<button class="btn btn-teal btn-xs mt-1" onclick="openDM(\''+s.creator_id+'\')">Message</button>')+'</div></div></div>').join(''):'<div class="t-body c-text3">No services listed yet</div>')+'</div>':'')+
-  '<div class="card"><h2 class="t-h2 mb-3">Recent Deals</h2>'+(myDeals.slice(0,3).length?myDeals.slice(0,3).map(d=>{const other=store.getUser(d.buyerId===u.id?d.sellerId:d.buyerId);return '<div class="flex justify-between items-center mb-3">'+avatarHtml(other,'sm')+'<div class="flex-1" style="margin-left:.5rem"><div class="t-small" style="font-weight:600">'+escHtml(d.title)+'</div><div class="t-micro c-text4">'+timeAgo(d.createdAt)+'</div></div>'+dealStatusBadge(d.status)+'</div>';}).join(''):'<div class="t-body c-text3">No deals yet</div>')+
+  '<div class="card"><h2 class="t-h2 mb-3">Recent Deals</h2>'+(myDeals.slice(0,3).length?myDeals.slice(0,3).map(d=>{const other=recentDealUsers[d.buyerId===u.id?d.sellerId:d.buyerId];return '<div class="flex justify-between items-center mb-3">'+avatarHtml(other,'sm')+'<div class="flex-1" style="margin-left:.5rem"><div class="t-small" style="font-weight:600">'+escHtml(d.title)+'</div><div class="t-micro c-text4">'+timeAgo(d.createdAt)+'</div></div>'+dealStatusBadge(d.status)+'</div>';}).join(''):'<div class="t-body c-text3">No deals yet</div>')+
   '</div>'+
   (isMe?'<div class="card mt-4"><h2 class="t-h2 mb-3">Account</h2><div style="display:flex;flex-direction:column;gap:.5rem"><button class="btn btn-outline btn-sm" style="justify-content:flex-start" onclick="navigate(\'support\')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Support</button><button class="btn btn-outline btn-sm" style="justify-content:flex-start;color:var(--red);border-color:var(--red)" onclick="handleLogout()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Log Out</button></div></div>':'')+
   '</div></div>';
@@ -1981,6 +2062,54 @@ window.addEducation=async()=>{
   }
 };
 window.removeEducation=async(i)=>{const me=store.getMe(),education=[...(me.education||[])];education.splice(i,1);try{await store.updateMe({education});toast('Removed','success');renderProfile();}catch(e){toast('Failed to remove: '+e.message,'error');}};
+
+window.submitReviewReply=async(reviewId)=>{
+  const input=$('#reply-input-'+reviewId);
+  const reply=input?.value.trim();
+  if(!reply){toast('Write a reply first','error');return;}
+  try{
+    await store.submitReply(reviewId,reply);
+    toast('Reply posted','success');
+    renderProfile();
+  }catch(e){
+    toast('Could not post reply: '+e.message,'error');
+  }
+};
+
+window.reportReviewPrompt=async(reviewId)=>{
+  const reason=window.prompt('Tell us what\'s wrong with this review (abuse, harassment, or a false claim). This flags it for admin review only \u2014 it will not be removed automatically.');
+  if(reason===null) return;
+  try{
+    await store.reportReview(reviewId,reason);
+    toast('Reported. Our team will take a look.','success');
+    renderProfile();
+  }catch(e){
+    toast('Could not report review: '+e.message,'error');
+  }
+};
+
+window.setDealReviewStar=(n)=>{
+  const wrap=$('#deal-review-stars');
+  if(!wrap) return;
+  wrap.dataset.rating=n;
+  $$('.deal-review-star',wrap).forEach((btn,i)=>{
+    btn.innerHTML=starIcon(i<n).replace(/width="14" height="14"/,'width="24" height="24"');
+  });
+};
+
+window.submitDealReview=async(dealId,revieweeId)=>{
+  const wrap=$('#deal-review-stars');
+  const rating=parseInt(wrap?.dataset.rating||'0',10);
+  if(!rating){toast('Pick a star rating first','error');return;}
+  const comment=$('#deal-review-comment')?.value.trim()||'';
+  try{
+    await store.submitReview(dealId,revieweeId,rating,comment);
+    toast('Review submitted','success');
+    renderDealDetail();
+  }catch(e){
+    toast('Could not submit review: '+e.message,'error');
+  }
+};
 // uploadPic / uploadVideo / uploadResume are defined in supabase_phase2.js
 // (real Supabase Storage uploads with correct slot handling) — do not
 // redefine them here, it silently overwrites the working versions.
@@ -1994,11 +2123,16 @@ async function renderAnalytics(){
   const allDeals=store.get('deals').filter(d=>(myWheels||[]).some(w=>w.id===d.wheelId));
   const paid=allDeals.filter(d=>d.status==='paid'),gmv=paid.reduce((s,d)=>s+d.priceCents/100,0);
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul'],rev=[1200,2100,1800,3400,2800,4200,5100],maxRev=Math.max(...rev);
+  let topMembers=[];
+  try{
+    const memberArrays=await Promise.all(myWheels.map(w=>store.getWheelMembers(w.id).catch(()=>[])));
+    topMembers=memberArrays.flat().filter((u,i,a)=>u&&a.findIndex(x=>x.id===u.id)===i).sort((a,b)=>(b.reviewAvg||0)-(a.reviewAvg||0)).slice(0,5);
+  }catch(e){ topMembers=[]; }
   document.getElementById('page-analytics').innerHTML=
   '<div class="page-head"><div class="page-head-left"><h1 class="page-title">Analytics</h1><p class="page-sub">Your network at a glance</p></div></div>'+
   '<div class="stats-grid"><div class="stat-card"><span class="stat-label">Total Members</span><span class="stat-value">'+fmt(myWheels.reduce((s,w)=>s+w.memberCount,0))+'</span></div><div class="stat-card"><span class="stat-label">GMV</span><span class="stat-value">'+fmtMoney(gmv)+'</span></div><div class="stat-card"><span class="stat-label">Completed Deals</span><span class="stat-value">'+paid.length+'</span></div><div class="stat-card"><span class="stat-label">Active Deals</span><span class="stat-value">'+allDeals.filter(d=>d.status==='in_progress').length+'</span></div></div>'+
   '<div class="two-col"><div><div class="analytics-chart"><h3 class="t-h2 mb-3">Revenue (Monthly)</h3><div class="chart-bars">'+months.map((m,i)=>'<div class="chart-bar-group"><div class="chart-bar-val">'+fmtMoney(rev[i])+'</div><div class="chart-bar" style="height:'+Math.round(rev[i]/maxRev*100)+'%;background:'+(i===months.length-1?'var(--teal)':'var(--navy)')+'"></div><div class="chart-bar-label">'+m+'</div></div>').join('')+'</div></div></div>'+
-  '<div><div class="card"><h3 class="t-h2 mb-3">Top Members by Trust</h3>'+myWheels.flatMap(w=>store.getWheelMembers(w.id)).filter((u,i,a)=>a.findIndex(x=>x.id===u.id)===i).sort((a,b)=>b.trustScore-a.trustScore).slice(0,5).map(u=>'<div class="flex gap-2 items-center mb-3">'+avatarHtml(u,'sm')+'<div class="flex-1"><div class="t-small" style="font-weight:600">'+escHtml(u.name)+'</div></div><div class="trust-bar-wrap" style="width:80px"><div class="trust-bar-fill" style="width:'+u.trustScore+'%"></div></div><span class="trust-score-num">'+u.trustScore+'</span></div>').join('')+'</div></div></div>';
+  '<div><div class="card"><h3 class="t-h2 mb-3">Top Members by Rating</h3>'+(topMembers.length?topMembers.map(u=>'<div class="flex gap-2 items-center mb-3">'+avatarHtml(u,'sm')+'<div class="flex-1"><div class="t-small" style="font-weight:600">'+escHtml(u.name)+'</div></div>'+reviewSummaryHtml(u.reviewAvg||0,u.reviewCount||0)+'</div>').join(''):'<p class="t-body c-text3">No members yet</p>')+'</div></div></div>';
 }
 
 // ── Direct Messages ──────────────────────────────────────────────────────
@@ -2063,7 +2197,8 @@ window.insertEmoji = (inputId, emoji) => {
 
 // Get a user's profile, falling back to a live Supabase fetch if not cached locally.
 async function dmGetUser(id){
-  let u = store.getUser(id);
+  let u = null;
+  try { u = await store.getUser(id); } catch(e){ u = null; }
   if(u) return u;
   try {
     if(window.Users?.getById){
@@ -2255,11 +2390,12 @@ async function renderMessages(){
 }
 
 // ── Invite Modal ────────────────────────────────────────────────────────────
-window.openInviteModal=wheelId=>{
+window.openInviteModal=async wheelId=>{
   openModal('modal-invite-wheel');
   const wheel=store.get('wheels').find(w=>w.id===wheelId);
   if(!wheel)return;
-  const memberIds=store.getWheelMembers(wheelId).map(u=>u.id);
+  let memberIds=[];
+  try{ memberIds=(await store.getWheelMembers(wheelId)).map(u=>u.id); }catch(e){ memberIds=[]; }
   // Show ALL users on platform (except current user), mark existing members
   const allUsers=store.get('users').filter(u=>u.id!==store.getMe()?.id);
 
@@ -2328,14 +2464,16 @@ window.openInviteModal=wheelId=>{
 };
 
 // ── @Mention ────────────────────────────────────────────────────────────────
-function initMentionAutocomplete(textareaId,wheelId){
+async function initMentionAutocomplete(textareaId,wheelId){
   const ta=document.getElementById(textareaId);if(!ta)return;
   let dropdown=document.getElementById('mention-dropdown');
   if(!dropdown){dropdown=document.createElement('div');dropdown.id='mention-dropdown';dropdown.style.cssText='position:fixed;background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);z-index:9999;min-width:220px;max-height:200px;overflow-y:auto;display:none';document.body.appendChild(dropdown);}
+  let cachedMembers=[];
+  try{ cachedMembers=wheelId?(await store.getWheelMembers(wheelId)):store.get('users'); }catch(e){ cachedMembers=[]; }
   ta.addEventListener('input',()=>{
     const val=ta.value,pos=ta.selectionStart,before=val.slice(0,pos),match=before.match(/@(\w*)$/);
     if(!match){dropdown.style.display='none';return;}
-    const members=wheelId?store.getWheelMembers(wheelId):store.get('users');
+    const members=cachedMembers;
     const q=match[1].toLowerCase();
     const filtered=members.filter(u=>u.id!==store.getMe()?.id&&(u.name.toLowerCase().includes(q)||(u.username||'').toLowerCase().includes(q))).slice(0,6);
     if(!filtered.length){dropdown.style.display='none';return;}
@@ -2464,10 +2602,15 @@ function bindModalForms(){
     const myWheels = await store.getMyWheels();
     const wheelId=pageParams.wheelId||(myWheels||[])[0]?.id;
     if(!wheelId){toast('Join a Wheel first','error');return;}
-    const doPost=(photo,video)=>{
+    const doPost=async(photo,video)=>{
       store.createPost({wheelId,body,type:$('#cp-type').value,link:link||null,photo:photo||null,video:video||null});
       const mentions=[...body.matchAll(/@(\w+)/g)].map(m=>m[1].toLowerCase());
-      if(mentions.length){store.getWheelMembers(wheelId).forEach(m=>{if(mentions.includes(m.username?.toLowerCase()||m.name.split(' ')[0].toLowerCase())&&m.id!==store.getMe().id)notifyUser(m.id,'mention','<strong>'+escHtml(store.getMe().name)+'</strong> mentioned you in a post');});}
+      if(mentions.length){
+        try{
+          const wheelMembers=await store.getWheelMembers(wheelId);
+          (wheelMembers||[]).forEach(m=>{if(mentions.includes(m.username?.toLowerCase()||m.name.split(' ')[0].toLowerCase())&&m.id!==store.getMe().id)notifyUser(m.id,'mention','<strong>'+escHtml(store.getMe().name)+'</strong> mentioned you in a post');});
+        }catch(e){}
+      }
       toast('Post published!','success');closeAllModals();renderWheelDetail();
     };
     if(photoFile){const r=new FileReader();r.onload=ev=>{if(videoFile){const r2=new FileReader();r2.onload=ev2=>doPost(ev.target.result,ev2.target.result);r2.readAsDataURL(videoFile);}else doPost(ev.target.result,null);};r.readAsDataURL(photoFile);}
