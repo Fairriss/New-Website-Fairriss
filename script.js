@@ -1804,7 +1804,6 @@ function renderAboutCard(u,isMe){
     const isCustomRole = u.userType && !roleOptions.includes(u.userType);
     const selectedValue = isCustomRole ? 'Other' : (u.userType||'');
     h+='<div class="form-group mb-2"><label class="form-label">Name</label><input class="form-control" id="profile-name" value="'+escHtml(u.name||'')+'" placeholder="Your name"></div>';
-    h+='<div class="form-group mb-2"><label class="form-label">Username</label><input class="form-control" id="profile-username" data-original="'+escHtml(u.username||'')+'" value="'+escHtml(u.username||'')+'" placeholder="username"><div class="t-micro c-text3 mt-1">Used in your profile link (fairriss.com/?u=your-username). <strong style="color:var(--red)">Changing it breaks any link you\'ve already shared.</strong></div></div>';
     h+='<div class="form-group mb-2"><label class="form-label">What best describes you? <span>(optional)</span></label><select class="form-control" id="profile-usertype" onchange="document.getElementById(\'profile-other-row\').style.display=(this.value===\'Other\')?\'block\':\'none\'">'+roleOptions.map(r=>'<option value="'+escHtml(r)+'"'+(selectedValue===r?' selected':'')+'>'+(r||'Not set')+'</option>').join('')+'</select></div>';
     h+='<div class="form-group mb-2" id="profile-other-row" style="display:'+(isCustomRole?'block':'none')+'"><label class="form-label">Tell us what you do</label><input class="form-control" id="profile-other-input" value="'+escHtml(isCustomRole?u.userType:'')+'" placeholder="e.g. Consultant, Student, Recruiter..."></div>';
     h+='<textarea class="form-control mb-2" id="profile-bio" rows="3">'+escHtml(u.bio||'')+'</textarea>';
@@ -1931,6 +1930,7 @@ async function renderProfile(){
   (isMe?'<div style="border:1.5px dashed var(--border);border-radius:var(--radius-sm);padding:.875rem;margin-top:.5rem"><div class="form-row mb-2"><div class="form-group"><label class="form-label">School</label><input class="form-control" id="edu-school" placeholder="University of Toronto"></div><div class="form-group"><label class="form-label">Degree</label><input class="form-control" id="edu-degree" placeholder="Bachelor of Arts"></div></div><div class="form-row mb-2"><div class="form-group"><label class="form-label">Field of Study</label><input class="form-control" id="edu-field" placeholder="Economics"></div><div class="form-group"><label class="form-label">City/Country</label><input class="form-control" id="edu-location" placeholder="Toronto, Canada"></div></div><div class="form-row mb-2"><div class="form-group"><label class="form-label">From</label><input class="form-control" id="edu-from" placeholder="2019"></div><div class="form-group"><label class="form-label">To</label><input class="form-control" id="edu-to" placeholder="2023 or Present"></div></div><button class="btn btn-outline btn-sm" onclick="addEducation()">+ Add Education</button></div>':'')+
   '</div>'+
   (isMe||u.resume?'<div class="card mb-4"><h2 class="t-h2 mb-3">'+icon('file')+' Resume</h2>'+(u.resume?'<div class="flex gap-2 items-center"><span class="t-small c-green">Resume uploaded</span><a href="'+u.resume+'" target="_blank" class="btn btn-outline btn-sm">View</a>'+(isMe?'<label class="btn btn-ghost btn-sm" style="cursor:pointer">Replace<input type="file" accept=".pdf,.doc,.docx" style="display:none" onchange="uploadResume(event)"></label>':'')+'</div>':'<label class="btn btn-outline btn-sm" style="cursor:pointer">'+icon('file')+' Upload Resume<input type="file" accept=".pdf,.doc,.docx" style="display:none" onchange="uploadResume(event)"></label>')+'</div>':'')+
+  (isMe?'<div class="card mb-4"><h2 class="t-h2 mb-3">Username</h2><div class="form-group mb-2"><input class="form-control" id="profile-username" data-original="'+escHtml(u.username||'')+'" value="'+escHtml(u.username||'')+'" placeholder="username"><div class="t-micro c-text3 mt-1">Used in your profile link (fairriss.com/?u=your-username). <strong style="color:var(--red)">Changing it breaks any link you\'ve already shared.</strong></div></div><button class="btn btn-outline btn-sm" onclick="saveUsername()">Save</button></div>':'')+
   '</div><div>'+
   '<div class="card mb-4"><h2 class="t-h2 mb-3">Reputation</h2><div class="reputation-grid"><div class="rep-item"><div class="rep-value">'+(u.deals||0)+'</div><div class="rep-label">Deals Done</div></div>'+(isMe?'<div class="rep-item"><div class="rep-value">'+fmtMoney(u.revenue||0)+'</div><div class="rep-label">Revenue</div></div>':'')+
   '<div class="rep-item"><div class="rep-value">'+(u.referralsSent||0)+'</div><div class="rep-label">Referrals</div></div><div class="rep-item"><div class="rep-value">'+(u.referralsConverted||0)+'</div><div class="rep-label">Converted</div></div><div class="rep-item"><div class="rep-value">'+(u.reviewCount?u.reviewAvg:'-')+'</div><div class="rep-label">Avg Review</div></div><div class="rep-item"><div class="rep-value">'+(u.reviewCount||0)+'</div><div class="rep-label">Reviews</div></div></div></div>'+
@@ -2007,19 +2007,30 @@ window.shareWheel = async (slug, name) => {
   }
 };
 
-window.saveProfileInfo=async()=>{
-  const name=$('#profile-name')?.value.trim();
-  if(!name){toast('Name cannot be empty','error');return;}
+window.saveUsername=async()=>{
   const usernameInput=$('#profile-username');
   let username=usernameInput?.value.trim().toLowerCase()||'';
   const originalUsername=usernameInput?.dataset.original||'';
   if(!username){toast('Username cannot be empty','error');return;}
   if(!/^[a-z0-9_-]+$/.test(username)){toast('Username can only contain letters, numbers, hyphens and underscores','error');return;}
-  const usernameChanged = username!==originalUsername.toLowerCase();
-  if(usernameChanged){
-    const ok=window.confirm('Change your username from "'+originalUsername+'" to "'+username+'"?\n\nYour profile link will change. Anyone who already has your old link (fairriss.com/?u='+originalUsername+') will get a broken link once you save.');
-    if(!ok) return;
+  if(username===originalUsername.toLowerCase()){toast('No change to save','success');return;}
+  const ok=window.confirm('Change your username from "'+originalUsername+'" to "'+username+'"?\n\nYour profile link will change. Anyone who already has your old link (fairriss.com/?u='+originalUsername+') will get a broken link once you save.');
+  if(!ok) return;
+  const btn = event?.target;
+  if(btn){ btn.disabled=true; btn.textContent='Saving...'; }
+  try {
+    await store.updateMe({username});
+    toast('Username updated','success');
+    renderProfile();
+  } catch(e){
+    const isDupe = /unique|duplicate/i.test(e.message||'');
+    toast(isDupe?'That username is already taken \u2014 please choose another':'Failed to save: '+e.message, 'error');
+    if(btn){ btn.disabled=false; btn.textContent='Save'; }
   }
+};
+window.saveProfileInfo=async()=>{
+  const name=$('#profile-name')?.value.trim();
+  if(!name){toast('Name cannot be empty','error');return;}
   const links=[...$$('.profile-link-input')].map(i=>i.value.trim()).filter(Boolean);
   let userType=$('#profile-usertype')?.value||'';
   if(userType==='Other'){
@@ -2027,7 +2038,7 @@ window.saveProfileInfo=async()=>{
     if(!custom){ toast('Please tell us what you do, or pick "Not set"', 'error'); return; }
     userType=custom;
   }
-  const fields={name,username,bio:$('#profile-bio').value.trim(),jobTitle:$('#profile-title').value.trim(),company:$('#profile-company').value.trim(),website:$('#profile-website')?.value.trim()||'',userType,links,location:$('#profile-location')?.value.trim()||'',contactEmail:$('#profile-contact-email')?.value.trim()||''};
+  const fields={name,bio:$('#profile-bio').value.trim(),jobTitle:$('#profile-title').value.trim(),company:$('#profile-company').value.trim(),website:$('#profile-website')?.value.trim()||'',userType,links,location:$('#profile-location')?.value.trim()||'',contactEmail:$('#profile-contact-email')?.value.trim()||''};
   const btn = event?.target;
   if(btn){ btn.disabled=true; btn.textContent='Saving...'; }
   try {
