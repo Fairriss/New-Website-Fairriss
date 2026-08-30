@@ -1803,6 +1803,7 @@ function renderAboutCard(u,isMe){
     const roleOptions=['','Founder','Freelancer','Owner','Investor','Advisor','Other'];
     const isCustomRole = u.userType && !roleOptions.includes(u.userType);
     const selectedValue = isCustomRole ? 'Other' : (u.userType||'');
+    h+='<div class="form-group mb-2"><label class="form-label">Name</label><input class="form-control" id="profile-name" value="'+escHtml(u.name||'')+'" placeholder="Your name"></div>';
     h+='<div class="form-group mb-2"><label class="form-label">What best describes you? <span>(optional)</span></label><select class="form-control" id="profile-usertype" onchange="document.getElementById(\'profile-other-row\').style.display=(this.value===\'Other\')?\'block\':\'none\'">'+roleOptions.map(r=>'<option value="'+escHtml(r)+'"'+(selectedValue===r?' selected':'')+'>'+(r||'Not set')+'</option>').join('')+'</select></div>';
     h+='<div class="form-group mb-2" id="profile-other-row" style="display:'+(isCustomRole?'block':'none')+'"><label class="form-label">Tell us what you do</label><input class="form-control" id="profile-other-input" value="'+escHtml(isCustomRole?u.userType:'')+'" placeholder="e.g. Consultant, Student, Recruiter..."></div>';
     h+='<textarea class="form-control mb-2" id="profile-bio" rows="3">'+escHtml(u.bio||'')+'</textarea>';
@@ -2006,6 +2007,8 @@ window.shareWheel = async (slug, name) => {
 };
 
 window.saveProfileInfo=async()=>{
+  const name=$('#profile-name')?.value.trim();
+  if(!name){toast('Name cannot be empty','error');return;}
   const links=[...$$('.profile-link-input')].map(i=>i.value.trim()).filter(Boolean);
   let userType=$('#profile-usertype')?.value||'';
   if(userType==='Other'){
@@ -2013,12 +2016,16 @@ window.saveProfileInfo=async()=>{
     if(!custom){ toast('Please tell us what you do, or pick "Not set"', 'error'); return; }
     userType=custom;
   }
-  const fields={bio:$('#profile-bio').value.trim(),jobTitle:$('#profile-title').value.trim(),company:$('#profile-company').value.trim(),website:$('#profile-website')?.value.trim()||'',userType,links,location:$('#profile-location')?.value.trim()||'',contactEmail:$('#profile-contact-email')?.value.trim()||''};
+  const fields={name,bio:$('#profile-bio').value.trim(),jobTitle:$('#profile-title').value.trim(),company:$('#profile-company').value.trim(),website:$('#profile-website')?.value.trim()||'',userType,links,location:$('#profile-location')?.value.trim()||'',contactEmail:$('#profile-contact-email')?.value.trim()||''};
   const btn = event?.target;
   if(btn){ btn.disabled=true; btn.textContent='Saving...'; }
   try {
     await store.updateMe(fields);
     toast('Profile updated','success');
+    const headerAvatar=document.getElementById('header-avatar');
+    if(headerAvatar) headerAvatar.textContent=initials(name);
+    const sidebarName=document.querySelector('.sidebar-user-name');
+    if(sidebarName) sidebarName.textContent=name;
     renderProfile();
   } catch(e){
     toast('Failed to save: '+e.message, 'error');
