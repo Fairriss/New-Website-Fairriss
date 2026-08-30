@@ -83,6 +83,28 @@ ul, ol { list-style: none; }
 .t-micro { font-size: .75rem; line-height: 1.4; letter-spacing: .02em; }
 .t-label { font-size: .6875rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 
+/* ── Profile page: larger, bolder text (scoped to #page-profile only) ──
+   NOTE: this block must stay ABOVE the @media breakpoints below — ties in
+   CSS specificity are resolved by source order, not by media-query
+   presence, so if this were moved after the mobile overrides it would
+   silently win on phones too and break the mobile step-down sizes. */
+#page-profile .t-h1        { font-size: 2rem;     font-weight: 800; }
+#page-profile .t-h2        { font-size: 1.375rem; font-weight: 800; }
+#page-profile .t-h3        { font-size: 1.125rem; font-weight: 700; }
+#page-profile .t-body      { font-size: 1.0625rem; font-weight: 500; line-height: 1.6; }
+#page-profile .t-small     { font-size: 1rem;      font-weight: 500; line-height: 1.5; }
+#page-profile .t-micro     { font-size: .9375rem;  font-weight: 500; }
+#page-profile .t-label     { font-size: .8125rem;  font-weight: 800; }
+#page-profile .form-label  { font-size: 1rem;      font-weight: 700; }
+#page-profile .form-control{ font-size: 1.0625rem; }
+#page-profile .btn         { font-size: 1rem;      font-weight: 700; }
+#page-profile .btn-sm      { font-size: 1rem;      font-weight: 700; }
+#page-profile .btn-xs      { font-size: .9375rem;  font-weight: 700; }
+#page-profile .skill-tag   { font-size: .875rem;   font-weight: 700; }
+#page-profile .rep-value   { font-size: 1.875rem;  font-weight: 900; }
+#page-profile .rep-label   { font-size: .8125rem;  font-weight: 700; }
+#page-profile .profile-name{ font-size: 2.25rem !important; }
+
 .c-teal   { color: var(--teal); }
 .c-text2  { color: var(--text-2); }
 .c-text3  { color: var(--text-3); }
@@ -1179,6 +1201,12 @@ select.form-control { cursor: pointer; }
   .trust-score-circle { width: 60px !important; height: 60px !important; }
   .trust-score-inner { width: 44px !important; height: 44px !important; }
   .trust-score-num-lg { font-size: 1rem !important; }
+
+  /* Profile page: step down the desktop text-size bump so the fixed
+     3-column reputation grid doesn't overflow on narrow screens */
+  #page-profile .rep-value    { font-size: 1.625rem; }
+  #page-profile .t-h1         { font-size: 1.75rem; }
+  #page-profile .profile-name { font-size: 1.875rem !important; }
 }
 
 /* ── Small phones (380px) ─────────────────────────────────── */
@@ -1189,6 +1217,10 @@ select.form-control { cursor: pointer; }
   .auth-form-side { padding: 1.5rem 1.25rem; }
   .mobile-nav-item { font-size: .5625rem; padding: .375rem .125rem; }
   .mobile-nav-item svg { width: 18px; height: 18px; }
+
+  /* Profile page: further step-down for the smallest phones */
+  #page-profile .rep-value    { font-size: 1.375rem; }
+  #page-profile .profile-name { font-size: 1.625rem !important; }
 }
 
 /* ── Animations ────────────────────────────────────────────── */
