@@ -58,6 +58,7 @@ function dbUser(u) {
     featuredPhotos: u.featured_photos || [],
     contactEmail: u.contact_email || '',
     education: u.education || [],
+    nameHistory: u.name_history || [],
     joinedAt: u.created_at,
   };
 }
@@ -299,6 +300,7 @@ const LiveStore = {
 
   async updateMe(fields) {
     const mapped = {};
+    if (fields.name !== undefined)       mapped.name = fields.name;
     if (fields.bio !== undefined)        mapped.bio = fields.bio;
     if (fields.jobTitle !== undefined)   mapped.job_title = fields.jobTitle;
     if (fields.company !== undefined)    mapped.company = fields.company;
