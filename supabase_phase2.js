@@ -54,6 +54,9 @@ function dbUser(u) {
     referralsConverted: u.referrals_converted || 0,
     reviewAvg: u.review_avg || 0,
     workHistory: u.work_history || [],
+    videos: u.videos || [],
+    featuredPhotos: u.featured_photos || [],
+    contactEmail: u.contact_email || '',
     joinedAt: u.created_at,
   };
 }
