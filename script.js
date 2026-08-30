@@ -1841,6 +1841,10 @@ async function renderProfile(){
   (u.workHistory||[]).map((j,i)=>'<div style="padding:.875rem;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.625rem"><div class="flex justify-between items-start"><div><div class="t-h3">'+escHtml(j.title)+'</div><div class="t-small c-text3">'+escHtml(j.company)+(j.city?' &middot; '+escHtml(j.city):'')+' - '+escHtml(j.from)+' to '+escHtml(j.to)+'</div></div>'+(isMe?'<button class="btn btn-ghost btn-xs" onclick="removeJob('+i+')">Remove</button>':'')+'</div>'+(j.desc?'<p class="t-small c-text3 mt-1">'+escHtml(j.desc)+'</p>':'')+'</div>').join('')+
   (isMe?'<div style="border:1.5px dashed var(--border);border-radius:var(--radius-sm);padding:.875rem;margin-top:.5rem"><div class="form-row mb-2"><div class="form-group"><label class="form-label">Title</label><input class="form-control" id="job-title" placeholder="Product Manager"></div><div class="form-group"><label class="form-label">Company</label><input class="form-control" id="job-company" placeholder="Acme Corp"></div></div><div class="form-row mb-2"><div class="form-group"><label class="form-label">City</label><input class="form-control" id="job-city" placeholder="Toronto, ON"></div><div class="form-group"><label class="form-label">From</label><input class="form-control" id="job-from" placeholder="2022"></div></div><div class="form-group mb-2"><label class="form-label">To</label><input class="form-control" id="job-to" placeholder="Present"></div><div class="form-group mb-2"><label class="form-label">Description</label><input class="form-control" id="job-desc" placeholder="What did you do?"></div><button class="btn btn-outline btn-sm" onclick="addJob()">+ Add Position</button></div>':'')+
   '</div>'+
+  '<div class="card mb-4"><h2 class="t-h2 mb-3">'+icon('briefcase')+' Education</h2>'+
+  (u.education||[]).map((ed,i)=>'<div style="padding:.875rem;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.625rem"><div class="flex justify-between items-start"><div><div class="t-h3">'+escHtml(ed.school)+'</div><div class="t-small c-text3">'+escHtml(ed.degree)+(ed.fieldOfStudy?', '+escHtml(ed.fieldOfStudy):'')+(ed.location?' &middot; '+escHtml(ed.location):'')+'</div><div class="t-small c-text3">'+escHtml(ed.from)+' - '+escHtml(ed.to)+'</div></div>'+(isMe?'<button class="btn btn-ghost btn-xs" onclick="removeEducation('+i+')">Remove</button>':'')+'</div></div>').join('')+
+  (isMe?'<div style="border:1.5px dashed var(--border);border-radius:var(--radius-sm);padding:.875rem;margin-top:.5rem"><div class="form-row mb-2"><div class="form-group"><label class="form-label">School</label><input class="form-control" id="edu-school" placeholder="University of Toronto"></div><div class="form-group"><label class="form-label">Degree</label><input class="form-control" id="edu-degree" placeholder="Bachelor of Arts"></div></div><div class="form-row mb-2"><div class="form-group"><label class="form-label">Field of Study</label><input class="form-control" id="edu-field" placeholder="Economics"></div><div class="form-group"><label class="form-label">City/Country</label><input class="form-control" id="edu-location" placeholder="Toronto, Canada"></div></div><div class="form-row mb-2"><div class="form-group"><label class="form-label">From</label><input class="form-control" id="edu-from" placeholder="2019"></div><div class="form-group"><label class="form-label">To</label><input class="form-control" id="edu-to" placeholder="2023 or Present"></div></div><button class="btn btn-outline btn-sm" onclick="addEducation()">+ Add Education</button></div>':'')+
+  '</div>'+
   (isMe||u.resume?'<div class="card mb-4"><h2 class="t-h2 mb-3">'+icon('file')+' Resume</h2>'+(u.resume?'<div class="flex gap-2 items-center"><span class="t-small c-green">Resume uploaded</span><a href="'+u.resume+'" target="_blank" class="btn btn-outline btn-sm">View</a>'+(isMe?'<label class="btn btn-ghost btn-sm" style="cursor:pointer">Replace<input type="file" accept=".pdf,.doc,.docx" style="display:none" onchange="uploadResume(event)"></label>':'')+'</div>':'<label class="btn btn-outline btn-sm" style="cursor:pointer">'+icon('file')+' Upload Resume<input type="file" accept=".pdf,.doc,.docx" style="display:none" onchange="uploadResume(event)"></label>')+'</div>':'')+
   '</div><div>'+
   '<div class="card mb-4"><h2 class="t-h2 mb-3">Reputation</h2><div class="reputation-grid"><div class="rep-item"><div class="rep-value">'+(u.deals||0)+'</div><div class="rep-label">Deals Done</div></div>'+(isMe?'<div class="rep-item"><div class="rep-value">'+fmtMoney(u.revenue||0)+'</div><div class="rep-label">Revenue</div></div>':'')+
@@ -1955,6 +1959,23 @@ window.addJob=async()=>{
   }
 };
 window.removeJob=async(i)=>{const me=store.getMe(),history=[...(me.workHistory||[])];history.splice(i,1);try{await store.updateMe({workHistory:history});toast('Removed','success');renderProfile();}catch(e){toast('Failed to remove: '+e.message,'error');}};
+window.addEducation=async()=>{
+  const school=$('#edu-school').value.trim(),degree=$('#edu-degree').value.trim();
+  if(!school||!degree){toast('School and degree required','error');return;}
+  const me=store.getMe();
+  const education=[...(me.education||[]),{id:uid(),school,degree,fieldOfStudy:$('#edu-field').value.trim()||'',location:$('#edu-location').value.trim()||'',from:$('#edu-from').value.trim()||'',to:$('#edu-to').value.trim()||'Present'}];
+  const btn = event?.target;
+  if(btn){ btn.disabled=true; btn.textContent='Adding...'; }
+  try {
+    await store.updateMe({education});
+    toast('Education added','success');
+    renderProfile();
+  } catch(e){
+    toast('Failed to add: '+e.message, 'error');
+    if(btn){ btn.disabled=false; btn.textContent='+ Add Education'; }
+  }
+};
+window.removeEducation=async(i)=>{const me=store.getMe(),education=[...(me.education||[])];education.splice(i,1);try{await store.updateMe({education});toast('Removed','success');renderProfile();}catch(e){toast('Failed to remove: '+e.message,'error');}};
 // uploadPic / uploadVideo / uploadResume are defined in supabase_phase2.js
 // (real Supabase Storage uploads with correct slot handling) — do not
 // redefine them here, it silently overwrites the working versions.
