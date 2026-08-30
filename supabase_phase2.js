@@ -47,12 +47,12 @@ function dbUser(u) {
     profilePics: u.profile_pics || [],
     introVideo: u.intro_video || '',
     resume: u.resume || '',
-    trustScore: u.trust_score || 0,
     deals: u.deals_count || 0,
     revenue: u.revenue || 0,
     referralsSent: u.referrals_sent || 0,
     referralsConverted: u.referrals_converted || 0,
     reviewAvg: u.review_avg || 0,
+    reviewCount: 0,
     workHistory: u.work_history || [],
     videos: u.videos || [],
     featuredPhotos: u.featured_photos || [],
@@ -79,6 +79,21 @@ function dbPost(p) {
   };
 }
 
+function dbReview(r) {
+  return {
+    id: r.id,
+    dealId: r.deal_id,
+    reviewerId: r.reviewer_id,
+    revieweeId: r.reviewee_id,
+    rating: r.rating,
+    comment: r.comment || '',
+    reply: r.reply || null,
+    repliedAt: r.replied_at,
+    reported: !!r.reported,
+    createdAt: r.created_at,
+  };
+}
+
 function dbDeal(d) {
   return {
     id: d.id,
@@ -96,6 +111,7 @@ function dbDeal(d) {
     endDate: d.end_date || '',
     platformFeePct: d.platform_fee_pct || 3,
     creatorCommissionPct: d.creator_commission_pct || 2.5,
+    completedAt: d.completed_at || null,
     createdAt: d.created_at,
     messages: (d.deal_messages || []).map(m => ({
       id: m.id,
@@ -170,7 +186,7 @@ const LiveStore = {
       // Load profile
       const { data: profile } = await window._supabase
         .from('users').select('*').eq('id', user.id).single();
-      if (profile) this._profile = dbUser(profile);
+      if (profile) this._profile = await this.mergeReviewStats(dbUser(profile));
       this._loaded = true;
       return true;
     } catch(e) {
@@ -182,17 +198,103 @@ const LiveStore = {
   getMe() { return this._profile; },
   isReady() { return this._loaded && !!this._currentUserId; },
 
+  // ── Reviews (stars + review count, replaces Trust Score) ───────
+  // Bulk-fetches rating stats for a list of user ids in one query and
+  // returns a map of { avg, count } keyed by userId. Used to merge live
+  // review data onto user objects after fetching them.
+  async getReviewStats(userIds) {
+    const ids = [...new Set(userIds)].filter(Boolean);
+    if (!ids.length) return {};
+    const { data, error } = await window._supabase
+      .from('reviews').select('reviewee_id, rating').in('reviewee_id', ids);
+    if (error) throw error;
+    const stats = {};
+    ids.forEach(id => stats[id] = { avg: 0, count: 0 });
+    data.forEach(r => {
+      if (!stats[r.reviewee_id]) stats[r.reviewee_id] = { avg: 0, count: 0 };
+      stats[r.reviewee_id]._sum = (stats[r.reviewee_id]._sum || 0) + r.rating;
+      stats[r.reviewee_id].count += 1;
+    });
+    Object.keys(stats).forEach(id => {
+      const s = stats[id];
+      s.avg = s.count ? Math.round((s._sum / s.count) * 10) / 10 : 0;
+      delete s._sum;
+    });
+    return stats;
+  },
+
+  async mergeReviewStats(users) {
+    const single = !Array.isArray(users);
+    const list = single ? [users] : users;
+    const stats = await this.getReviewStats(list.map(u => u.id));
+    list.forEach(u => {
+      const s = stats[u.id] || { avg: 0, count: 0 };
+      u.reviewAvg = s.avg;
+      u.reviewCount = s.count;
+    });
+    return single ? list[0] : list;
+  },
+
+  async getReviewsForUser(userId) {
+    const { data, error } = await window._supabase
+      .from('reviews').select('*').eq('reviewee_id', userId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    const reviews = data.map(dbReview);
+    const reviewerIds = [...new Set(reviews.map(r => r.reviewerId))];
+    if (reviewerIds.length) {
+      const { data: reviewers } = await window._supabase
+        .from('users').select('id,name,profile_pics').in('id', reviewerIds);
+      const byId = {};
+      (reviewers || []).forEach(r => byId[r.id] = { name: r.name, profilePics: r.profile_pics || [] });
+      reviews.forEach(r => r.reviewer = byId[r.reviewerId] || { name: 'Fairriss user', profilePics: [] });
+    }
+    return reviews;
+  },
+
+  async getMyReviewForDeal(dealId, reviewerId) {
+    const { data, error } = await window._supabase
+      .from('reviews').select('*').eq('deal_id', dealId).eq('reviewer_id', reviewerId).maybeSingle();
+    if (error) throw error;
+    return data ? dbReview(data) : null;
+  },
+
+  async submitReview(dealId, revieweeId, rating, comment) {
+    const { data, error } = await window._supabase
+      .from('reviews').insert({
+        deal_id: dealId, reviewer_id: this._currentUserId, reviewee_id: revieweeId,
+        rating, comment: comment || '',
+      }).select().single();
+    if (error) throw error;
+    return dbReview(data);
+  },
+
+  async submitReply(reviewId, reply) {
+    const { data, error } = await window._supabase
+      .from('reviews').update({ reply }).eq('id', reviewId).select().single();
+    if (error) throw error;
+    return dbReview(data);
+  },
+
+  async reportReview(reviewId, reason) {
+    const { data, error } = await window._supabase
+      .from('reviews').update({ reported: true, reported_reason: reason || '' }).eq('id', reviewId).select().single();
+    if (error) throw error;
+    return dbReview(data);
+  },
+
   // ── Users ────────────────────────────────────────────────────
   async getAllUsers() {
-    const { data, error } = await window._supabase.from('users').select('*').order('trust_score', { ascending: false });
+    const { data, error } = await window._supabase.from('users').select('*').order('created_at', { ascending: false });
     if (error) throw error;
-    return data.map(dbUser);
+    const users = data.map(dbUser);
+    return this.mergeReviewStats(users);
   },
 
   async getUser(id) {
     const { data, error } = await window._supabase.from('users').select('*').eq('id', id).single();
     if (error) throw error;
-    return dbUser(data);
+    return this.mergeReviewStats(dbUser(data));
   },
 
   async updateMe(fields) {
@@ -218,7 +320,8 @@ const LiveStore = {
     const { data, error } = await window._supabase
       .from('users').update(mapped).eq('id', this._currentUserId).select().single();
     if (error) throw error;
-    this._profile = dbUser(data);
+    const prevStats = this._profile ? { reviewAvg: this._profile.reviewAvg, reviewCount: this._profile.reviewCount } : { reviewAvg: 0, reviewCount: 0 };
+    this._profile = { ...dbUser(data), ...prevStats };
     return this._profile;
   },
 
@@ -247,7 +350,8 @@ const LiveStore = {
       .eq('wheel_id', wheelId)
       .eq('status', 'active');
     if (error) throw error;
-    return data.map(r => dbUser(r.users)).filter(Boolean);
+    const users = data.map(r => dbUser(r.users)).filter(Boolean);
+    return this.mergeReviewStats(users);
   },
 
   async createWheel(fields) {
@@ -407,6 +511,7 @@ const LiveStore = {
     const mapped = {};
     if (fields.status) mapped.status = fields.status;
     if (fields.deliverables) mapped.deliverables = fields.deliverables;
+    if (fields.completedAt) mapped.completed_at = fields.completedAt;
     const { data, error } = await window._supabase
       .from('deals').update(mapped).eq('id', id).select().single();
     if (error) throw error;
@@ -545,9 +650,10 @@ const LiveStore = {
       );
     }
     if (location) query = query.ilike('location', `%${location}%`);
-    const { data, error } = await query.order('trust_score', { ascending: false });
+    const { data, error } = await query.order('created_at', { ascending: false });
     if (error) throw error;
-    return data.map(dbUser);
+    const users = data.map(dbUser);
+    return this.mergeReviewStats(users);
   },
 };
 
@@ -643,6 +749,28 @@ async function patchStoreWithLive() {
 
   store.updateDeal = async (id, fields) => {
     return await LiveStore.updateDeal(id, fields);
+  };
+
+  store.getReviewsForUser = async (userId) => {
+    try { return await LiveStore.getReviewsForUser(userId); }
+    catch(e) { console.warn('getReviewsForUser failed:', e.message); return []; }
+  };
+
+  store.getMyReviewForDeal = async (dealId, reviewerId) => {
+    try { return await LiveStore.getMyReviewForDeal(dealId, reviewerId); }
+    catch(e) { console.warn('getMyReviewForDeal failed:', e.message); return null; }
+  };
+
+  store.submitReview = async (dealId, revieweeId, rating, comment) => {
+    return await LiveStore.submitReview(dealId, revieweeId, rating, comment);
+  };
+
+  store.submitReply = async (reviewId, reply) => {
+    return await LiveStore.submitReply(reviewId, reply);
+  };
+
+  store.reportReview = async (reviewId, reason) => {
+    return await LiveStore.reportReview(reviewId, reason);
   };
 
   store.addDealMessage = async (dealId, body) => {
