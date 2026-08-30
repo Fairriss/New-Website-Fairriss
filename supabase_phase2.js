@@ -57,6 +57,7 @@ function dbUser(u) {
     videos: u.videos || [],
     featuredPhotos: u.featured_photos || [],
     contactEmail: u.contact_email || '',
+    education: u.education || [],
     joinedAt: u.created_at,
   };
 }
@@ -213,6 +214,7 @@ const LiveStore = {
     if (fields.videos !== undefined)      mapped.videos = fields.videos;
     if (fields.featuredPhotos !== undefined) mapped.featured_photos = fields.featuredPhotos;
     if (fields.contactEmail !== undefined) mapped.contact_email = fields.contactEmail;
+    if (fields.education !== undefined)   mapped.education = fields.education;
     const { data, error } = await window._supabase
       .from('users').update(mapped).eq('id', this._currentUserId).select().single();
     if (error) throw error;
