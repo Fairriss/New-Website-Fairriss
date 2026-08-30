@@ -1955,9 +1955,9 @@ window.addJob=async()=>{
   }
 };
 window.removeJob=async(i)=>{const me=store.getMe(),history=[...(me.workHistory||[])];history.splice(i,1);try{await store.updateMe({workHistory:history});toast('Removed','success');renderProfile();}catch(e){toast('Failed to remove: '+e.message,'error');}};
-window.uploadPic=(e,slot)=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{const me=store.getMe(),pics=[...(me.profilePics||[])];pics[slot]=ev.target.result;store.updateMe({profilePics:pics});toast('Photo uploaded','success');renderProfile();};r.readAsDataURL(file);};
-window.uploadVideo=(e)=>{const file=e.target.files[0];if(!file)return;if(file.size>50*1024*1024){toast('Video must be under 50MB','error');return;}const r=new FileReader();r.onload=ev=>{store.updateMe({introVideo:ev.target.result});toast('Video uploaded','success');renderProfile();};r.readAsDataURL(file);};
-window.uploadResume=(e)=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{store.updateMe({resume:ev.target.result});toast('Resume uploaded','success');renderProfile();};r.readAsDataURL(file);};
+// uploadPic / uploadVideo / uploadResume are defined in supabase_phase2.js
+// (real Supabase Storage uploads with correct slot handling) — do not
+// redefine them here, it silently overwrites the working versions.
 window.previewPostPhoto=e=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{const p=document.getElementById('cp-photo-preview');if(p)p.innerHTML='<img src="'+ev.target.result+'" style="max-width:100%;max-height:200px;border-radius:var(--radius-sm);object-fit:cover;display:block">';};r.readAsDataURL(file);};
 window.previewEventPhoto=e=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{const p=document.getElementById('ev-photo-preview');if(p)p.innerHTML='<img src="'+ev.target.result+'" style="max-width:100%;max-height:200px;border-radius:var(--radius-sm);object-fit:cover;display:block">';};r.readAsDataURL(file);};
 window.previewPostVideo=e=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{const p=document.getElementById('cp-video-preview');if(p)p.innerHTML='<video src="'+ev.target.result+'" controls style="max-width:100%;max-height:180px;border-radius:var(--radius-sm);display:block"></video>';};r.readAsDataURL(file);};
