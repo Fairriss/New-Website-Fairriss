@@ -697,6 +697,7 @@ async function patchStoreWithLive() {
   store.getUser = async (id) => {
     try { return await LiveStore.getUser(id); }
     catch(e) {
+      console.warn('LiveStore.getUser failed for id='+id+':', e.message);
       return store.data.users.find(u => u.id === id) || null;
     }
   };
