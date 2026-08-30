@@ -301,6 +301,7 @@ const LiveStore = {
   async updateMe(fields) {
     const mapped = {};
     if (fields.name !== undefined)       mapped.name = fields.name;
+    if (fields.username !== undefined)   mapped.username = fields.username;
     if (fields.bio !== undefined)        mapped.bio = fields.bio;
     if (fields.jobTitle !== undefined)   mapped.job_title = fields.jobTitle;
     if (fields.company !== undefined)    mapped.company = fields.company;
