@@ -1804,6 +1804,7 @@ function renderAboutCard(u,isMe){
     const isCustomRole = u.userType && !roleOptions.includes(u.userType);
     const selectedValue = isCustomRole ? 'Other' : (u.userType||'');
     h+='<div class="form-group mb-2"><label class="form-label">Name</label><input class="form-control" id="profile-name" value="'+escHtml(u.name||'')+'" placeholder="Your name"></div>';
+    h+='<div class="form-group mb-2"><label class="form-label">Username</label><input class="form-control" id="profile-username" data-original="'+escHtml(u.username||'')+'" value="'+escHtml(u.username||'')+'" placeholder="username"><div class="t-micro c-text3 mt-1">Used in your profile link (fairriss.com/?u=your-username). <strong style="color:var(--red)">Changing it breaks any link you\'ve already shared.</strong></div></div>';
     h+='<div class="form-group mb-2"><label class="form-label">What best describes you? <span>(optional)</span></label><select class="form-control" id="profile-usertype" onchange="document.getElementById(\'profile-other-row\').style.display=(this.value===\'Other\')?\'block\':\'none\'">'+roleOptions.map(r=>'<option value="'+escHtml(r)+'"'+(selectedValue===r?' selected':'')+'>'+(r||'Not set')+'</option>').join('')+'</select></div>';
     h+='<div class="form-group mb-2" id="profile-other-row" style="display:'+(isCustomRole?'block':'none')+'"><label class="form-label">Tell us what you do</label><input class="form-control" id="profile-other-input" value="'+escHtml(isCustomRole?u.userType:'')+'" placeholder="e.g. Consultant, Student, Recruiter..."></div>';
     h+='<textarea class="form-control mb-2" id="profile-bio" rows="3">'+escHtml(u.bio||'')+'</textarea>';
@@ -2009,6 +2010,16 @@ window.shareWheel = async (slug, name) => {
 window.saveProfileInfo=async()=>{
   const name=$('#profile-name')?.value.trim();
   if(!name){toast('Name cannot be empty','error');return;}
+  const usernameInput=$('#profile-username');
+  let username=usernameInput?.value.trim().toLowerCase()||'';
+  const originalUsername=usernameInput?.dataset.original||'';
+  if(!username){toast('Username cannot be empty','error');return;}
+  if(!/^[a-z0-9_-]+$/.test(username)){toast('Username can only contain letters, numbers, hyphens and underscores','error');return;}
+  const usernameChanged = username!==originalUsername.toLowerCase();
+  if(usernameChanged){
+    const ok=window.confirm('Change your username from "'+originalUsername+'" to "'+username+'"?\n\nYour profile link will change. Anyone who already has your old link (fairriss.com/?u='+originalUsername+') will get a broken link once you save.');
+    if(!ok) return;
+  }
   const links=[...$$('.profile-link-input')].map(i=>i.value.trim()).filter(Boolean);
   let userType=$('#profile-usertype')?.value||'';
   if(userType==='Other'){
@@ -2016,7 +2027,7 @@ window.saveProfileInfo=async()=>{
     if(!custom){ toast('Please tell us what you do, or pick "Not set"', 'error'); return; }
     userType=custom;
   }
-  const fields={name,bio:$('#profile-bio').value.trim(),jobTitle:$('#profile-title').value.trim(),company:$('#profile-company').value.trim(),website:$('#profile-website')?.value.trim()||'',userType,links,location:$('#profile-location')?.value.trim()||'',contactEmail:$('#profile-contact-email')?.value.trim()||''};
+  const fields={name,username,bio:$('#profile-bio').value.trim(),jobTitle:$('#profile-title').value.trim(),company:$('#profile-company').value.trim(),website:$('#profile-website')?.value.trim()||'',userType,links,location:$('#profile-location')?.value.trim()||'',contactEmail:$('#profile-contact-email')?.value.trim()||''};
   const btn = event?.target;
   if(btn){ btn.disabled=true; btn.textContent='Saving...'; }
   try {
@@ -2028,7 +2039,8 @@ window.saveProfileInfo=async()=>{
     if(sidebarName) sidebarName.textContent=name;
     renderProfile();
   } catch(e){
-    toast('Failed to save: '+e.message, 'error');
+    const isDupe = /unique|duplicate/i.test(e.message||'');
+    toast(isDupe?'That username is already taken \u2014 please choose another':'Failed to save: '+e.message, 'error');
     if(btn){ btn.disabled=false; btn.textContent='Save'; }
   }
 };
