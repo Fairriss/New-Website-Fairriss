@@ -282,6 +282,7 @@ ul, ol { list-style: none; }
   position: relative;
 }
 .header-btn:hover { background: var(--surface); }
+.mobile-search-btn { display: none; border: none; cursor: pointer; }
 .notif-dot {
   position: absolute; top: 6px; right: 6px;
   width: 8px; height: 8px; border-radius: 50%;
@@ -1101,6 +1102,7 @@ select.form-control { cursor: pointer; }
   }
   .header-logo-text { display: block; }
   .header-search { display: none !important; }
+  .mobile-search-btn { display: flex !important; }
   .header-actions { margin-left: auto; }
 
   /* Main content */
