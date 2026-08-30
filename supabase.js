@@ -104,7 +104,7 @@ const Users = {
     if (location) {
       q = q.ilike('location', `%${location}%`);
     }
-    const { data, error } = await q.order('trust_score', { ascending: false });
+    const { data, error } = await q.order('created_at', { ascending: false });
     if (error) throw error;
     return data;
   },
