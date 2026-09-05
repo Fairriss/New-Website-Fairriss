@@ -1383,6 +1383,49 @@ async function renderMembers(){
   if(filterAvail!=='all')members=members.filter(u=>u.availability===filterAvail);
   if(filterLoc)members=members.filter(u=>(u.location||'').toLowerCase().includes(filterLoc));
   const allLocs=[...new Set(store.get('users').map(u=>(u.location||'').split(',')[0].trim()).filter(Boolean))];
+
+  // Featured Services section — shows real open service listings once people
+  // start posting them. Until then, shows realistic placeholder examples so
+  // the section isn't empty and gives a preview of how it'll look.
+  // Selection: prioritize freelancers near the viewer's own location, then
+  // sort by highest star rating within that.
+  const myLocation = (store.getMe()?.location||'').split(',')[0].trim().toLowerCase();
+  let realServices=[];
+  try{ realServices = await fetchServices(''); }catch(e){ realServices=[]; }
+  const usingPlaceholders = realServices.length===0;
+  let featuredCards=[];
+  if(usingPlaceholders){
+    const placeholders=[
+      {name:'Jordan Sato',jobTitle:'Full-Stack Developer',location:'Austin, TX',title:'Full-Stack Web Development',description:'I build fast, responsive web apps end to end \u2014 React, Node, and everything in between.',priceLabel:'$75/hr',rating:4.9,reviewCount:58},
+      {name:'Priya Mehta',jobTitle:'Graphic Designer',location:'Bangalore, India',title:'Brand Identity & Logo Design',description:'Complete brand identity packages: logo, color palette, and a type system you can grow into.',priceLabel:'$450',rating:4.8,reviewCount:122},
+      {name:'Marcus Owusu',jobTitle:'Copywriter',location:'Lagos, Nigeria',title:'Copywriting & Content Strategy',description:'Website copy, email sequences, and content strategy that actually converts.',priceLabel:'$0.50/word',rating:5.0,reviewCount:34},
+      {name:'Alex Torres',jobTitle:'Video Editor',location:'New York, NY',title:'Video Editing & Motion Graphics',description:'Polished edits and motion graphics for social, ads, and product launches.',priceLabel:'$200',rating:4.7,reviewCount:89},
+      {name:'Sofia Rossi',jobTitle:'Social Media Manager',location:'San Francisco, CA',title:'Social Media Management & Strategy',description:'Content calendars, community management, and growth strategy for brands that want to actually show up online.',priceLabel:'$600/mo',rating:4.8,reviewCount:41},
+      {name:'David Okafor',jobTitle:'Business Consultant',location:'Toronto, ON',title:'Startup Strategy & Fundraising Prep',description:'I help early-stage founders sharpen their pitch, model, and go-to-market before they talk to investors.',priceLabel:'$150/hr',rating:4.9,reviewCount:27},
+    ];
+    featuredCards = placeholders.map((p,i)=>({
+      creator:{id:'demo-'+i,name:p.name,jobTitle:p.jobTitle,location:p.location,profilePics:[]},
+      title:p.title, description:p.description, priceLabel:p.priceLabel,
+      rating:p.rating, reviewCount:p.reviewCount, isFake:true
+    }));
+  } else {
+    const creatorsById = await usersByIdMap(realServices.map(s=>s.creator_id));
+    featuredCards = realServices.map(s=>{
+      const creator=creatorsById[s.creator_id]||{id:s.creator_id,name:'Fairriss user',profilePics:[]};
+      return {
+        creator, title:s.title, description:s.description,
+        priceLabel: s.price_cents ? fmtMoney(s.price_cents/100)+(s.price_type==='hourly'?'/hr':'') : 'Rate on request',
+        rating:creator.reviewAvg||0, reviewCount:creator.reviewCount||0, isFake:false
+      };
+    });
+  }
+  featuredCards.sort((a,b)=>{
+    const aMatch = myLocation && (a.creator.location||'').toLowerCase().includes(myLocation) ? 1 : 0;
+    const bMatch = myLocation && (b.creator.location||'').toLowerCase().includes(myLocation) ? 1 : 0;
+    if(aMatch!==bMatch) return bMatch-aMatch;
+    return (b.rating||0)-(a.rating||0);
+  });
+  featuredCards = featuredCards.slice(0,6);
   const el=document.getElementById('page-members');
   el.innerHTML=
     '<div class="page-head"><div class="page-head-left"><h1 class="page-title">Find People</h1><p class="page-sub">'+members.length+' '+(q||filterLoc?'results found':'professionals on Fairriss')+'</p></div><div class="page-actions"><button class="btn btn-teal btn-sm" onclick="openModal(\'modal-create-deal\')">'+icon('plus')+' Create Deal</button></div></div>'+
@@ -1397,7 +1440,9 @@ async function renderMembers(){
     '</div></div></div>'+
     (allLocs.length&&!filterLoc?'<div style="margin-top:.875rem;display:flex;gap:.375rem;flex-wrap:wrap;align-items:center"><span style="font-size:.75rem;color:var(--text-4);font-weight:600;margin-right:.25rem">Browse by city:</span>'+allLocs.slice(0,8).map(l=>'<button class="filter-pill city-pill" data-loc="'+escHtml(l)+'" style="font-size:.75rem;padding:.2rem .625rem">'+escHtml(l)+'</button>').join('')+'</div>':'')+'</div>'+
     (members.length?'<div class="member-grid">'+members.map(u=>renderMemberCard(u)).join('')+'</div>':
-    '<div class="empty-state"><div class="empty-icon">&#x1F50D;</div><div class="empty-title">No results found</div><div class="empty-desc">Try a different skill, name, or location</div></div>');
+    '<div class="empty-state"><div class="empty-icon">&#x1F50D;</div><div class="empty-title">No results found</div><div class="empty-desc">Try a different skill, name, or location</div></div>')+
+    '<div class="mb-3" style="margin-top:2rem"><h2 class="t-h1" style="font-size:1.375rem">Freelancers offering services</h2><p class="t-body c-text3">Browse what people in your network can do for you</p></div>'+
+    '<div class="service-feature-grid">'+featuredCards.map(renderFeaturedServiceCard).join('')+'</div>';
 
   let st,st2;
   const ms=$('#member-search'),ls=$('#loc-search');
@@ -1414,6 +1459,21 @@ async function renderMembers(){
 function renderMemberCard(u){
   const dotClass={available:'avail-available',limited:'avail-limited',unavailable:'avail-unavailable'}[u.availability]||'avail-unavailable';
   return '<div class="member-card" data-user-id="'+u.id+'"><div class="member-card-top"><div class="member-avatar-wrap">'+avatarHtml(u,'lg')+'<span class="member-avail-dot '+dotClass+'"></span></div><div class="flex-1"><div class="member-name">'+escHtml(u.name)+'</div><div class="member-title">'+escHtml(u.jobTitle||(u.skills||[])[0]||u.role)+'</div>'+(u.company?'<div class="t-micro c-text4">'+escHtml(u.company)+'</div>':'')+(u.location?'<div class="t-micro c-text4">'+icon('map')+' '+escHtml(u.location)+'</div>':'')+'<div class="member-trust">'+reviewSummaryHtml(u.reviewAvg||0,u.reviewCount||0)+'</div></div></div>'+(u.skills?.length?'<div class="skill-tags">'+u.skills.slice(0,4).map((s,i)=>'<span class="skill-tag'+(i===0?' primary':'')+'">'+escHtml(s)+'</span>').join('')+'</div>':'')+'<div class="member-card-footer"><span class="avail-badge '+(u.availability||'unavailable')+'">'+(u.availability==='available'?'Available':u.availability==='limited'?'Limited':'Unavailable')+'</span><button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openModal(\'modal-create-deal\')">Deal</button></div></div>';
+}
+
+function renderFeaturedServiceCard(fc){
+  const clickAction = fc.isFake
+    ? "toast('Real freelancers will show up here once they start posting services!','success')"
+    : "navigate('profile',{userId:'"+fc.creator.id+"'})";
+  return '<div class="service-feature-card" onclick="'+clickAction+'">'+
+    avatarHtml(fc.creator,'xl')+
+    '<div class="service-feature-name">'+escHtml(fc.creator.name)+'</div>'+
+    (fc.creator.jobTitle?'<div class="t-small c-text3">'+escHtml(fc.creator.jobTitle)+'</div>':'')+
+    '<div style="margin-top:.375rem">'+reviewSummaryHtml(fc.rating,fc.reviewCount)+'</div>'+
+    '<div class="service-feature-title">'+escHtml(fc.title)+'</div>'+
+    '<p class="t-small c-text3" style="line-height:1.5">'+escHtml(fc.description)+'</p>'+
+    '<div class="service-feature-price">'+fc.priceLabel+'</div>'+
+  '</div>';
 }
 
 // ── Opportunities ──────────────────────────────────────────────────────────
