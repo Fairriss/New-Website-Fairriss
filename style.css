@@ -383,7 +383,7 @@ ul, ol { list-style: none; }
 .sidebar-user-role { font-size: .75rem; color: var(--text-3); }
 
 /* ── Main Content ─────────────────────────────────────────── */
-.main { padding: 2rem; overflow-y: auto; }
+.main { padding: 2rem; overflow-y: auto; max-width: 1680px; margin: 0 auto; width: 100%; }
 .page { display: none; }
 .page.active { display: block; }
 
@@ -499,6 +499,17 @@ ul, ol { list-style: none; }
 
 /* ── Member Cards ─────────────────────────────────────────── */
 .member-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
+.service-feature-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
+.service-feature-card {
+  background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1.5rem 1.25rem; box-shadow: var(--shadow-sm); cursor: pointer;
+  transition: box-shadow .2s, border-color .2s;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.service-feature-card:hover { box-shadow: var(--shadow); border-color: var(--border-mid); }
+.service-feature-name { font-size: 1.25rem; font-weight: 800; color: var(--navy); margin-top: .625rem; }
+.service-feature-title { font-size: 1.0625rem; font-weight: 700; color: var(--navy); margin-top: .625rem; }
+.service-feature-price { font-size: 1.25rem; font-weight: 800; color: var(--teal-dim); margin-top: .5rem; }
 .member-card {
   background: var(--white);
   border: 1px solid var(--border);
@@ -1047,6 +1058,7 @@ select.form-control { cursor: pointer; }
   .stats-grid { grid-template-columns: repeat(2,1fr); }
   .wheel-grid { grid-template-columns: repeat(2,1fr); }
   .member-grid { grid-template-columns: repeat(2,1fr); }
+  .service-feature-grid { grid-template-columns: repeat(2,1fr); }
   .two-col { grid-template-columns: 1fr; }
   .three-col { grid-template-columns: 1fr 1fr; }
   .two-col-equal { grid-template-columns: 1fr; }
@@ -1150,6 +1162,7 @@ select.form-control { cursor: pointer; }
   .stats-grid { grid-template-columns: 1fr 1fr; gap: .625rem; }
   .wheel-grid { grid-template-columns: 1fr; }
   .member-grid { grid-template-columns: 1fr; }
+  .service-feature-grid { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
   .two-col-equal { grid-template-columns: 1fr; }
   .reputation-grid { grid-template-columns: repeat(3,1fr); gap: .5rem; }
