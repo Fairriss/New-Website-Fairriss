@@ -850,14 +850,28 @@ function renderAuth(){
     const btn=document.getElementById('create-account-btn');
     btn.textContent='Creating account...';btn.disabled=true;
     try {
-      const user=await window.Auth.signUp(email,password,name,username);
-      if(user){
-        store.createUser({id:user.id,name,username,email,role:'member',bio:'',skills:[],location:'',availability:'available'});
-        store.data.currentUser=user.id;store._save();
-        if(window._supabase){setTimeout(async()=>{try{await window._supabase.from('notifications').insert({user_id:user.id,type:'welcome',text:'Welcome to Fairriss, '+escHtml(name)+'! Start by creating or joining a Wheel.'});}catch(e){}},2000);}
-        toast('Account created! Check your email to verify.','success');
-        renderOnboarding();
+      const { user, session } = await window.Auth.signUp(email,password,name,username);
+      if(!user){
+        showAuthError('signup-error','Sign up failed. Please try again.');
+        btn.textContent='Create Account';btn.disabled=false;
+        return;
       }
+      if(!session){
+        // Email confirmation required — do NOT log them in locally, since
+        // there's no real Supabase session yet. Send them back to Sign In
+        // with a clear message instead of a fake "onboarding" state that
+        // would just bounce them back once the app checks the real session.
+        toast('Account created! Check your email to confirm, then sign in.','success');
+        document.getElementById('li-email').value=email;
+        authTab('login');
+        btn.textContent='Create Account';btn.disabled=false;
+        return;
+      }
+      store.createUser({id:user.id,name,username,email,role:'member',bio:'',skills:[],location:'',availability:'available'});
+      store.data.currentUser=user.id;store._save();
+      if(window._supabase){setTimeout(async()=>{try{await window._supabase.from('notifications').insert({user_id:user.id,type:'welcome',text:'Welcome to Fairriss, '+escHtml(name)+'! Start by creating or joining a Wheel.'});}catch(e){}},2000);}
+      toast('Account created!','success');
+      setTimeout(renderOnboarding,500);
     } catch(e){
       showAuthError('signup-error',e.message||'Sign up failed. Try a different email.');
       btn.textContent='Create Account';btn.disabled=false;
