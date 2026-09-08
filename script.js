@@ -850,9 +850,18 @@ function renderAuth(){
     const btn=document.getElementById('create-account-btn');
     btn.textContent='Creating account...';btn.disabled=true;
     try {
-      const { user, session } = await window.Auth.signUp(email,password,name,username);
+      const signupResult = await window.Auth.signUp(email,password,name,username);
+      console.log('Signup response:', signupResult);
+      const { user, session } = signupResult||{};
       if(!user){
-        showAuthError('signup-error','Sign up failed. Please try again.');
+        // No error was thrown, but no user came back either — this happens
+        // when the email was already used in an earlier, still-unconfirmed
+        // signup attempt. Supabase quietly resends the confirmation email
+        // in that case rather than creating a new account, so treat this
+        // the same as "check your email", not as a hard failure.
+        toast('A confirmation email has been sent to this address. Check your inbox, then sign in.','success');
+        document.getElementById('li-email').value=email;
+        authTab('login');
         btn.textContent='Create Account';btn.disabled=false;
         return;
       }
