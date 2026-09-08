@@ -937,7 +937,7 @@ select.form-control { cursor: pointer; }
 .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: .625rem; }
 
 /* ── Toast ────────────────────────────────────────────────── */
-.toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 600; display: flex; flex-direction: column; gap: .5rem; }
+.toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 20000; display: flex; flex-direction: column; gap: .5rem; }
 .toast {
   background: var(--navy);
   color: var(--white);
