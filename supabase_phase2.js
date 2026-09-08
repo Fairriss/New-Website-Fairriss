@@ -38,7 +38,7 @@ function dbUser(u) {
     company: u.company || '',
     location: u.location || '',
     website: u.website || '',
-    userType: u.user_type || 'member',
+    userType: u.user_type,
     role: u.role || 'member',
     availability: u.availability || 'available',
     skills: u.skills || [],
