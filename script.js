@@ -139,7 +139,7 @@ function navigate(page,params={}){currentPage=page;pageParams=params;renderPage(
 function renderPage(){
   const me=store.getMe();
   if(!me){renderAuth();return;}
-  if(me.userType===undefined){renderOnboarding();return;}
+  if(!me.userType){renderOnboarding();return;}
   renderShell(me);
   $$('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+currentPage)?.classList.add('active');
@@ -371,7 +371,7 @@ function sbToLocal(p){
     id:p.id, name:p.name||'', username:p.username||'', email:p.email||'',
     bio:p.bio||'', jobTitle:p.job_title||'', company:p.company||'',
     location:p.location||'', website:p.website||'',
-    userType:p.user_type||'member', role:p.role||'member',
+    userType:p.user_type, role:p.role||'member',
     availability:p.availability||'available',
     skills:p.skills||[], links:p.links||[], wantTo:p.want_to||[],
     profilePics:p.profile_pics||[], introVideo:p.intro_video||'',
