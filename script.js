@@ -300,6 +300,7 @@ function renderTerms(){
   '<h2 style="color:#0F1F3D;margin-top:2rem">2. Description of Service</h2>'+
   '<p>Fairriss is a network-commerce platform that enables professionals to create communities called "Wheels," post opportunities, and transact with each other through our escrow-based deal system.</p>'+
   '<h2 style="color:#0F1F3D;margin-top:2rem">3. User Accounts</h2>'+
+  '<p>You must be at least 18 years old to use the Platform. By creating an account, you represent that you are 18 or older and have the legal capacity to enter into these Terms. Fairriss does not knowingly permit anyone under 18 to create or use an account.</p>'+
   '<p>You must provide accurate information when creating an account. You are responsible for maintaining the confidentiality of your account credentials and for all activity under your account.</p>'+
   '<h2 style="color:#0F1F3D;margin-top:2rem">4. Payments and Fees</h2>'+
   '<p>Fairriss charges a 10% platform fee on all completed deals. Payments are processed through Stripe and held in escrow until the buyer approves the completed work. All fees are non-refundable except in cases of dispute resolution in your favour.</p>'+
@@ -307,13 +308,19 @@ function renderTerms(){
   '<p>You may not use the Platform to: (a) violate any law or regulation; (b) post false or misleading content; (c) harass or harm other users; (d) circumvent the platform fee by transacting off-platform; (e) create multiple accounts to abuse the system.</p>'+
   '<h2 style="color:#0F1F3D;margin-top:2rem">6. Disputes</h2>'+
   '<p>In the event of a dispute between buyer and seller, Fairriss will review the evidence provided by both parties and make a final determination. Fairriss reserves the right to issue refunds or release funds at its sole discretion.</p>'+
-  '<h2 style="color:#0F1F3D;margin-top:2rem">7. Intellectual Property</h2>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">7. Reviews and Ratings</h2>'+
+  '<p>After a deal is marked completed or paid, both parties may leave the other a star rating and written review within 14 days. Reviews reflect the personal opinion of the reviewer and are not verified or endorsed by Fairriss.</p>'+
+  '<p>A reviewee may post one written reply to a review within 28 days of it being submitted. Once submitted, reviews and replies cannot be edited or deleted by the user who posted them.</p>'+
+  '<p>Any user may report a review they believe violates these Terms (for example, harassment, a knowingly false statement, or content unrelated to the underlying deal) for administrator review. Fairriss reserves the right, but is not obligated, to remove or restrict reviews that violate these Terms following such a report.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">8. Intellectual Property</h2>'+
   '<p>You retain ownership of content you post. By posting, you grant Fairriss a non-exclusive license to display your content on the Platform.</p>'+
-  '<h2 style="color:#0F1F3D;margin-top:2rem">8. Termination</h2>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">9. Termination</h2>'+
   '<p>Fairriss reserves the right to suspend or terminate any account that violates these terms, with or without notice.</p>'+
-  '<h2 style="color:#0F1F3D;margin-top:2rem">9. Limitation of Liability</h2>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">10. Governing Law</h2>'+
+  '<p>These Terms are governed by the laws of the Province of Ontario and the federal laws of Canada applicable therein, without regard to its conflict of law principles. Any dispute arising from these Terms or your use of the Platform that cannot be resolved informally shall be subject to the exclusive jurisdiction of the courts located in Toronto, Ontario.</p>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">11. Limitation of Liability</h2>'+
   '<p>Fairriss is not liable for any indirect, incidental, or consequential damages arising from your use of the Platform. Our total liability shall not exceed the fees paid by you in the 12 months preceding the claim.</p>'+
-  '<h2 style="color:#0F1F3D;margin-top:2rem">10. Contact</h2>'+
+  '<h2 style="color:#0F1F3D;margin-top:2rem">12. Contact</h2>'+
   '<p>For questions about these terms, contact us at <a href="mailto:hello@fairriss.com" style="color:#00C9A7">hello@fairriss.com</a></p>'+
   '</div>'+
   '<div style="margin-top:3rem;padding-top:1.5rem;border-top:1px solid #E2E8F0;text-align:center;color:#94A3B8;font-size:.875rem">'+
@@ -334,6 +341,7 @@ function renderPrivacy(){
   '<p style="color:#64748B;margin-bottom:2rem">Last updated: '+new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+'</p>'+
   '<div style="line-height:1.8;color:#374151">'+
   '<h2 style="color:#0F1F3D;margin-top:2rem">1. Information We Collect</h2>'+
+  '<p>Fairriss is intended for users 18 and older. We do not knowingly collect personal information from anyone under 18. If we learn that we have collected information from someone under 18, we will delete it.</p>'+
   '<p>We collect information you provide directly: name, email, profile details, skills, and location. We also collect usage data such as pages visited, deals created, and interactions on the Platform.</p>'+
   '<h2 style="color:#0F1F3D;margin-top:2rem">2. How We Use Your Information</h2>'+
   '<p>We use your information to: operate and improve the Platform; process payments; send transactional emails (confirmations, deal updates, password resets); and show your profile to other members.</p>'+
@@ -341,6 +349,7 @@ function renderPrivacy(){
   '<p>We do not sell your personal data. We share information with: Stripe (payment processing); Supabase (database hosting); Resend (email delivery). All third parties are bound by their own privacy policies.</p>'+
   '<h2 style="color:#0F1F3D;margin-top:2rem">4. Profile Visibility</h2>'+
   '<p>Your name, profile photo, job title, skills, and location are visible to other Fairriss members. Your email address and revenue are never shown to other users.</p>'+
+  '<p>Star ratings and written reviews you leave or receive are publicly visible on the relevant profile, including your name. Any reply you post to a review, and whether a review has been reported, are also visible.</p>'+
   '<h2 style="color:#0F1F3D;margin-top:2rem">5. Data Security</h2>'+
   '<p>We use industry-standard security including encrypted connections (HTTPS), Row Level Security on our database, and secure payment processing through Stripe. We never store payment card details.</p>'+
   '<h2 style="color:#0F1F3D;margin-top:2rem">6. Data Retention</h2>'+
@@ -2032,7 +2041,7 @@ async function renderProfile(){
   (myServices.length || isMe ? '<div class="card mb-4"><div class="flex justify-between items-center mb-3"><h2 class="t-h2" style="margin:0">Services</h2>'+(isMe?'<button class="btn btn-outline btn-xs" onclick="openModal(\'modal-create-service\')">+ Add</button>':'')+'</div>'+(myServices.length?myServices.map(s=>'<div class="card card-sm mb-2" style="background:var(--surface)"><div class="flex justify-between items-start"><div class="flex-1"><div class="t-h3 mb-1">'+escHtml(s.title)+'</div><div class="t-small c-text3 mb-1">'+escHtml(s.description)+'</div><div class="skill-tags mt-1">'+(s.skills||[]).map(sk=>'<span class="skill-tag">'+escHtml(sk)+'</span>').join('')+'</div></div><div style="text-align:right;flex-shrink:0;margin-left:.75rem"><div style="font-weight:800;color:var(--navy)">'+(s.price_cents?fmtMoney(s.price_cents/100)+(s.price_type==='hourly'?'/hr':''):'Rate on request')+'</div>'+(isMe?'<button class="btn btn-ghost btn-xs mt-1" style="color:var(--red)" onclick="deleteServiceAction(\''+s.id+'\',\''+escHtml(s.title).replace(/'/g,"\\\\'")+'\')">Delete</button>':'<button class="btn btn-teal btn-xs mt-1" onclick="openDM(\''+s.creator_id+'\')">Message</button>')+'</div></div></div>').join(''):'<div class="t-body c-text3">No services listed yet</div>')+'</div>':'')+
   '<div class="card"><h2 class="t-h2 mb-3">Recent Deals</h2>'+(myDeals.slice(0,3).length?myDeals.slice(0,3).map(d=>{const other=recentDealUsers[d.buyerId===u.id?d.sellerId:d.buyerId];return '<div class="flex justify-between items-center mb-3">'+avatarHtml(other,'sm')+'<div class="flex-1" style="margin-left:.5rem"><div class="t-small" style="font-weight:600">'+escHtml(d.title)+'</div><div class="t-micro c-text4">'+timeAgo(d.createdAt)+'</div></div>'+dealStatusBadge(d.status)+'</div>';}).join(''):'<div class="t-body c-text3">No deals yet</div>')+
   '</div>'+
-  (isMe?'<div class="card mt-4"><h2 class="t-h2 mb-3">Account</h2><div style="display:flex;flex-direction:column;gap:.5rem"><button class="btn btn-outline btn-sm" style="justify-content:flex-start" onclick="navigate(\'support\')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Support</button><button class="btn btn-outline btn-sm" style="justify-content:flex-start;color:var(--red);border-color:var(--red)" onclick="handleLogout()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Log Out</button></div></div>':'')+
+  (isMe?'<div class="card mt-4"><h2 class="t-h2 mb-3">Account</h2><div style="display:flex;flex-direction:column;gap:.5rem"><button class="btn btn-outline btn-sm" style="justify-content:flex-start" onclick="navigate(\'support\')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Support</button><button class="btn btn-outline btn-sm" style="justify-content:flex-start" onclick="renderTerms()">Terms of Service</button><button class="btn btn-outline btn-sm" style="justify-content:flex-start" onclick="renderPrivacy()">Privacy Policy</button><button class="btn btn-outline btn-sm" style="justify-content:flex-start;color:var(--red);border-color:var(--red)" onclick="handleLogout()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Log Out</button></div></div>':'')+
   '</div></div>';
 }
 
