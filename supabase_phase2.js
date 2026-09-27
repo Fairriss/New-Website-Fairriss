@@ -73,6 +73,9 @@ function dbPost(p) {
     photo: p.photo || '',
     video: p.video || '',
     link: p.link || '',
+    linkTitle: p.link_title || '',
+    linkImage: p.link_image || '',
+    linkDesc: p.link_desc || '',
     likes: p.likes || 0,
     createdAt: p.created_at,
     // joined user data
@@ -422,6 +425,9 @@ const LiveStore = {
         photo: fields.photo || '',
         video: fields.video || '',
         link: fields.link || '',
+        link_title: fields.linkTitle || '',
+        link_image: fields.linkImage || '',
+        link_desc: fields.linkDesc || '',
       })
       .select().single();
     if (error) throw error;
