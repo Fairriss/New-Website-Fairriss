@@ -404,7 +404,7 @@ const LiveStore = {
   async getPosts(wheelId) {
     const { data, error } = await window._supabase
       .from('posts')
-      .select('*, users(id, name, profile_pics, job_title, user_type, role)')
+      .select('*')
       .eq('wheel_id', wheelId)
       .order('created_at', { ascending: false });
     if (error) throw error;
