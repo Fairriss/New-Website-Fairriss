@@ -2282,16 +2282,56 @@ function resetPostForm(){
 }
 
 // ── Link previews ──────────────────────────────────────────────────────────
+// We fetch the target page's raw HTML through a plain CORS proxy and read its
+// own og:image/og:title/og:description tags ourselves, rather than trusting a
+// third-party "link preview API" to have both fetched AND correctly parsed
+// the page (services like microlink are frequently blocked by the target
+// site or by ad-blockers, and fail silently with no way to tell why).
 let _pendingLinkPreview=null; // {url,title,image,desc} for the link currently in the New Post modal
+function parseOgTags(html, pageUrl){
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  const meta=(prop)=>{
+    const el=doc.querySelector('meta[property="'+prop+'"]')||doc.querySelector('meta[name="'+prop+'"]');
+    const v=el?el.getAttribute('content'):'';
+    return v?v.trim():'';
+  };
+  let image=meta('og:image')||meta('twitter:image')||meta('twitter:image:src')||'';
+  const title=meta('og:title')||meta('twitter:title')||(doc.querySelector('title')?.textContent||'').trim();
+  const desc=meta('og:description')||meta('twitter:description')||meta('description')||'';
+  if(image){
+    try{ image=new URL(image, pageUrl).href; }catch(e){ image=''; }
+  }
+  if(!title&&!image) return null;
+  return {url:pageUrl, title, image, desc};
+}
 async function fetchLinkPreview(url){
+  // 1) Preferred: our own Supabase Edge Function (server-side fetch, can't
+  //    be blocked by ad-blockers or "known proxy" blocklists in the visitor's
+  //    browser). Falls through silently if it isn't deployed yet.
   try{
-    const res=await fetch('https://api.microlink.io/?url='+encodeURIComponent(url)+'&meta=false');
-    const json=await res.json();
-    if(json.status==='success'&&json.data){
-      const image=(json.data.image&&json.data.image.url)||(json.data.logo&&json.data.logo.url)||'';
-      return {url, title:json.data.title||'', image, desc:json.data.description||''};
+    const edgeUrl=SUPABASE_URL+'/functions/v1/link-preview?url='+encodeURIComponent(url);
+    const res=await fetch(edgeUrl, { headers:{ 'apikey': SUPABASE_ANON, 'Authorization':'Bearer '+SUPABASE_ANON } });
+    if(res.ok){
+      const json=await res.json();
+      if(json&&(json.title||json.image)) return {url, title:json.title||'', image:json.image||'', desc:json.desc||''};
     }
-  }catch(e){}
+  }catch(e){ /* edge function not deployed / unreachable, fall through */ }
+
+  // 2) Fallback: public CORS proxies, parsing the page's own og: tags ourselves.
+  const proxies=[
+    p=>'https://api.allorigins.win/raw?url='+encodeURIComponent(p),
+    p=>'https://corsproxy.io/?url='+encodeURIComponent(p),
+  ];
+  for(const buildProxyUrl of proxies){
+    try{
+      const res=await fetch(buildProxyUrl(url));
+      if(!res.ok) continue;
+      const html=await res.text();
+      if(!html) continue;
+      const parsed=parseOgTags(html, url);
+      if(parsed) return parsed;
+    }catch(e){ /* try next proxy */ }
+  }
   return null;
 }
 function normalizeUrl(u){u=(u||'').trim();if(!u)return'';if(!/^https?:\/\//i.test(u))u='https://'+u;return u;}
