@@ -2725,30 +2725,35 @@ function bindModalForms(){
     const myWheels = await store.getMyWheels();
     const wheelId=pageParams.wheelId||(myWheels||[])[0]?.id;
     if(!wheelId){toast('Join a Wheel first','error');return;}
-    const readAsDataURL=file=>new Promise((resolve,reject)=>{const r=new FileReader();r.onload=ev=>resolve(ev.target.result);r.onerror=reject;r.readAsDataURL(file);});
-    const doPost=async(photo,video)=>{
-      const origText=btn.textContent; btn.disabled=true; btn.textContent='Posting...';
-      try{
-        await store.createPost({wheelId,body,type:$('#cp-type').value,link:link||null,photo:photo||null,video:video||null});
-        const mentions=[...body.matchAll(/@(\w+)/g)].map(m=>m[1].toLowerCase());
-        if(mentions.length){
-          try{
-            const wheelMembers=await store.getWheelMembers(wheelId);
-            (wheelMembers||[]).forEach(m=>{if(mentions.includes(m.username?.toLowerCase()||m.name.split(' ')[0].toLowerCase())&&m.id!==store.getMe().id)notifyUser(m.id,'mention','<strong>'+escHtml(store.getMe().name)+'</strong> mentioned you in a post');});
-          }catch(e){}
-        }
-        toast('Post published!','success');closeAllModals();renderWheelDetail();
-      }catch(e){
-        toast('Failed to post: '+e.message,'error'); btn.disabled=false; btn.textContent=origText;
-      }
-    };
+    const origText=btn.textContent; btn.disabled=true;
     try{
       let photo=null,video=null;
-      if(photoFile) photo=await readAsDataURL(photoFile);
-      if(videoFile) video=await readAsDataURL(videoFile);
-      await doPost(photo,video);
+      if(photoFile){
+        btn.textContent='Uploading photo...';
+        const up=await dmUploadAttachment(photoFile);
+        if(!up){btn.disabled=false;btn.textContent=origText;return;} // dmUploadAttachment already toasts the error
+        photo=up.url;
+      }
+      if(videoFile){
+        btn.textContent='Uploading video...';
+        const up=await dmUploadAttachment(videoFile);
+        if(!up){btn.disabled=false;btn.textContent=origText;return;}
+        video=up.url;
+      }
+      btn.textContent='Posting...';
+      await store.createPost({wheelId,body,type:$('#cp-type').value,link:link||null,photo:photo||null,video:video||null});
+      const mentions=[...body.matchAll(/@(\w+)/g)].map(m=>m[1].toLowerCase());
+      if(mentions.length){
+        try{
+          const wheelMembers=await store.getWheelMembers(wheelId);
+          (wheelMembers||[]).forEach(m=>{if(mentions.includes(m.username?.toLowerCase()||m.name.split(' ')[0].toLowerCase())&&m.id!==store.getMe().id)notifyUser(m.id,'mention','<strong>'+escHtml(store.getMe().name)+'</strong> mentioned you in a post');});
+        }catch(e){}
+      }
+      toast('Post published!','success');closeAllModals();renderWheelDetail();
     }catch(e){
-      toast('Failed to read attached file','error');
+      toast('Failed to post: '+e.message,'error');
+    }finally{
+      btn.disabled=false; btn.textContent=origText;
     }
   });
   document.getElementById('modal-create-post')?.addEventListener('click',()=>{setTimeout(()=>initMentionAutocomplete('cp-body',pageParams.wheelId||null),50);});
