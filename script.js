@@ -1024,7 +1024,8 @@ function renderFeedPost(post, iLiked, usersById){
   if(post.photo)h+='<div style="margin:.75rem 0"><img src="'+post.photo+'" style="width:100%;max-height:360px;object-fit:cover;border-radius:var(--radius-sm);display:block"></div>';
   if(post.video)h+='<div style="margin:.75rem 0"><video src="'+post.video+'" controls style="width:100%;max-height:320px;border-radius:var(--radius-sm);background:#000;display:block"></video></div>';
   if(post.link){const href=post.link.startsWith('http')?post.link:'https://'+post.link;const label=post.link.replace(/^https?:\/\//,'').replace(/\/$/,'');h+='<a href="'+escHtml(href)+'" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:.5rem;padding:.625rem .875rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--teal);font-size:.875rem;font-weight:500;text-decoration:none;margin:.75rem 0">'+icon('link')+escHtml(label)+'</a>';}
-  h+='<div class="post-actions"><button class="post-action-btn post-like-btn" data-post-id="'+post.id+'" data-liked="'+(iLiked?'1':'0')+'" style="'+(iLiked?'color:var(--red)':'')+'"><svg width="14" height="14" fill="'+(iLiked?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>'+(post.likes>0?'<span class="post-action-btn" style="cursor:pointer" onclick="showPostLikers(\''+post.id+'\')">'+post.likes+' like'+(post.likes===1?'':'s')+'</span>':'<span class="post-action-btn" style="opacity:.5">0 likes</span>')+'<button class="post-action-btn reply-toggle-btn" data-post-id="'+post.id+'" onclick="togglePostReplies(\''+post.id+'\')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Reply</button></div>'+
+  const isMyPost=post.authorId===store.getMe()?.id;
+  h+='<div class="post-actions"><button class="post-action-btn post-like-btn" data-post-id="'+post.id+'" data-liked="'+(iLiked?'1':'0')+'" style="'+(iLiked?'color:var(--red)':'')+'"><svg width="14" height="14" fill="'+(iLiked?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>'+(post.likes>0?'<span class="post-action-btn" style="cursor:pointer" onclick="showPostLikers(\''+post.id+'\')">'+post.likes+' like'+(post.likes===1?'':'s')+'</span>':'<span class="post-action-btn" style="opacity:.5">0 likes</span>')+'<button class="post-action-btn reply-toggle-btn" data-post-id="'+post.id+'" onclick="togglePostReplies(\''+post.id+'\')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Reply</button>'+(isMyPost?'<button class="post-action-btn" style="margin-left:auto;color:var(--red)" onclick="deletePostAction(\''+post.id+'\')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg> Delete</button>':'')+'</div>'+
   '<div class="post-replies" id="post-replies-'+post.id+'" style="display:none"></div>'+
   '</div>';
   return h;
@@ -1746,6 +1747,20 @@ window.deleteOpportunityAction = async (oppId, oppTitle) => {
     closeAllModals();
     if(currentPage==='wheel-detail') renderWheelDetail();
     else navigate('opportunities');
+  } catch(e){ toast('Failed to delete: '+e.message, 'error'); }
+};
+
+window.deletePostAction = async (postId) => {
+  if(!confirm('Delete this post? This cannot be undone.')) return;
+  const sb = getSb();
+  try {
+    if(sb){
+      await sb.from('post_likes').delete().eq('post_id', postId).then(()=>{}, ()=>{});
+      const { error } = await sb.from('posts').delete().eq('id', postId);
+      if(error) throw error;
+    }
+    toast('Post deleted', 'success');
+    if(currentPage==='wheel-detail') renderWheelDetail();
   } catch(e){ toast('Failed to delete: '+e.message, 'error'); }
 };
 
