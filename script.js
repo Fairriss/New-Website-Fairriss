@@ -1760,7 +1760,9 @@ window.deletePostAction = async (postId) => {
       if(error) throw error;
     }
     toast('Post deleted', 'success');
+    document.querySelectorAll('[data-post-id="'+postId+'"]').forEach(btn=>btn.closest('.feed-post')?.remove());
     if(currentPage==='wheel-detail') renderWheelDetail();
+    else if(currentPage==='home') renderHome();
   } catch(e){ toast('Failed to delete: '+e.message, 'error'); }
 };
 
