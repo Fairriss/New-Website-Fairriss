@@ -2718,26 +2718,38 @@ function bindModalForms(){
     (myWheels||[]).forEach(w=>wsel.options.add(new Option(w.name,w.id)));
   });
   $('#create-post-btn')?.addEventListener('click', async ()=>{
+    const btn=$('#create-post-btn');
     const body=$('#cp-body')?.value.trim()||'',link=$('#cp-link')?.value.trim()||'';
     const photoFile=document.getElementById('cp-photo')?.files[0],videoFile=document.getElementById('cp-video')?.files[0];
     if(!body&&!link&&!photoFile&&!videoFile){toast('Add a message, link, photo or video','error');return;}
     const myWheels = await store.getMyWheels();
     const wheelId=pageParams.wheelId||(myWheels||[])[0]?.id;
     if(!wheelId){toast('Join a Wheel first','error');return;}
+    const readAsDataURL=file=>new Promise((resolve,reject)=>{const r=new FileReader();r.onload=ev=>resolve(ev.target.result);r.onerror=reject;r.readAsDataURL(file);});
     const doPost=async(photo,video)=>{
-      store.createPost({wheelId,body,type:$('#cp-type').value,link:link||null,photo:photo||null,video:video||null});
-      const mentions=[...body.matchAll(/@(\w+)/g)].map(m=>m[1].toLowerCase());
-      if(mentions.length){
-        try{
-          const wheelMembers=await store.getWheelMembers(wheelId);
-          (wheelMembers||[]).forEach(m=>{if(mentions.includes(m.username?.toLowerCase()||m.name.split(' ')[0].toLowerCase())&&m.id!==store.getMe().id)notifyUser(m.id,'mention','<strong>'+escHtml(store.getMe().name)+'</strong> mentioned you in a post');});
-        }catch(e){}
+      const origText=btn.textContent; btn.disabled=true; btn.textContent='Posting...';
+      try{
+        await store.createPost({wheelId,body,type:$('#cp-type').value,link:link||null,photo:photo||null,video:video||null});
+        const mentions=[...body.matchAll(/@(\w+)/g)].map(m=>m[1].toLowerCase());
+        if(mentions.length){
+          try{
+            const wheelMembers=await store.getWheelMembers(wheelId);
+            (wheelMembers||[]).forEach(m=>{if(mentions.includes(m.username?.toLowerCase()||m.name.split(' ')[0].toLowerCase())&&m.id!==store.getMe().id)notifyUser(m.id,'mention','<strong>'+escHtml(store.getMe().name)+'</strong> mentioned you in a post');});
+          }catch(e){}
+        }
+        toast('Post published!','success');closeAllModals();renderWheelDetail();
+      }catch(e){
+        toast('Failed to post: '+e.message,'error'); btn.disabled=false; btn.textContent=origText;
       }
-      toast('Post published!','success');closeAllModals();renderWheelDetail();
     };
-    if(photoFile){const r=new FileReader();r.onload=ev=>{if(videoFile){const r2=new FileReader();r2.onload=ev2=>doPost(ev.target.result,ev2.target.result);r2.readAsDataURL(videoFile);}else doPost(ev.target.result,null);};r.readAsDataURL(photoFile);}
-    else if(videoFile){const r=new FileReader();r.onload=ev=>doPost(null,ev.target.result);r.readAsDataURL(videoFile);}
-    else doPost(null,null);
+    try{
+      let photo=null,video=null;
+      if(photoFile) photo=await readAsDataURL(photoFile);
+      if(videoFile) video=await readAsDataURL(videoFile);
+      await doPost(photo,video);
+    }catch(e){
+      toast('Failed to read attached file','error');
+    }
   });
   document.getElementById('modal-create-post')?.addEventListener('click',()=>{setTimeout(()=>initMentionAutocomplete('cp-body',pageParams.wheelId||null),50);});
   $('#create-event-btn')?.addEventListener('click', async ()=>{
