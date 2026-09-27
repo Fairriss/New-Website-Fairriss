@@ -716,7 +716,7 @@ async function patchStoreWithLive() {
 
   store.getPosts = async (wid) => {
     try { return await LiveStore.getPosts(wid); }
-    catch(e) { return []; }
+    catch(e) { console.error('getPosts failed:', e); return []; }
   };
 
   store.createPost = async (fields) => {
