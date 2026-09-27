@@ -28,7 +28,7 @@ const Auth = {
       options: { data: { name, username } }
     });
     if (error) throw error;
-    return data.user;
+    return data;
   },
 
   // Sign in with email + password
@@ -225,7 +225,7 @@ const Posts = {
   async getByWheel(wheelId) {
     const { data, error } = await _supabase
       .from('posts')
-      .select('*, users(id, name, profile_pics, job_title)')
+      .select('*')
       .eq('wheel_id', wheelId)
       .order('created_at', { ascending: false });
     if (error) throw error;
