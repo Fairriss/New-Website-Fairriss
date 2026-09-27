@@ -2255,6 +2255,16 @@ window.submitDealReview=async(dealId,revieweeId)=>{
 window.previewPostPhoto=e=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{const p=document.getElementById('cp-photo-preview');if(p)p.innerHTML='<img src="'+ev.target.result+'" style="max-width:100%;max-height:200px;border-radius:var(--radius-sm);object-fit:cover;display:block">';};r.readAsDataURL(file);};
 window.previewEventPhoto=e=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{const p=document.getElementById('ev-photo-preview');if(p)p.innerHTML='<img src="'+ev.target.result+'" style="max-width:100%;max-height:200px;border-radius:var(--radius-sm);object-fit:cover;display:block">';};r.readAsDataURL(file);};
 window.previewPostVideo=e=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{const p=document.getElementById('cp-video-preview');if(p)p.innerHTML='<video src="'+ev.target.result+'" controls style="max-width:100%;max-height:180px;border-radius:var(--radius-sm);display:block"></video>';};r.readAsDataURL(file);};
+function resetPostForm(){
+  const body=document.getElementById('cp-body'),link=document.getElementById('cp-link'),type=document.getElementById('cp-type'),photo=document.getElementById('cp-photo'),video=document.getElementById('cp-video'),photoPrev=document.getElementById('cp-photo-preview'),videoPrev=document.getElementById('cp-video-preview');
+  if(body)body.value='';
+  if(link)link.value='';
+  if(type)type.value='post';
+  if(photo)photo.value='';
+  if(video)video.value='';
+  if(photoPrev)photoPrev.innerHTML='';
+  if(videoPrev)videoPrev.innerHTML='';
+}
 
 // ── Analytics ──────────────────────────────────────────────────────────────
 async function renderAnalytics(){
@@ -2766,7 +2776,7 @@ function bindModalForms(){
           (wheelMembers||[]).forEach(m=>{if(mentions.includes(m.username?.toLowerCase()||m.name.split(' ')[0].toLowerCase())&&m.id!==store.getMe().id)notifyUser(m.id,'mention','<strong>'+escHtml(store.getMe().name)+'</strong> mentioned you in a post');});
         }catch(e){}
       }
-      toast('Post published!','success');closeAllModals();renderWheelDetail();
+      toast('Post published!','success');closeAllModals();resetPostForm();renderWheelDetail();
     }catch(e){
       toast('Failed to post: '+e.message,'error');
     }finally{
@@ -2798,22 +2808,23 @@ function bindModalForms(){
 // ── Boot ────────────────────────────────────────────────────────────────────
 
 
-window.handlePostClick = wheelId => {
+window.handlePostClick = async wheelId => {
   const me = store.getMe();
   if (!me) return;
   // Check if user is a member
-  const isMember = store.isMember(wheelId);
+  const isMember = await store.isMember(wheelId);
   if (!isMember) {
     // Show join prompt instead of post modal
     const wheel = store.get('wheels').find(w => w.id === wheelId);
     if (confirm('You need to join "' + (wheel ? wheel.name : 'this Wheel') + '" before you can post. Join now?')) {
-      store.joinWheel(wheelId);
+      await store.joinWheel(wheelId);
       toast('Joined! You can now post in this Wheel.', 'success');
       updateShellDynamic(me);
       renderWheelDetail();
     }
     return;
   }
+  resetPostForm();
   openModal('modal-create-post');
 };
 
