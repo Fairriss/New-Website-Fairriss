@@ -1178,7 +1178,7 @@ async function renderWheelDetail(){
   const likedIds = await fetchMyLikedPostIds(posts.map(p=>p.id));
   const postAuthors = await usersByIdMap(posts.map(p=>p.authorId));
   const isCreator=wheel.creatorId===store.getMe()?.id;
-  const isMember=store.isMember(wheel.id);
+  const isMember=await store.isMember(wheel.id);
   const creatorUser = await dmGetUser(wheel.creatorId);
   const el=document.getElementById('page-wheel-detail');
   el.innerHTML=
