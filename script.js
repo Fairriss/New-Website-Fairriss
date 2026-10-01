@@ -514,7 +514,9 @@ async function renderPublicJob(jobId){
   '<div class="card mb-4"><div class="flex gap-2 items-center mb-3"><span class="type-badge" style="background:var(--surface);color:var(--text-3)">'+(typeLabels[j.employment_type]||j.employment_type)+'</span>'+(j.salary_text?'<span class="t-small" style="font-weight:600;color:var(--navy)">'+escHtml(j.salary_text)+'</span>':'')+'</div>'+
   '<p class="t-body" style="color:var(--text-2);line-height:1.7;white-space:pre-wrap">'+escHtml(j.description)+'</p>'+
   ((j.skills||[]).length?'<div class="skill-tags mt-3">'+j.skills.map(s=>'<span class="skill-tag">'+escHtml(s)+'</span>').join('')+'</div>':'')+
+  (j.shift_schedule?'<div class="divider" style="margin:1rem 0"></div><div><div class="t-label c-text4 mb-1">Shift and Schedule</div><div class="t-body">'+escHtml(j.shift_schedule)+'</div></div>':'')+
   '</div>'+
+  ((j.benefits||[]).length?'<div class="card mb-4"><div class="t-label c-text4 mb-2">Benefits</div><ul style="margin:0;padding-left:1.25rem;line-height:1.9">'+j.benefits.map(b=>'<li class="t-body">'+escHtml(b)+'</li>').join('')+'</ul></div>':'')+
   '<div class="card" style="text-align:center;background:var(--navy)"><h2 style="color:var(--teal);margin-bottom:.5rem">Join Fairriss to '+(isHiring?'Apply':'Message')+'</h2><p style="color:rgba(255,255,255,.7);margin-bottom:1.25rem">Create a free account to '+(isHiring?'apply to this job':'get in touch')+' and see the rest of the network.</p><button class="btn btn-teal" style="justify-content:center;width:100%" onclick="window.location.href=window.location.pathname">Join Fairriss</button></div>'+
   '</div></div>';
 }
@@ -1849,7 +1851,10 @@ async function renderJobDetail(jobId){
   let html='<div class="flex gap-3 items-start mb-4">'+avatarHtml(creator,'md')+'<div><div class="t-h3">'+escHtml(isHiring?(j.company||creator?.name||''):creator?.name||'')+'</div><div class="t-small c-text3">'+timeAgo(j.createdAt)+(place?' - '+escHtml(place):'')+'</div></div><span class="type-badge '+(isHiring?'type-job':'type-service')+'" style="margin-left:auto">'+(isHiring?'Hiring':'Seeking')+'</span></div>'+
   '<p class="t-body mb-4" style="line-height:1.7">'+escHtml(j.description)+'</p>'+
   '<div class="skill-tags mb-4">'+(j.skills||[]).map(s=>'<span class="skill-tag primary">'+escHtml(s)+'</span>').join('')+'</div>'+
-  '<div class="card card-sm" style="background:var(--surface)"><div class="form-row"><div><div class="t-label c-text4 mb-1">Employment Type</div><div class="t-body">'+(JOB_TYPE_LABELS[j.employmentType]||j.employmentType)+'</div></div><div><div class="t-label c-text4 mb-1">Pay</div><div class="t-body">'+(escHtml(j.salaryText)||'Not listed')+'</div></div></div></div>';
+  '<div class="card card-sm mb-4" style="background:var(--surface)"><div class="form-row"><div><div class="t-label c-text4 mb-1">Employment Type</div><div class="t-body">'+(JOB_TYPE_LABELS[j.employmentType]||j.employmentType)+'</div></div><div><div class="t-label c-text4 mb-1">Pay</div><div class="t-body">'+(escHtml(j.salaryText)||'Not listed')+'</div></div></div>'+
+  (j.shiftSchedule?'<div class="divider" style="margin:.75rem 0"></div><div><div class="t-label c-text4 mb-1">Shift and Schedule</div><div class="t-body">'+escHtml(j.shiftSchedule)+'</div></div>':'')+
+  '</div>'+
+  ((j.benefits||[]).length?'<div class="mb-4"><div class="t-label c-text4 mb-2">Benefits</div><ul style="margin:0;padding-left:1.25rem;line-height:1.9">'+j.benefits.map(b=>'<li class="t-body">'+escHtml(b)+'</li>').join('')+'</ul></div>':'');
 
   if(isOwner && isHiring){
     html += '<div class="mt-4"><div class="flex justify-between items-center mb-2"><h3 class="t-h2" style="margin:0">Applicants</h3><button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="deleteJobAction(getActiveJobId(),\''+escHtml(j.title).replace(/'/g,"\\\\'")+'\')">Delete Posting</button></div><div id="job-applicants-list"><div class="t-small c-text3" style="padding:1rem">Loading...</div></div></div>';
@@ -2503,7 +2508,7 @@ function resetPostForm(){
 }
 
 function resetJobForm(){
-  ['cj-title','cj-company','cj-city','cj-country','cj-salary','cj-desc','cj-skills'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+  ['cj-title','cj-company','cj-city','cj-country','cj-salary','cj-desc','cj-skills','cj-benefits','cj-shift'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
   const kind=document.getElementById('cj-kind'); if(kind) kind.value='hiring';
   const type=document.getElementById('cj-type'); if(type) type.value='full_time';
   const requireResume=document.getElementById('cj-require-resume'); if(requireResume) requireResume.checked=true;
@@ -2970,6 +2975,8 @@ function buildModals(){
     '<div class="form-row"><div class="form-group"><label class="form-label">Employment Type</label><select class="form-control" id="cj-type"><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="internship">Internship</option><option value="freelance">Freelance</option></select></div><div class="form-group"><label class="form-label">Pay <span>(optional)</span></label><input class="form-control" id="cj-salary" placeholder="$50k - $70k/yr or $25/hr"></div></div>'+
     '<div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="cj-desc" rows="4" placeholder="Describe the role, or what kind of work you\'re looking for..."></textarea></div>'+
     '<div class="form-group"><label class="form-label">Skills <span>(optional, comma separated)</span></label><input class="form-control" id="cj-skills" placeholder="Lighting, Retouching, Studio..."></div>'+
+    '<div class="form-group"><label class="form-label">Benefits <span>(optional, comma separated)</span></label><input class="form-control" id="cj-benefits" placeholder="Vision care, Dental care, On-site parking..."></div>'+
+    '<div class="form-group"><label class="form-label">Shift and Schedule <span>(optional)</span></label><input class="form-control" id="cj-shift" placeholder="Monday to Friday, 8 hour shift..."></div>'+
     '<label id="cj-resume-row" style="display:flex;align-items:center;gap:.625rem;cursor:pointer;padding:.75rem;background:var(--surface);border-radius:8px"><input type="checkbox" id="cj-require-resume" checked style="width:18px;height:18px;accent-color:var(--teal)"><span class="t-body">Require applicants to submit a resume</span></label>'+
   '</div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-job-btn">Post Job</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-job-detail"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title" id="modal-job-title">Job</span><button class="modal-close">x</button></div><div class="modal-body" id="modal-job-body"></div><div class="modal-footer"><button class="btn btn-outline" onclick="shareJob(getActiveJobId(), document.getElementById(\'modal-job-title\').textContent)">'+icon('link')+' Share</button><button class="btn btn-outline" onclick="closeAllModals()">Close</button><button class="btn btn-teal" onclick="applyToJob(getActiveJobId(), this)">Apply Now</button></div></div></div>'+
@@ -3046,6 +3053,8 @@ function bindModalForms(){
         salaryText: $('#cj-salary').value.trim(),
         description: desc,
         skills: $('#cj-skills').value.split(',').map(s=>s.trim()).filter(Boolean),
+        benefits: $('#cj-benefits').value.split(',').map(s=>s.trim()).filter(Boolean),
+        shiftSchedule: $('#cj-shift').value.trim(),
         requireResume: kind==='hiring' ? ($('#cj-require-resume')?.checked!==false) : false,
       });
       toast('Job posted!','success');closeAllModals();resetJobForm();navigate('jobs');
