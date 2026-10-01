@@ -132,7 +132,7 @@ document.addEventListener('click',e=>{
   if(e.target.classList.contains('modal-close'))closeAllModals();
 });
 
-const PAGES=['home','wheels','members','opportunities','deals','profile','wheel-detail','deal-detail','analytics','admin','support','messages'];
+const PAGES=['home','wheels','members','opportunities','jobs','deals','profile','wheel-detail','deal-detail','analytics','admin','support','messages'];
 let currentPage='home',pageParams={};
 function navigate(page,params={}){currentPage=page;pageParams=params;renderPage();window.scrollTo(0,0);}
 
@@ -149,7 +149,7 @@ function renderPage(){
     const isActive = (activeGroups[p]||[p]).includes(currentPage);
     el.classList.toggle('active', isActive);
   });
-  const renders={home:renderHome,wheels:renderWheels,members:renderMembers,opportunities:renderOpportunities,deals:renderDeals,profile:renderProfile,'wheel-detail':renderWheelDetail,'deal-detail':renderDealDetail,analytics:renderAnalytics,admin:renderAdmin,support:renderSupport,messages:renderMessages};
+  const renders={home:renderHome,wheels:renderWheels,members:renderMembers,opportunities:renderOpportunities,jobs:renderJobs,deals:renderDeals,profile:renderProfile,'wheel-detail':renderWheelDetail,'deal-detail':renderDealDetail,analytics:renderAnalytics,admin:renderAdmin,support:renderSupport,messages:renderMessages};
   renders[currentPage]?.();
 }
 
@@ -471,6 +471,51 @@ async function renderPublicWheel(slug){
   '<div style="max-width:560px;margin:0 auto;padding:2rem 1.5rem">'+
   '<div class="card mb-4"><p class="t-body" style="color:var(--text-2);line-height:1.7">'+escHtml(w.description)+'</p></div>'+
   '<div class="card" style="text-align:center;background:var(--navy)"><h2 style="color:var(--teal);margin-bottom:.5rem">Join Fairriss to see what\'s happening in '+escHtml(w.name)+'</h2><p style="color:rgba(255,255,255,.7);margin-bottom:1.25rem">Members, posts, opportunities, and deals are only visible once you join.</p><button class="btn btn-teal" style="justify-content:center;width:100%" onclick="window.location.href=window.location.pathname">Join Fairriss</button></div>'+
+  '</div></div>';
+}
+
+// ── Public Job preview (shareable, no login required) ──────────────────────
+// Anyone with the link can read the full posting; the Apply button is
+// swapped for a "Join Fairriss to Apply" CTA until they sign up and come
+// back in. job_postings' own RLS policy already allows public SELECT, so
+// this works for anonymous visitors with no extra setup.
+async function renderPublicJob(jobId){
+  document.body.innerHTML = '<div style="min-height:100vh;background:var(--surface);display:flex;align-items:center;justify-content:center;padding:1.5rem"><div style="text-align:center;color:var(--text-3)">Loading...</div></div>';
+  let j = null, creator = null;
+  try {
+    const sb = getSb();
+    if(sb){
+      const { data } = await sb.from('job_postings').select('*').eq('id', jobId).eq('status','open').single();
+      if(data) j = data;
+      if(j){
+        const { data: u } = await sb.from('public_profiles').select('*').eq('id', j.creator_id).single();
+        if(u) creator = u;
+      }
+    }
+  } catch(e){ console.warn('Public job fetch failed:', e.message); }
+
+  if(!j){
+    document.body.innerHTML = '<div style="min-height:100vh;background:var(--surface);display:flex;align-items:center;justify-content:center;padding:1.5rem"><div style="text-align:center"><h2 style="color:var(--navy)">This listing is no longer available</h2><p class="t-body c-text3 mb-4">It may have been closed or deleted, or the link is incorrect.</p><a href="'+window.location.pathname+'" class="btn btn-primary">Go to Fairriss</a></div></div>';
+    return;
+  }
+
+  const isHiring = (j.kind||'hiring')!=='seeking';
+  const place=[j.city,j.country].filter(Boolean).join(', ');
+  const typeLabels={full_time:'Full-time',part_time:'Part-time',contract:'Contract',internship:'Internship',freelance:'Freelance'};
+
+  document.body.innerHTML =
+  '<div style="min-height:100vh;background:var(--surface)">'+
+  '<div style="background:var(--navy);padding:3rem 1.5rem;text-align:center">'+
+  '<div style="color:rgba(255,255,255,.55);font-size:.8125rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:.75rem">'+(isHiring?'Hiring':'Looking for Work')+'</div>'+
+  '<h1 style="color:#fff;font-size:1.75rem;margin-bottom:.5rem">'+escHtml(j.title)+'</h1>'+
+  '<div style="color:rgba(255,255,255,.7);font-size:.9375rem">'+(isHiring?escHtml(j.company||''):escHtml(creator?.name||''))+(place?' &middot; '+escHtml(place):'')+'</div>'+
+  '</div>'+
+  '<div style="max-width:560px;margin:0 auto;padding:2rem 1.5rem">'+
+  '<div class="card mb-4"><div class="flex gap-2 items-center mb-3"><span class="type-badge" style="background:var(--surface);color:var(--text-3)">'+(typeLabels[j.employment_type]||j.employment_type)+'</span>'+(j.salary_text?'<span class="t-small" style="font-weight:600;color:var(--navy)">'+escHtml(j.salary_text)+'</span>':'')+'</div>'+
+  '<p class="t-body" style="color:var(--text-2);line-height:1.7;white-space:pre-wrap">'+escHtml(j.description)+'</p>'+
+  ((j.skills||[]).length?'<div class="skill-tags mt-3">'+j.skills.map(s=>'<span class="skill-tag">'+escHtml(s)+'</span>').join('')+'</div>':'')+
+  '</div>'+
+  '<div class="card" style="text-align:center;background:var(--navy)"><h2 style="color:var(--teal);margin-bottom:.5rem">Join Fairriss to '+(isHiring?'Apply':'Message')+'</h2><p style="color:rgba(255,255,255,.7);margin-bottom:1.25rem">Create a free account to '+(isHiring?'apply to this job':'get in touch')+' and see the rest of the network.</p><button class="btn btn-teal" style="justify-content:center;width:100%" onclick="window.location.href=window.location.pathname">Join Fairriss</button></div>'+
   '</div></div>';
 }
 
@@ -930,7 +975,7 @@ window.ob2Finish=()=>{const wantTo=[...$$('label input[type=checkbox]:checked')]
 // ── Shell ──────────────────────────────────────────────────────────────────
 function renderShell(me){
   if($('.shell')){updateShellDynamic(me);return;}
-  document.body.innerHTML='<div class="shell"><header class="header"><div class="header-logo"><div class="header-logo-mark" onclick="navigate(\'home\')" style="cursor:pointer">F</div><span class="header-logo-text" onclick="navigate(\'home\')" style="cursor:pointer">Fairriss</span></div><div class="header-search"><svg class="header-search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search members, deals, opportunities..." id="global-search"></div><div class="header-actions"><button class="header-btn mobile-search-btn" onclick="navigate(\'members\',{focus:true})" aria-label="Search"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button><div style="position:relative"><button class="header-btn" id="notif-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-dot" id="notif-dot" style="display:none"></span></button><div class="notif-panel" id="notif-panel"></div></div><div class="header-avatar" id="header-avatar" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+initials(me.name)+'</div></div></header><aside class="sidebar"><div class="sidebar-section"><div class="sidebar-label">Navigation</div><nav><div class="nav-item" data-page="home" onclick="navigate(\'home\')">'+icon('home')+' Home</div><div class="nav-item" data-page="wheels" onclick="navigate(\'wheels\')">'+icon('wheel')+' My Wheels</div><div class="nav-item" data-page="opportunities" onclick="navigate(\'opportunities\')">'+icon('opp')+' Opportunities</div><div class="nav-item" data-page="deals" onclick="navigate(\'deals\')">'+icon('deal')+' Deals <span class="nav-badge" id="deal-badge" style="display:none"></span></div><div class="nav-item" data-page="messages" onclick="navigate(\'messages\')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Inbox <span class="nav-badge" id="dm-badge" style="display:none"></span></div><div class="nav-item" data-page="members" onclick="navigate(\'members\')">'+icon('members')+' Find People</div><div class="nav-item" data-page="analytics" onclick="navigate(\'analytics\')">'+icon('analytics')+' Analytics</div>'+'<div class="nav-item" data-page="support" onclick="navigate(\'support\')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Support</div>'+'<div class="nav-item" onclick="handleLogout()" style="color:var(--red)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Log Out</div></nav></div><div class="sidebar-section"><div class="sidebar-label">My Wheels</div><div class="sidebar-wheels" id="sidebar-wheels"></div></div><div class="sidebar-bottom"><div class="sidebar-user" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+avatarHtml(me,'sm')+'<div class="sidebar-user-info"><div class="sidebar-user-name">'+escHtml(me.name)+'</div><div class="sidebar-user-role">'+(me.userType||me.role)+(me.reviewCount?' - '+me.reviewAvg+' \u2605 ('+me.reviewCount+')':'')+'</div></div></div><div style="padding:.625rem 1.25rem;border-top:1px solid var(--border);display:flex;gap:1rem"><a href="#" onclick="renderTerms()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Terms</a><a href="#" onclick="renderPrivacy()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Privacy</a></div></div></aside><main class="main" id="main-content">'+PAGES.map(p=>'<div class="page fade-in" id="page-'+p+'"></div>').join('')+'</main>'+
+  document.body.innerHTML='<div class="shell"><header class="header"><div class="header-logo"><div class="header-logo-mark" onclick="navigate(\'home\')" style="cursor:pointer">F</div><span class="header-logo-text" onclick="navigate(\'home\')" style="cursor:pointer">Fairriss</span></div><div class="header-search"><svg class="header-search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search members, deals, opportunities..." id="global-search"></div><div class="header-actions"><button class="header-btn mobile-search-btn" onclick="navigate(\'members\',{focus:true})" aria-label="Search"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button><div style="position:relative"><button class="header-btn" id="notif-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-dot" id="notif-dot" style="display:none"></span></button><div class="notif-panel" id="notif-panel"></div></div><div class="header-avatar" id="header-avatar" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+initials(me.name)+'</div></div></header><aside class="sidebar"><div class="sidebar-section"><div class="sidebar-label">Navigation</div><nav><div class="nav-item" data-page="home" onclick="navigate(\'home\')">'+icon('home')+' Home</div><div class="nav-item" data-page="wheels" onclick="navigate(\'wheels\')">'+icon('wheel')+' My Wheels</div><div class="nav-item" data-page="opportunities" onclick="navigate(\'opportunities\')">'+icon('opp')+' Opportunities</div><div class="nav-item" data-page="jobs" onclick="navigate(\'jobs\')">'+icon('briefcase')+' Jobs</div><div class="nav-item" data-page="deals" onclick="navigate(\'deals\')">'+icon('deal')+' Deals <span class="nav-badge" id="deal-badge" style="display:none"></span></div><div class="nav-item" data-page="messages" onclick="navigate(\'messages\')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Inbox <span class="nav-badge" id="dm-badge" style="display:none"></span></div><div class="nav-item" data-page="members" onclick="navigate(\'members\')">'+icon('members')+' Find People</div><div class="nav-item" data-page="analytics" onclick="navigate(\'analytics\')">'+icon('analytics')+' Analytics</div>'+'<div class="nav-item" data-page="support" onclick="navigate(\'support\')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Support</div>'+'<div class="nav-item" onclick="handleLogout()" style="color:var(--red)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Log Out</div></nav></div><div class="sidebar-section"><div class="sidebar-label">My Wheels</div><div class="sidebar-wheels" id="sidebar-wheels"></div></div><div class="sidebar-bottom"><div class="sidebar-user" onclick="navigate(\'profile\',{userId:\''+me.id+'\'})">'+avatarHtml(me,'sm')+'<div class="sidebar-user-info"><div class="sidebar-user-name">'+escHtml(me.name)+'</div><div class="sidebar-user-role">'+(me.userType||me.role)+(me.reviewCount?' - '+me.reviewAvg+' \u2605 ('+me.reviewCount+')':'')+'</div></div></div><div style="padding:.625rem 1.25rem;border-top:1px solid var(--border);display:flex;gap:1rem"><a href="#" onclick="renderTerms()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Terms</a><a href="#" onclick="renderPrivacy()" style="font-size:.6875rem;color:var(--text-4);text-decoration:none">Privacy</a></div></div></aside><main class="main" id="main-content">'+PAGES.map(p=>'<div class="page fade-in" id="page-'+p+'"></div>').join('')+'</main>'+
   // Mobile bottom navigation
   '<nav class="mobile-nav" style="display:none" id="mobile-nav">'+
   '<div class="mobile-nav-item" data-page="home" onclick="navigate(\'home\')">'+
@@ -939,6 +984,8 @@ function renderShell(me){
   '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/></svg>Wheels</div>'+
   '<div class="mobile-nav-item" data-page="opportunities" onclick="navigate(\'opportunities\')">'+
   '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>Opps</div>'+
+  '<div class="mobile-nav-item" data-page="jobs" onclick="navigate(\'jobs\')">'+
+  '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Jobs</div>'+
   '<div class="mobile-nav-item" data-page="deals" onclick="navigate(\'deals\')">'+
   '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Deals</div>'+
   '<div class="mobile-nav-item" data-page="messages" onclick="navigate(\'messages\')">'+
@@ -983,7 +1030,7 @@ async function updateShellDynamic(me){
 
 function renderNotifPanel(){
   const notifs=store.getMyNotifs();
-  const icons={deal_message:'&#x1F4AC;',new_member:'&#x1F464;',deal_completed:'&#x2705;',new_opportunity:'&#x1F3AF;',wheel_invite:'&#x1F517;',mention:'@',event_reminder:'&#x1F39F;',dm:'&#x2709;'};
+  const icons={deal_message:'&#x1F4AC;',new_member:'&#x1F464;',deal_completed:'&#x2705;',new_opportunity:'&#x1F3AF;',wheel_invite:'&#x1F517;',mention:'@',event_reminder:'&#x1F39F;',dm:'&#x2709;',job_application:'&#x1F4BC;'};
   $('#notif-panel').innerHTML='<div class="notif-panel-head"><span class="notif-panel-title">Notifications</span></div>'+
   (notifs.length?notifs.map(n=>'<div class="notif-item '+(n.read?'':'unread')+'"><div class="notif-icon">'+(icons[n.type]||'&#x1F514;')+'</div><div><div class="notif-text">'+n.text+'</div><div class="notif-time">'+timeAgo(n.createdAt)+'</div></div></div>').join(''):'<div class="empty-state" style="padding:1.5rem">No notifications yet</div>');
 }
@@ -1002,6 +1049,7 @@ async function renderHome(){
   const allPosts = postArrays.flat().sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,6);
   const likedIds = await fetchMyLikedPostIds(allPosts.map(p=>p.id));
   const postAuthors = await usersByIdMap(allPosts.map(p=>p.authorId));
+  cacheOpportunities(opps);
   const topOpps=(opps||[]).slice(0,3);
   const el=document.getElementById('page-home');
   el.innerHTML=
@@ -1523,6 +1571,30 @@ function renderFeaturedServiceCard(fc){
 }
 
 // ── Opportunities ──────────────────────────────────────────────────────────
+// store.data.opportunities is the local lookup cache that applyToOpportunity /
+// renderOppDetail read by id. It is never populated by the real Supabase
+// fetch (only by the original local demo seed data), so looking up any
+// opportunity actually created live used to silently fail — the Apply button
+// and the detail modal just did nothing for real postings. This merges every
+// fetch result into that cache by id (never replacing it wholesale, since a
+// filtered fetch only returns a subset) so lookups by id keep working.
+function cacheOpportunities(opps){
+  const byId={};
+  (store.data.opportunities||[]).forEach(o=>{ byId[o.id]=o; });
+  (opps||[]).forEach(o=>{ byId[o.id]=o; });
+  store.data.opportunities=Object.values(byId);
+}
+async function fetchOpportunityById(oppId){
+  let o=store.get('opportunities').find(x=>x.id===oppId);
+  if(o) return o;
+  try{
+    const fresh=await store.getOpportunities({});
+    cacheOpportunities(fresh);
+    o=fresh.find(x=>x.id===oppId);
+  }catch(e){}
+  return o||null;
+}
+
 async function renderOpportunities(){
   const view = pageParams.view || 'requests';
   const el=document.getElementById('page-opportunities');
@@ -1537,6 +1609,7 @@ async function renderOpportunities(){
   // Fetch by type only — do our own text+location matching client-side so
   // searching "Toronto" also matches the location field, not just title/description.
   try { opps=await store.getOpportunities({type:filter}); } catch(e){ opps=[]; }
+  cacheOpportunities(opps);
   if(q){
     const ql=q.toLowerCase();
     opps=opps.filter(o=>
@@ -1622,8 +1695,8 @@ async function appFetchApplications(oppId){
 window.applyToOpportunity = async (oppId, btnEl) => {
   const me = store.getMe();
   if(!me) return;
-  const opp = store.get('opportunities').find(o=>o.id===oppId);
-  if(!opp) return;
+  const opp = await fetchOpportunityById(oppId);
+  if(!opp){ toast('Could not find that opportunity — try refreshing.', 'error'); return; }
   const requiresResume = opp.type==='job' && opp.metadata?.requireResume !== false;
   if(requiresResume && !me.resume){
     toast('Add a resume to your profile before applying to jobs.', 'error');
@@ -1645,6 +1718,9 @@ window.applyToOpportunity = async (oppId, btnEl) => {
     store._save();
     toast('Application submitted!', 'success');
     if(btnEl){ btnEl.textContent='Applied'; }
+    if(opp.creatorId!==me.id){
+      notifyUser(opp.creatorId, 'new_opportunity', '<strong>'+escHtml(me.name)+'</strong> applied to: '+escHtml(opp.title));
+    }
     if($('#modal-opp-detail')?.classList.contains('open')) renderOppDetail(oppId);
   } catch(e){
     toast('Failed to apply: '+e.message, 'error');
@@ -1653,7 +1729,8 @@ window.applyToOpportunity = async (oppId, btnEl) => {
 };
 
 async function renderOppDetail(oppId){
-  const o=store.get('opportunities').find(x=>x.id===oppId);if(!o)return;
+  const o=await fetchOpportunityById(oppId);
+  if(!o){ toast('Could not find that opportunity — try refreshing.', 'error'); closeAllModals(); return; }
   _activeOppId = oppId;
   const creator=await store.getUser(o.creatorId);
   const me=store.getMe();
@@ -1688,6 +1765,139 @@ async function renderOppDetail(oppId){
   }
 }
 window.getActiveOppId = () => _activeOppId;
+
+// ── Jobs (public job board — separate from Wheel-scoped Opportunities) ──────
+const JOB_TYPE_LABELS={full_time:'Full-time',part_time:'Part-time',contract:'Contract',internship:'Internship',freelance:'Freelance'};
+let _jobsCache=[]; // refreshed on every renderJobs() / renderJobDetail() fetch — avoids relying on stale store.data
+let _activeJobId=null;
+
+async function renderJobs(){
+  const el=document.getElementById('page-jobs');
+  const kind=pageParams.kind||'all', city=pageParams.city||'', country=pageParams.country||'', q=pageParams.q||'';
+  let jobs=[];
+  try { jobs=await store.getJobs({kind, city, country, q}); } catch(e){ jobs=[]; }
+  _jobsCache=jobs;
+  const creators=await usersByIdMap(jobs.map(j=>j.creatorId));
+  el.innerHTML='<div class="page-head"><div class="page-head-left"><h1 class="page-title">Jobs</h1><p class="page-sub">'+jobs.length+' listing'+(jobs.length===1?'':'s')+'</p></div><div class="page-actions"><button class="btn btn-teal" onclick="resetJobForm();openModal(\'modal-create-job\')">'+icon('plus')+' Post a Job</button></div></div>'+
+  '<div class="filter-bar">'+['all','hiring','seeking'].map(t=>'<button class="filter-pill job-kind-btn '+(kind===t?'active':'')+'" data-kind="'+t+'">'+(t==='all'?'All':t==='hiring'?'Hiring':'Looking for Work')+'</button>').join('')+'</div>'+
+  '<div class="filter-bar"><input class="form-control" id="job-city" placeholder="City" value="'+escHtml(city)+'" style="max-width:160px"><input class="form-control" id="job-country" placeholder="Country" value="'+escHtml(country)+'" style="max-width:160px"><div style="position:relative;margin-left:auto"><svg style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--text-4);pointer-events:none" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input class="form-control" id="job-search" placeholder="Search title, company..." value="'+escHtml(q)+'" style="padding-left:2.25rem;width:220px"></div></div>'+
+  '<div class="opp-list">'+(jobs.length?jobs.map(j=>renderJobCard(j,creators[j.creatorId])).join(''):'<div class="empty-state"><div class="empty-icon">'+String.fromCodePoint(0x1F4BC)+'</div><div class="empty-title">No job listings found</div><button class="btn btn-primary btn-sm" onclick="resetJobForm();openModal(\'modal-create-job\')">Post One</button></div>')+'</div>';
+  $$('.job-kind-btn',el).forEach(btn=>btn.addEventListener('click',()=>navigate('jobs',{kind:btn.dataset.kind,city,country,q})));
+  let st;
+  const debouncedNav=()=>{clearTimeout(st);st=setTimeout(()=>navigate('jobs',{kind,city:$('#job-city').value.trim(),country:$('#job-country').value.trim(),q:$('#job-search').value.trim()}),350);};
+  $('#job-city')?.addEventListener('input',debouncedNav);
+  $('#job-country')?.addEventListener('input',debouncedNav);
+  $('#job-search')?.addEventListener('input',debouncedNav);
+  $$('.job-card',el).forEach(c=>c.onclick=()=>{openModal('modal-job-detail');renderJobDetail(c.dataset.jobId);});
+  $$('.delete-job-btn',el).forEach(btn=>btn.onclick=(e)=>{e.stopPropagation();deleteJobAction(btn.dataset.jobId, btn.dataset.jobTitle);});
+}
+
+function renderJobCard(j, creator){
+  const me=store.getMe();
+  const isOwner=me&&j.creatorId===me.id;
+  const isHiring=j.kind!=='seeking';
+  const place=[j.city,j.country].filter(Boolean).join(', ');
+  const titleLine=isHiring?escHtml(j.title):escHtml(j.title)+' <span class="t-small c-text3">— looking for work</span>';
+  const subLine=isHiring?escHtml(j.company||'Company not listed'):escHtml(creator?.name||'');
+  return '<div class="opp-card job-card" data-job-id="'+j.id+'"><div class="opp-main"><div class="opp-title">'+titleLine+'</div><div class="opp-meta"><span class="type-badge '+(isHiring?'type-job':'type-service')+'">'+(isHiring?'Hiring':'Seeking')+'</span><span class="type-badge" style="background:var(--surface);color:var(--text-3)">'+(JOB_TYPE_LABELS[j.employmentType]||j.employmentType)+'</span>'+avatarHtml(creator,'sm')+'<span class="opp-meta-item">'+subLine+'</span>'+(place?'<span class="opp-meta-item">'+icon('map')+' '+escHtml(place)+'</span>':'')+'</div><div class="opp-desc">'+escHtml(j.description)+'</div><div class="skill-tags mt-2">'+(j.skills||[]).map(s=>'<span class="skill-tag">'+escHtml(s)+'</span>').join('')+'</div></div><div class="opp-right"><div class="opp-value">'+(escHtml(j.salaryText)||'')+'</div><div class="flex gap-2 items-center"><div class="opp-posted">'+timeAgo(j.createdAt)+'</div><button class="btn btn-ghost btn-xs" title="Copy shareable link" onclick="event.stopPropagation();shareJob(\''+j.id+'\',\''+escHtml(j.title).replace(/'/g,"\\\\'")+'\')">'+icon('link')+'</button></div>'+(isOwner?'<button class="btn btn-ghost btn-xs mt-2 delete-job-btn" style="color:var(--red)" data-job-id="'+j.id+'" data-job-title="'+escHtml(j.title)+'">Delete</button>':(isHiring?'<button class="btn btn-teal btn-sm mt-2" onclick="event.stopPropagation();applyToJob(\''+j.id+'\',this)">Apply</button>':'<button class="btn btn-teal btn-sm mt-2" onclick="event.stopPropagation();openDM(\''+j.creatorId+'\')">Message</button>'))+'</div></div>';
+}
+
+async function jobFetchApplications(jobId){
+  try { return await store.getJobApplications(jobId); } catch(e){ return []; }
+}
+
+window.applyToJob = async (jobId, btnEl) => {
+  const me=store.getMe();
+  if(!me) return;
+  let job=_jobsCache.find(j=>j.id===jobId);
+  if(!job){
+    try{ const fresh=await store.getJobs({}); _jobsCache=fresh; job=fresh.find(j=>j.id===jobId); }catch(e){}
+  }
+  if(!job){ toast('Could not find that job — try refreshing.', 'error'); return; }
+  if(job.requireResume && !me.resume){
+    toast('Add a resume to your profile before applying.', 'error');
+    closeAllModals();
+    navigate('profile', { userId: me.id });
+    return;
+  }
+  if(btnEl){ btnEl.disabled=true; btnEl.textContent='Applying...'; }
+  try {
+    await store.applyToJob(jobId, me.resume || null, '');
+    toast('Application submitted!', 'success');
+    if(btnEl){ btnEl.textContent='Applied'; }
+    if(job.creatorId!==me.id){
+      notifyUser(job.creatorId, 'job_application', '<strong>'+escHtml(me.name)+'</strong> applied to your job: '+escHtml(job.title));
+    }
+    if($('#modal-job-detail')?.classList.contains('open')) renderJobDetail(jobId);
+  } catch(e){
+    toast('Failed to apply: '+e.message, 'error');
+    if(btnEl){ btnEl.disabled=false; btnEl.textContent='Apply'; }
+  }
+};
+
+async function renderJobDetail(jobId){
+  let j=_jobsCache.find(x=>x.id===jobId);
+  if(!j){ try{ const fresh=await store.getJobs({}); _jobsCache=fresh; j=fresh.find(x=>x.id===jobId); }catch(e){} }
+  if(!j) return;
+  _activeJobId=jobId;
+  const creator=await dmGetUser(j.creatorId);
+  const me=store.getMe();
+  const isOwner=me&&j.creatorId===me.id;
+  const isHiring=j.kind!=='seeking';
+  const place=[j.city,j.country].filter(Boolean).join(', ');
+  $('#modal-job-title').textContent=j.title;
+  let html='<div class="flex gap-3 items-start mb-4">'+avatarHtml(creator,'md')+'<div><div class="t-h3">'+escHtml(isHiring?(j.company||creator?.name||''):creator?.name||'')+'</div><div class="t-small c-text3">'+timeAgo(j.createdAt)+(place?' - '+escHtml(place):'')+'</div></div><span class="type-badge '+(isHiring?'type-job':'type-service')+'" style="margin-left:auto">'+(isHiring?'Hiring':'Seeking')+'</span></div>'+
+  '<p class="t-body mb-4" style="line-height:1.7">'+escHtml(j.description)+'</p>'+
+  '<div class="skill-tags mb-4">'+(j.skills||[]).map(s=>'<span class="skill-tag primary">'+escHtml(s)+'</span>').join('')+'</div>'+
+  '<div class="card card-sm" style="background:var(--surface)"><div class="form-row"><div><div class="t-label c-text4 mb-1">Employment Type</div><div class="t-body">'+(JOB_TYPE_LABELS[j.employmentType]||j.employmentType)+'</div></div><div><div class="t-label c-text4 mb-1">Pay</div><div class="t-body">'+(escHtml(j.salaryText)||'Not listed')+'</div></div></div></div>';
+
+  if(isOwner && isHiring){
+    html += '<div class="mt-4"><div class="flex justify-between items-center mb-2"><h3 class="t-h2" style="margin:0">Applicants</h3><button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="deleteJobAction(getActiveJobId(),\''+escHtml(j.title).replace(/'/g,"\\\\'")+'\')">Delete Posting</button></div><div id="job-applicants-list"><div class="t-small c-text3" style="padding:1rem">Loading...</div></div></div>';
+  } else if(isOwner){
+    html += '<div class="mt-4"><button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="deleteJobAction(getActiveJobId(),\''+escHtml(j.title).replace(/'/g,"\\\\'")+'\')">Delete Posting</button></div>';
+  }
+  $('#modal-job-body').innerHTML=html;
+
+  const footerBtn=$('#modal-job-detail .modal-footer .btn-teal');
+  if(footerBtn){
+    if(isOwner){ footerBtn.style.display='none'; }
+    else if(isHiring){ footerBtn.style.display=''; footerBtn.textContent='Apply Now'; footerBtn.disabled=false; footerBtn.onclick=()=>applyToJob(jobId, footerBtn); }
+    else { footerBtn.style.display=''; footerBtn.textContent='Message'; footerBtn.disabled=false; footerBtn.onclick=()=>{closeAllModals();openDM(j.creatorId);}; }
+  }
+
+  if(isOwner && isHiring){
+    const apps=await jobFetchApplications(jobId);
+    const listEl=document.getElementById('job-applicants-list');
+    if(!listEl) return;
+    if(!apps.length){
+      listEl.innerHTML='<div class="empty-state" style="padding:1.5rem"><div class="empty-icon">'+String.fromCodePoint(0x1F4E5)+'</div><div class="empty-title">No applicants yet</div></div>';
+      return;
+    }
+    const applicants=await Promise.all(apps.map(a=>dmGetUser(a.applicant_id)));
+    listEl.innerHTML=apps.map((a,i)=>{
+      const u=applicants[i];
+      const resumeUrl=a.resume_url||u?.resume;
+      return '<div class="card card-sm mb-2" style="display:flex;align-items:center;gap:.75rem">'+avatarHtml(u,'sm')+'<div class="flex-1"><div class="t-small" style="font-weight:600">'+escHtml(u?.name||'Unknown')+'</div><div class="t-micro c-text4">Applied '+timeAgo(a.created_at)+'</div></div>'+(resumeUrl?'<a href="'+escHtml(resumeUrl)+'" target="_blank" rel="noopener" class="btn btn-outline btn-xs">'+icon('file')+' Resume</a>':'<span class="t-micro c-text4">No resume</span>')+'<button class="btn btn-ghost btn-xs" onclick="openDM(\''+(u?.id||'')+'\')">Message</button></div>';
+    }).join('');
+  }
+}
+window.getActiveJobId = () => _activeJobId;
+
+window.deleteJobAction = async (jobId, jobTitle) => {
+  if(!confirm('Delete "'+(jobTitle||'this listing')+'"? This cannot be undone and all applications to it will be removed.')) return;
+  const sb=getSb();
+  try {
+    if(sb){
+      await sb.from('job_applications').delete().eq('job_id', jobId).then(()=>{}, ()=>{});
+      const { error } = await sb.from('job_postings').delete().eq('id', jobId);
+      if(error) throw error;
+    }
+    _jobsCache=_jobsCache.filter(j=>j.id!==jobId);
+    toast('Listing deleted', 'success');
+    closeAllModals();
+    navigate('jobs');
+  } catch(e){ toast('Failed to delete: '+e.message, 'error'); }
+};
 
 window.deleteWheelAction = async (wheelId, wheelName) => {
   if(!confirm('Delete "'+(wheelName||'this Wheel')+'"? This cannot be undone. All posts, opportunities, and events in this Wheel will be removed.')) return;
@@ -2129,6 +2339,17 @@ window.shareWheel = async (slug, name) => {
   }
 };
 
+window.shareJob = async (jobId, title) => {
+  if(!jobId){ toast('This listing has no shareable link yet', 'error'); return; }
+  const url = window.location.origin + window.location.pathname + '?job=' + encodeURIComponent(jobId);
+  try {
+    await navigator.clipboard.writeText(url);
+    toast((title||'Job')+' link copied!', 'success');
+  } catch(e){
+    prompt('Copy the job link:', url);
+  }
+};
+
 window.saveUsername=async()=>{
   const usernameInput=$('#profile-username');
   let username=usernameInput?.value.trim().toLowerCase()||'';
@@ -2279,6 +2500,15 @@ function resetPostForm(){
   if(videoPrev)videoPrev.innerHTML='';
   if(linkPrev)linkPrev.innerHTML='';
   _pendingLinkPreview=null;
+}
+
+function resetJobForm(){
+  ['cj-title','cj-company','cj-city','cj-country','cj-salary','cj-desc','cj-skills'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+  const kind=document.getElementById('cj-kind'); if(kind) kind.value='hiring';
+  const type=document.getElementById('cj-type'); if(type) type.value='full_time';
+  const requireResume=document.getElementById('cj-require-resume'); if(requireResume) requireResume.checked=true;
+  const companyRow=document.getElementById('cj-company-row'); if(companyRow) companyRow.style.display='block';
+  const resumeRow=document.getElementById('cj-resume-row'); if(resumeRow) resumeRow.style.display='flex';
 }
 
 // ── Link previews ──────────────────────────────────────────────────────────
@@ -2732,6 +2962,17 @@ function buildModals(){
   return (
   '<div class="modal-overlay" id="modal-create-wheel"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Create a Wheel</span><button class="modal-close">x</button></div><div class="modal-body"><p class="t-small c-text3 mb-3">All Wheels on Fairriss are open and free to join.</p><div class="form-group mb-3"><label class="form-label">Start from a template:</label><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.5rem" id="wheel-templates">'+templateGrid+'</div></div><div class="divider"></div><div class="form-stack"><div class="form-group"><label class="form-label">Wheel Name *</label><input class="form-control" id="cw-name" placeholder="The Founders Circle"></div><div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="cw-desc" rows="3" placeholder="What is this Wheel about?"></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Category</label><select class="form-control" id="cw-cat" onchange="document.getElementById(\'cw-other-row\').style.display=(this.value===\'Other\')?\'block\':\'none\'"><option>Startup</option><option>Design</option><option>Marketing</option><option>Technology</option><option>Finance</option><option>Business</option><option>Events</option><option>Community</option><option>Talent</option><option>Other</option></select></div><div class="form-group"><label class="form-label">Accent Color</label><input class="form-control" id="cw-color" type="color" value="#00C9A7" style="height:40px;cursor:pointer"></div></div><div class="form-group mb-3" id="cw-other-row" style="display:none"><label class="form-label">What kind of Wheel is this?</label><input class="form-control" id="cw-other-input" placeholder="e.g. Fashion, Wellness, Sports..."></div><div class="form-group"><label class="form-label">Location <span>(optional \u2014 city, town, or country)</span></label><input class="form-control" id="cw-location" placeholder="Toronto, ON or Remote"></div><label style="display:flex;align-items:center;gap:.625rem;cursor:pointer"><input type="checkbox" id="cw-is-event" style="width:18px;height:18px;accent-color:var(--teal)"><span class="t-body">This is an Event Wheel (enables ticket selling)</span></label></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-wheel-btn">Create Wheel</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-opp"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Post an Opportunity</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Type *</label><select class="form-control" id="co-type" onchange="document.getElementById(\'co-resume-row\').style.display=this.value===\'job\'?\'flex\':\'none\'"><option value="job">Job</option><option value="collaboration">Collaboration</option><option value="investment">Investment</option><option value="service">Service Request</option></select></div><div class="form-group"><label class="form-label">Title *</label><input class="form-control" id="co-title" placeholder="Head of Product at Acme Corp"></div><div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="co-desc" rows="4" placeholder="Tell members about this opportunity..."></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Location</label><input class="form-control" id="co-location" placeholder="Remote, New York..."></div><div class="form-group"><label class="form-label">Skills Required</label><input class="form-control" id="co-skills" placeholder="React, Design, Growth..."></div></div><div class="form-group"><label class="form-label">Compensation</label><input class="form-control" id="co-comp" placeholder="$120k - $150k or $500 bonus..."></div><label id="co-resume-row" style="display:flex;align-items:center;gap:.625rem;cursor:pointer;padding:.75rem;background:var(--surface);border-radius:8px"><input type="checkbox" id="co-require-resume" checked style="width:18px;height:18px;accent-color:var(--teal)"><span class="t-body">Require applicants to submit a resume</span></label></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-opp-btn">Post Opportunity</button></div></div></div>'+
+  '<div class="modal-overlay" id="modal-create-job"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Post a Job</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack">'+
+    '<div class="form-group"><label class="form-label">I am *</label><select class="form-control" id="cj-kind" onchange="document.getElementById(\'cj-company-row\').style.display=this.value===\'hiring\'?\'block\':\'none\';document.getElementById(\'cj-resume-row\').style.display=this.value===\'hiring\'?\'flex\':\'none\'"><option value="hiring">Hiring for a role</option><option value="seeking">Looking for work</option></select></div>'+
+    '<div class="form-group"><label class="form-label">Job Title *</label><input class="form-control" id="cj-title" placeholder="Senior Photographer"></div>'+
+    '<div class="form-group" id="cj-company-row"><label class="form-label">Company</label><input class="form-control" id="cj-company" placeholder="Acme Studios"></div>'+
+    '<div class="form-row"><div class="form-group"><label class="form-label">City *</label><input class="form-control" id="cj-city" placeholder="Toronto"></div><div class="form-group"><label class="form-label">Country *</label><input class="form-control" id="cj-country" placeholder="Canada"></div></div>'+
+    '<div class="form-row"><div class="form-group"><label class="form-label">Employment Type</label><select class="form-control" id="cj-type"><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="internship">Internship</option><option value="freelance">Freelance</option></select></div><div class="form-group"><label class="form-label">Pay <span>(optional)</span></label><input class="form-control" id="cj-salary" placeholder="$50k - $70k/yr or $25/hr"></div></div>'+
+    '<div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="cj-desc" rows="4" placeholder="Describe the role, or what kind of work you\'re looking for..."></textarea></div>'+
+    '<div class="form-group"><label class="form-label">Skills <span>(optional, comma separated)</span></label><input class="form-control" id="cj-skills" placeholder="Lighting, Retouching, Studio..."></div>'+
+    '<label id="cj-resume-row" style="display:flex;align-items:center;gap:.625rem;cursor:pointer;padding:.75rem;background:var(--surface);border-radius:8px"><input type="checkbox" id="cj-require-resume" checked style="width:18px;height:18px;accent-color:var(--teal)"><span class="t-body">Require applicants to submit a resume</span></label>'+
+  '</div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-job-btn">Post Job</button></div></div></div>'+
+  '<div class="modal-overlay" id="modal-job-detail"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title" id="modal-job-title">Job</span><button class="modal-close">x</button></div><div class="modal-body" id="modal-job-body"></div><div class="modal-footer"><button class="btn btn-outline" onclick="shareJob(getActiveJobId(), document.getElementById(\'modal-job-title\').textContent)">'+icon('link')+' Share</button><button class="btn btn-outline" onclick="closeAllModals()">Close</button><button class="btn btn-teal" onclick="applyToJob(getActiveJobId(), this)">Apply Now</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-service"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Post a Service</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Title *</label><input class="form-control" id="sv-title" placeholder="Brand identity design for startups"></div><div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="sv-desc" rows="4" placeholder="What do you offer? What\'s included?"></textarea></div><div class="form-group"><label class="form-label">Skills</label><input class="form-control" id="sv-skills" placeholder="Branding, Figma, Illustration..."></div><div class="form-group"><label class="form-label">Location <span>(optional \u2014 city, town, or country)</span></label><input class="form-control" id="sv-location" placeholder="Toronto, ON or Remote"></div><div class="form-row"><div class="form-group"><label class="form-label">Pricing Type</label><select class="form-control" id="sv-price-type"><option value="fixed">Flat rate</option><option value="hourly">Hourly</option></select></div><div class="form-group"><label class="form-label">Price ($) <span>(optional)</span></label><input class="form-control" id="sv-price" type="number" min="0" placeholder="1500"></div></div><div class="form-group"><label class="form-label">Typical Delivery Time <span>(optional, in days)</span></label><input class="form-control" id="sv-delivery" type="number" min="1" placeholder="14"></div><div class="form-group"><label class="form-label">Portfolio Link <span>(optional)</span></label><input class="form-control" id="sv-portfolio" placeholder="https://..."></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-service-btn">Post Service</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-deal"><div class="modal modal-lg"><div class="modal-header"><span class="modal-title">Create a Deal</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Deal Title *</label><input class="form-control" id="cd-title" placeholder="Website Redesign Project"></div><div class="form-group"><label class="form-label">Counterparty (Seller) *</label><select class="form-control" id="cd-seller"><option value="">Select member...</option></select></div><div class="form-group"><label class="form-label">Scope *</label><textarea class="form-control" id="cd-scope" rows="3" placeholder="Describe what you are buying..."></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Price ($) *</label><input class="form-control" id="cd-price" type="number" min="1" placeholder="5000"></div><div class="form-group"><label class="form-label">Payment Type</label><select class="form-control" id="cd-payment-type"><option value="lump_sum">Full Amount</option><option value="milestones">Milestones</option></select></div></div><div class="form-row"><div class="form-group"><label class="form-label">Start Date</label><input class="form-control" id="cd-start" type="date"></div><div class="form-group"><label class="form-label">End Date</label><input class="form-control" id="cd-end" type="date"></div></div><div class="form-group"><label class="form-label">Deliverables <span>one per line</span></label><textarea class="form-control" id="cd-deliverables" rows="3" placeholder="Discovery and wireframes&#10;High-fidelity mockups&#10;Developer handoff"></textarea></div><div class="form-group"><label class="form-label">Wheel</label><select class="form-control" id="cd-wheel"><option value="">None (direct deal)</option></select></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-deal-btn">Propose Deal</button></div></div></div>'+
   '<div class="modal-overlay" id="modal-create-post"><div class="modal"><div class="modal-header"><span class="modal-title">New Post</span><button class="modal-close">x</button></div><div class="modal-body"><div class="form-stack"><div class="form-group"><label class="form-label">Type</label><select class="form-control" id="cp-type"><option value="post">Post</option><option value="announcement">Announcement</option><option value="referral">Referral</option></select></div><div class="form-group"><label class="form-label">Message</label><textarea class="form-control" id="cp-body" rows="3" placeholder="Share something with your Wheel... Use @name to mention someone"></textarea></div><div class="form-group"><label class="form-label">Link <span>(optional)</span></label><input class="form-control" id="cp-link" placeholder="https://..." onblur="fetchAndShowLinkPreview()"><div id="cp-link-preview" style="margin-top:.5rem"></div></div><div class="form-group"><label class="form-label">Photo <span>(optional)</span></label><input type="file" id="cp-photo" accept="image/*" class="form-control" style="padding:.375rem" onchange="previewPostPhoto(event)"><div id="cp-photo-preview" style="margin-top:.5rem"></div></div><div class="form-group"><label class="form-label">Video <span>(optional)</span></label><input type="file" id="cp-video" accept="video/*" class="form-control" style="padding:.375rem" onchange="previewPostVideo(event)"><div id="cp-video-preview" style="margin-top:.5rem"></div></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancel</button><button class="btn btn-teal" id="create-post-btn">Publish</button></div></div></div>'+
@@ -2790,6 +3031,26 @@ function bindModalForms(){
       toast('Opportunity posted!','success');closeAllModals();navigate('opportunities');
     } catch(e){
       toast('Failed to post: '+e.message,'error'); btn.disabled=false; btn.textContent='Post Opportunity';
+    }
+  });
+  $('#create-job-btn')?.addEventListener('click', async ()=>{
+    const title=$('#cj-title').value.trim(),city=$('#cj-city').value.trim(),country=$('#cj-country').value.trim(),desc=$('#cj-desc').value.trim();
+    if(!title||!city||!country||!desc){toast('Job title, city, country, and description are required','error');return;}
+    const btn=$('#create-job-btn'); btn.disabled=true; btn.textContent='Posting...';
+    try {
+      const kind=$('#cj-kind').value;
+      await store.createJob({
+        kind, title, city, country,
+        company: kind==='hiring' ? $('#cj-company').value.trim() : '',
+        employmentType: $('#cj-type').value,
+        salaryText: $('#cj-salary').value.trim(),
+        description: desc,
+        skills: $('#cj-skills').value.split(',').map(s=>s.trim()).filter(Boolean),
+        requireResume: kind==='hiring' ? ($('#cj-require-resume')?.checked!==false) : false,
+      });
+      toast('Job posted!','success');closeAllModals();resetJobForm();navigate('jobs');
+    } catch(e){
+      toast('Failed to post: '+e.message,'error'); btn.disabled=false; btn.textContent='Post Job';
     }
   });
   $('#create-service-btn')?.addEventListener('click', async ()=>{
@@ -3084,6 +3345,13 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   const publicWheelSlug = new URLSearchParams(window.location.search).get('wheel');
   if(publicWheelSlug){
     await renderPublicWheel(publicWheelSlug);
+    return;
+  }
+
+  // Public shareable job posting link (?job=id) — works without logging in
+  const publicJobId = new URLSearchParams(window.location.search).get('job');
+  if(publicJobId){
+    await renderPublicJob(publicJobId);
     return;
   }
 
