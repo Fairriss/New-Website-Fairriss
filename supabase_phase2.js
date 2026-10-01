@@ -83,6 +83,25 @@ function dbPost(p) {
   };
 }
 
+function dbJob(j) {
+  return {
+    id: j.id,
+    creatorId: j.creator_id,
+    kind: j.kind || 'hiring',
+    title: j.title,
+    company: j.company || '',
+    city: j.city || '',
+    country: j.country || '',
+    employmentType: j.employment_type || 'full_time',
+    salaryText: j.salary_text || '',
+    description: j.description || '',
+    skills: j.skills || [],
+    requireResume: j.require_resume !== false,
+    status: j.status || 'open',
+    createdAt: j.created_at,
+  };
+}
+
 function dbReview(r) {
   return {
     id: r.id,
@@ -474,6 +493,65 @@ const LiveStore = {
     return dbOpp(data);
   },
 
+  // ── Job Postings (public job board, separate from Wheel Opportunities) ──
+  async getJobs(filters = {}) {
+    let q = window._supabase
+      .from('job_postings')
+      .select('*')
+      .eq('status', 'open')
+      .order('created_at', { ascending: false });
+    if (filters.kind && filters.kind !== 'all') q = q.eq('kind', filters.kind);
+    if (filters.city) q = q.ilike('city', `%${filters.city}%`);
+    if (filters.country) q = q.ilike('country', `%${filters.country}%`);
+    if (filters.q) q = q.or(`title.ilike.%${filters.q}%,company.ilike.%${filters.q}%,description.ilike.%${filters.q}%`);
+    const { data, error } = await q;
+    if (error) throw error;
+    return data.map(dbJob);
+  },
+
+  async createJob(fields) {
+    const { data, error } = await window._supabase
+      .from('job_postings')
+      .insert({
+        creator_id: this._currentUserId,
+        kind: fields.kind || 'hiring',
+        title: fields.title,
+        company: fields.company || '',
+        city: fields.city || '',
+        country: fields.country || '',
+        employment_type: fields.employmentType || 'full_time',
+        salary_text: fields.salaryText || '',
+        description: fields.description || '',
+        skills: fields.skills || [],
+        require_resume: fields.requireResume !== false,
+      })
+      .select().single();
+    if (error) throw error;
+    return dbJob(data);
+  },
+
+  async applyToJob(jobId, resumeUrl, message) {
+    const { error } = await window._supabase
+      .from('job_applications')
+      .insert({
+        job_id: jobId,
+        applicant_id: this._currentUserId,
+        resume_url: resumeUrl || null,
+        message: message || '',
+      });
+    if (error && error.code !== '23505') throw error; // 23505 = already applied
+  },
+
+  async getJobApplications(jobId) {
+    const { data, error } = await window._supabase
+      .from('job_applications')
+      .select('*')
+      .eq('job_id', jobId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
   // ── Deals ────────────────────────────────────────────────────
   async getMyDeals() {
     const { data, error } = await window._supabase
@@ -740,6 +818,24 @@ async function patchStoreWithLive() {
 
   store.createOpportunity = async (fields) => {
     return await LiveStore.createOpportunity(fields);
+  };
+
+  store.getJobs = async (filters) => {
+    try { return await LiveStore.getJobs(filters); }
+    catch(e) { console.error('getJobs failed:', e); return []; }
+  };
+
+  store.createJob = async (fields) => {
+    return await LiveStore.createJob(fields);
+  };
+
+  store.applyToJob = async (jobId, resumeUrl, message) => {
+    return await LiveStore.applyToJob(jobId, resumeUrl, message);
+  };
+
+  store.getJobApplications = async (jobId) => {
+    try { return await LiveStore.getJobApplications(jobId); }
+    catch(e) { console.error('getJobApplications failed:', e); return []; }
   };
 
   store.getMyDeals = async () => {
