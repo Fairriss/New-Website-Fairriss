@@ -97,6 +97,8 @@ function dbJob(j) {
     description: j.description || '',
     skills: j.skills || [],
     requireResume: j.require_resume !== false,
+    benefits: j.benefits || [],
+    shiftSchedule: j.shift_schedule || '',
     status: j.status || 'open',
     createdAt: j.created_at,
   };
@@ -524,6 +526,8 @@ const LiveStore = {
         description: fields.description || '',
         skills: fields.skills || [],
         require_resume: fields.requireResume !== false,
+        benefits: fields.benefits || [],
+        shift_schedule: fields.shiftSchedule || '',
       })
       .select().single();
     if (error) throw error;
