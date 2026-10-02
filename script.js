@@ -134,7 +134,15 @@ document.addEventListener('click',e=>{
 
 const PAGES=['home','wheels','members','opportunities','jobs','deals','profile','wheel-detail','deal-detail','analytics','admin','support','messages'];
 let currentPage='home',pageParams={};
-function navigate(page,params={}){currentPage=page;pageParams=params;renderPage();window.scrollTo(0,0);}
+function navigate(page,params={}){
+  // Only jump back to the top of the page when actually moving to a different
+  // page. Re-navigating to the *same* page (e.g. typing in a filter box,
+  // which re-runs navigate() to refresh results) should leave scroll position
+  // alone — otherwise the view yanks back to the top on every keystroke pause.
+  const samePage = currentPage===page;
+  currentPage=page;pageParams=params;renderPage();
+  if(!samePage) window.scrollTo(0,0);
+}
 
 function renderPage(){
   const me=store.getMe();
@@ -1776,6 +1784,14 @@ let _activeJobId=null;
 async function renderJobs(){
   const el=document.getElementById('page-jobs');
   const kind=pageParams.kind||'all', city=pageParams.city||'', country=pageParams.country||'', q=pageParams.q||'';
+  // Remember which filter input (if any) the person was typing in, and where
+  // their cursor was, so we can restore it after the re-render below — a full
+  // innerHTML rebuild destroys and recreates the <input> elements, which would
+  // otherwise silently drop focus mid-keystroke and make typing look "stuck".
+  const activeEl=document.activeElement;
+  const activeId=(activeEl && activeEl.id && ['job-city','job-country','job-search'].includes(activeEl.id)) ? activeEl.id : null;
+  const activeSelStart=activeId ? activeEl.selectionStart : null;
+  const activeSelEnd=activeId ? activeEl.selectionEnd : null;
   let jobs=[];
   try { jobs=await store.getJobs({kind, city, country, q}); } catch(e){ jobs=[]; }
   _jobsCache=jobs;
@@ -1792,6 +1808,14 @@ async function renderJobs(){
   $('#job-search')?.addEventListener('input',debouncedNav);
   $$('.job-card',el).forEach(c=>c.onclick=()=>{openModal('modal-job-detail');renderJobDetail(c.dataset.jobId);});
   $$('.delete-job-btn',el).forEach(btn=>btn.onclick=(e)=>{e.stopPropagation();deleteJobAction(btn.dataset.jobId, btn.dataset.jobTitle);});
+  // Restore focus + cursor position to whichever filter input was being typed in.
+  if(activeId){
+    const restoredEl=document.getElementById(activeId);
+    if(restoredEl){
+      restoredEl.focus();
+      try{ restoredEl.setSelectionRange(activeSelStart, activeSelEnd); }catch(e){}
+    }
+  }
 }
 
 function renderJobCard(j, creator){
