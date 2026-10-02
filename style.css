@@ -586,6 +586,7 @@ ul, ol { list-style: none; }
   display: inline-flex; align-items: center; gap: .3rem;
   font-size: .6875rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
   padding: .2rem .625rem; border-radius: 99px;
+  white-space: nowrap;
 }
 .type-job { background: var(--blue-bg); color: var(--blue); }
 .type-partnership { background: var(--purple-bg); color: var(--purple); }
