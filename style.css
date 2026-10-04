@@ -701,6 +701,8 @@ select.form-control { cursor: pointer; }
   transition: all .15s;
 }
 .filter-pill:hover { border-color: var(--border-mid); color: var(--text); }
+.job-cat-bar { overflow-x: auto; flex-wrap: nowrap; padding-bottom: .5rem; scrollbar-width: thin; }
+.job-cat-bar .filter-pill { white-space: nowrap; flex-shrink: 0; }
 .filter-pill.active { border-color: var(--navy); color: var(--navy); background: var(--navy); color: var(--white); }
 .filter-sep { width: 1px; height: 20px; background: var(--border); margin: 0 .25rem; }
 .search-input-sm {
