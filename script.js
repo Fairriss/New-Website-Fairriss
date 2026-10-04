@@ -519,7 +519,7 @@ async function renderPublicJob(jobId){
   '<div style="color:rgba(255,255,255,.7);font-size:.9375rem">'+(isHiring?escHtml(j.company||''):escHtml(creator?.name||''))+(place?' &middot; '+escHtml(place):'')+'</div>'+
   '</div>'+
   '<div style="max-width:560px;margin:0 auto;padding:2rem 1.5rem">'+
-  '<div class="card mb-4"><div class="flex gap-2 items-center mb-3"><span class="type-badge" style="background:var(--surface);color:var(--text-3)">'+(typeLabels[j.employment_type]||j.employment_type)+'</span>'+(j.salary_text?'<span class="t-small" style="font-weight:600;color:var(--navy)">'+escHtml(j.salary_text)+'</span>':'')+'</div>'+
+  '<div class="card mb-4"><div class="flex gap-2 items-center mb-3"><span class="type-badge" style="background:var(--surface);color:var(--text-3)">'+(typeLabels[j.employment_type]||j.employment_type)+'</span>'+(jobCategoryText(j.category,j.category_other)?'<span class="type-badge" style="background:var(--surface);color:var(--text-3)">'+escHtml(jobCategoryText(j.category,j.category_other))+'</span>':'')+(j.salary_text?'<span class="t-small" style="font-weight:600;color:var(--navy)">'+escHtml(j.salary_text)+'</span>':'')+'</div>'+
   '<p class="t-body" style="color:var(--text-2);line-height:1.7;white-space:pre-wrap">'+escHtml(j.description)+'</p>'+
   ((j.skills||[]).length?'<div class="skill-tags mt-3">'+j.skills.map(s=>'<span class="skill-tag">'+escHtml(s)+'</span>').join('')+'</div>':'')+
   (j.shift_schedule?'<div class="divider" style="margin:1rem 0"></div><div><div class="t-label c-text4 mb-1">Shift and Schedule</div><div class="t-body">'+escHtml(j.shift_schedule)+'</div></div>':'')+
@@ -1777,13 +1777,38 @@ async function renderOppDetail(oppId){
 window.getActiveOppId = () => _activeOppId;
 
 // ── Jobs (public job board — separate from Wheel-scoped Opportunities) ──────
+const JOB_CATEGORIES=[
+  {key:'drivers_security',label:'Drivers & Security'},
+  {key:'general_labour',label:'General Labour'},
+  {key:'construction_trades',label:'Construction & Trades'},
+  {key:'food_hospitality',label:'Bar, Food & Hospitality'},
+  {key:'cleaning_housekeeping',label:'Cleaning & Housekeeping'},
+  {key:'part_time_students',label:'Part Time & Students'},
+  {key:'healthcare',label:'Healthcare'},
+  {key:'customer_service',label:'Customer Service'},
+  {key:'sales_retail',label:'Sales & Retail'},
+  {key:'hair_salon',label:'Hair Stylist & Salon'},
+  {key:'child_care',label:'Child Care'},
+  {key:'accounting_management',label:'Accounting & Management'},
+  {key:'office_reception',label:'Office Manager & Receptionist'},
+  {key:'design',label:'Graphic & Web Design'},
+  {key:'media_fashion',label:'TV, Media & Fashion'},
+  {key:'tech',label:'Programmers & Computer'},
+  {key:'other',label:'Other'}
+];
+const JOB_CATEGORY_LABELS=Object.fromEntries(JOB_CATEGORIES.map(c=>[c.key,c.label]));
+// Text to show for a job's category. 'Other' with no custom text shows nothing on cards.
+function jobCategoryText(cat, other){
+  if(cat==='other') return (other||'').trim();
+  return JOB_CATEGORY_LABELS[cat]||'';
+}
 const JOB_TYPE_LABELS={full_time:'Full-time',part_time:'Part-time',contract:'Contract',internship:'Internship',freelance:'Freelance'};
 let _jobsCache=[]; // refreshed on every renderJobs() / renderJobDetail() fetch — avoids relying on stale store.data
 let _activeJobId=null;
 
 async function renderJobs(){
   const el=document.getElementById('page-jobs');
-  const kind=pageParams.kind||'all', city=pageParams.city||'', country=pageParams.country||'', q=pageParams.q||'';
+  const kind=pageParams.kind||'all', category=pageParams.category||'all', city=pageParams.city||'', country=pageParams.country||'', q=pageParams.q||'';
   // Remember which filter input (if any) the person was typing in, and where
   // their cursor was, so we can restore it after the re-render below — a full
   // innerHTML rebuild destroys and recreates the <input> elements, which would
@@ -1793,16 +1818,20 @@ async function renderJobs(){
   const activeSelStart=activeId ? activeEl.selectionStart : null;
   const activeSelEnd=activeId ? activeEl.selectionEnd : null;
   let jobs=[];
-  try { jobs=await store.getJobs({kind, city, country, q}); } catch(e){ jobs=[]; }
+  try { jobs=await store.getJobs({kind, category, city, country, q}); } catch(e){ jobs=[]; }
   _jobsCache=jobs;
+  const catCounts=await store.getJobCategoryCounts(kind);
+  const catTotal=Object.values(catCounts).reduce((a,b)=>a+b,0);
   const creators=await usersByIdMap(jobs.map(j=>j.creatorId));
   el.innerHTML='<div class="page-head"><div class="page-head-left"><h1 class="page-title">Jobs</h1><p class="page-sub">'+jobs.length+' listing'+(jobs.length===1?'':'s')+'</p></div><div class="page-actions"><button class="btn btn-teal" onclick="resetJobForm();openModal(\'modal-create-job\')">'+icon('plus')+' Post a Job</button></div></div>'+
   '<div class="filter-bar">'+['all','hiring','seeking'].map(t=>'<button class="filter-pill job-kind-btn '+(kind===t?'active':'')+'" data-kind="'+t+'">'+(t==='all'?'All':t==='hiring'?'Hiring':'Available for Work')+'</button>').join('')+'</div>'+
+  '<div class="filter-bar job-cat-bar"><button class="filter-pill job-cat-btn '+(category==='all'?'active':'')+'" data-cat="all">All Categories ('+catTotal+')</button>'+JOB_CATEGORIES.map(c=>'<button class="filter-pill job-cat-btn '+(category===c.key?'active':'')+'" data-cat="'+c.key+'">'+c.label+' ('+(catCounts[c.key]||0)+')</button>').join('')+'</div>'+
   '<div class="filter-bar"><input class="form-control" id="job-city" placeholder="City" value="'+escHtml(city)+'" style="max-width:160px"><input class="form-control" id="job-country" placeholder="Country" value="'+escHtml(country)+'" style="max-width:160px"><div style="position:relative;margin-left:auto"><svg style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--text-4);pointer-events:none" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input class="form-control" id="job-search" placeholder="Search title, company..." value="'+escHtml(q)+'" style="padding-left:2.25rem;width:220px"></div></div>'+
   '<div class="opp-list">'+(jobs.length?jobs.map(j=>renderJobCard(j,creators[j.creatorId])).join(''):'<div class="empty-state"><div class="empty-icon">'+String.fromCodePoint(0x1F4BC)+'</div><div class="empty-title">No job listings found</div><button class="btn btn-primary btn-sm" onclick="resetJobForm();openModal(\'modal-create-job\')">Post One</button></div>')+'</div>';
-  $$('.job-kind-btn',el).forEach(btn=>btn.addEventListener('click',()=>navigate('jobs',{kind:btn.dataset.kind,city,country,q})));
+  $$('.job-kind-btn',el).forEach(btn=>btn.addEventListener('click',()=>navigate('jobs',{kind:btn.dataset.kind,category,city,country,q})));
+  $$('.job-cat-btn',el).forEach(btn=>btn.addEventListener('click',()=>navigate('jobs',{kind,category:btn.dataset.cat,city,country,q})));
   let st;
-  const debouncedNav=()=>{clearTimeout(st);st=setTimeout(()=>navigate('jobs',{kind,city:$('#job-city').value.trim(),country:$('#job-country').value.trim(),q:$('#job-search').value.trim()}),350);};
+  const debouncedNav=()=>{clearTimeout(st);st=setTimeout(()=>navigate('jobs',{kind,category,city:$('#job-city').value.trim(),country:$('#job-country').value.trim(),q:$('#job-search').value.trim()}),350);};
   $('#job-city')?.addEventListener('input',debouncedNav);
   $('#job-country')?.addEventListener('input',debouncedNav);
   $('#job-search')?.addEventListener('input',debouncedNav);
@@ -1825,7 +1854,7 @@ function renderJobCard(j, creator){
   const place=[j.city,j.country].filter(Boolean).join(', ');
   const titleLine=isHiring?escHtml(j.title):escHtml(j.title)+' <span class="t-small c-text3">— available for work</span>';
   const subLine=isHiring?escHtml(j.company||'Company not listed'):escHtml(creator?.name||'');
-  return '<div class="opp-card job-card" data-job-id="'+j.id+'"><div class="opp-main"><div class="opp-title">'+titleLine+'</div><div class="opp-meta"><span class="type-badge '+(isHiring?'type-job':'type-service')+'">'+(isHiring?'Hiring':'Available for Work')+'</span><span class="type-badge" style="background:var(--surface);color:var(--text-3)">'+(JOB_TYPE_LABELS[j.employmentType]||j.employmentType)+'</span>'+avatarHtml(creator,'sm')+'<span class="opp-meta-item">'+subLine+'</span>'+(place?'<span class="opp-meta-item">'+icon('map')+' '+escHtml(place)+'</span>':'')+'</div><div class="opp-desc">'+escHtml(j.description)+'</div><div class="skill-tags mt-2">'+(j.skills||[]).map(s=>'<span class="skill-tag">'+escHtml(s)+'</span>').join('')+'</div></div><div class="opp-right"><div class="opp-value">'+(escHtml(j.salaryText)||'')+'</div><div class="flex gap-2 items-center"><div class="opp-posted">'+timeAgo(j.createdAt)+'</div><button class="btn btn-ghost btn-xs" title="Copy shareable link" onclick="event.stopPropagation();shareJob(\''+j.id+'\',\''+escHtml(j.title).replace(/'/g,"\\\\'")+'\')">'+icon('link')+'</button></div>'+(isOwner?'<button class="btn btn-ghost btn-xs mt-2 delete-job-btn" style="color:var(--red)" data-job-id="'+j.id+'" data-job-title="'+escHtml(j.title)+'">Delete</button>':(isHiring?'<button class="btn btn-teal btn-sm mt-2" onclick="event.stopPropagation();applyToJob(\''+j.id+'\',this)">Apply</button>':'<button class="btn btn-teal btn-sm mt-2" onclick="event.stopPropagation();openDM(\''+j.creatorId+'\')">Message</button>'))+'</div></div>';
+  return '<div class="opp-card job-card" data-job-id="'+j.id+'"><div class="opp-main"><div class="opp-title">'+titleLine+'</div><div class="opp-meta"><span class="type-badge '+(isHiring?'type-job':'type-service')+'">'+(isHiring?'Hiring':'Available for Work')+'</span><span class="type-badge" style="background:var(--surface);color:var(--text-3)">'+(JOB_TYPE_LABELS[j.employmentType]||j.employmentType)+'</span>'+(jobCategoryText(j.category,j.categoryOther)?'<span class="type-badge" style="background:var(--surface);color:var(--text-3)">'+escHtml(jobCategoryText(j.category,j.categoryOther))+'</span>':'')+avatarHtml(creator,'sm')+'<span class="opp-meta-item">'+subLine+'</span>'+(place?'<span class="opp-meta-item">'+icon('map')+' '+escHtml(place)+'</span>':'')+'</div><div class="opp-desc">'+escHtml(j.description)+'</div><div class="skill-tags mt-2">'+(j.skills||[]).map(s=>'<span class="skill-tag">'+escHtml(s)+'</span>').join('')+'</div></div><div class="opp-right"><div class="opp-value">'+(escHtml(j.salaryText)||'')+'</div><div class="flex gap-2 items-center"><div class="opp-posted">'+timeAgo(j.createdAt)+'</div><button class="btn btn-ghost btn-xs" title="Copy shareable link" onclick="event.stopPropagation();shareJob(\''+j.id+'\',\''+escHtml(j.title).replace(/'/g,"\\\\'")+'\')">'+icon('link')+'</button></div>'+(isOwner?'<button class="btn btn-ghost btn-xs mt-2 delete-job-btn" style="color:var(--red)" data-job-id="'+j.id+'" data-job-title="'+escHtml(j.title)+'">Delete</button>':(isHiring?'<button class="btn btn-teal btn-sm mt-2" onclick="event.stopPropagation();applyToJob(\''+j.id+'\',this)">Apply</button>':'<button class="btn btn-teal btn-sm mt-2" onclick="event.stopPropagation();openDM(\''+j.creatorId+'\')">Message</button>'))+'</div></div>';
 }
 
 async function jobFetchApplications(jobId){
@@ -1876,6 +1905,7 @@ async function renderJobDetail(jobId){
   '<p class="t-body mb-4" style="line-height:1.7">'+escHtml(j.description)+'</p>'+
   '<div class="skill-tags mb-4">'+(j.skills||[]).map(s=>'<span class="skill-tag primary">'+escHtml(s)+'</span>').join('')+'</div>'+
   '<div class="card card-sm mb-4" style="background:var(--surface)"><div class="form-row"><div><div class="t-label c-text4 mb-1">Employment Type</div><div class="t-body">'+(JOB_TYPE_LABELS[j.employmentType]||j.employmentType)+'</div></div><div><div class="t-label c-text4 mb-1">Pay</div><div class="t-body">'+(escHtml(j.salaryText)||'Not listed')+'</div></div></div>'+
+  '<div class="divider" style="margin:.75rem 0"></div><div><div class="t-label c-text4 mb-1">Category</div><div class="t-body">'+escHtml(jobCategoryText(j.category,j.categoryOther)||'Other')+'</div></div>'+
   (j.shiftSchedule?'<div class="divider" style="margin:.75rem 0"></div><div><div class="t-label c-text4 mb-1">Shift and Schedule</div><div class="t-body">'+escHtml(j.shiftSchedule)+'</div></div>':'')+
   '</div>'+
   ((j.benefits||[]).length?'<div class="mb-4"><div class="t-label c-text4 mb-2">Benefits</div><ul style="margin:0;padding-left:1.25rem;line-height:1.9">'+j.benefits.map(b=>'<li class="t-body">'+escHtml(b)+'</li>').join('')+'</ul></div>':'');
@@ -2535,6 +2565,9 @@ function resetJobForm(){
   ['cj-title','cj-company','cj-city','cj-country','cj-salary','cj-desc','cj-skills','cj-benefits','cj-shift'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
   const kind=document.getElementById('cj-kind'); if(kind) kind.value='hiring';
   const type=document.getElementById('cj-type'); if(type) type.value='full_time';
+  const cat=document.getElementById('cj-category'); if(cat) cat.value='other';
+  const catOther=document.getElementById('cj-category-other'); if(catOther) catOther.value='';
+  const catOtherRow=document.getElementById('cj-category-other-row'); if(catOtherRow) catOtherRow.style.display='block';
   const requireResume=document.getElementById('cj-require-resume'); if(requireResume) requireResume.checked=true;
   const companyRow=document.getElementById('cj-company-row'); if(companyRow) companyRow.style.display='block';
   const resumeRow=document.getElementById('cj-resume-row'); if(resumeRow) resumeRow.style.display='flex';
@@ -2997,6 +3030,8 @@ function buildModals(){
     '<div class="form-group" id="cj-company-row"><label class="form-label">Company</label><input class="form-control" id="cj-company" placeholder="Acme Studios"></div>'+
     '<div class="form-row"><div class="form-group"><label class="form-label">City *</label><input class="form-control" id="cj-city" placeholder="Toronto"></div><div class="form-group"><label class="form-label">Country *</label><input class="form-control" id="cj-country" placeholder="Canada"></div></div>'+
     '<div class="form-row"><div class="form-group"><label class="form-label">Employment Type</label><select class="form-control" id="cj-type"><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="internship">Internship</option><option value="freelance">Freelance</option></select></div><div class="form-group"><label class="form-label">Pay <span>(optional)</span></label><input class="form-control" id="cj-salary" placeholder="$50k - $70k/yr or $25/hr"></div></div>'+
+    '<div class="form-group"><label class="form-label">Category *</label><select class="form-control" id="cj-category" onchange="document.getElementById(\'cj-category-other-row\').style.display=this.value===\'other\'?\'block\':\'none\'">'+JOB_CATEGORIES.map(c=>'<option value="'+c.key+'">'+c.label+'</option>').join('')+'</select></div>'+
+    '<div class="form-group" id="cj-category-other-row"><label class="form-label">What kind of job is this? <span>(optional)</span></label><input class="form-control" id="cj-category-other" maxlength="60" placeholder="e.g. Welding, Landscaping, Pet Care..."></div>'+
     '<div class="form-group"><label class="form-label">Description *</label><textarea class="form-control" id="cj-desc" rows="4" placeholder="Describe the role, or what kind of work you\'re looking for..."></textarea></div>'+
     '<div class="form-group"><label class="form-label">Skills <span>(optional, comma separated)</span></label><input class="form-control" id="cj-skills" placeholder="Lighting, Retouching, Studio..."></div>'+
     '<div class="form-group"><label class="form-label">Benefits <span>(optional, comma separated)</span></label><input class="form-control" id="cj-benefits" placeholder="Vision care, Dental care, On-site parking..."></div>'+
@@ -3074,6 +3109,8 @@ function bindModalForms(){
         kind, title, city, country,
         company: kind==='hiring' ? $('#cj-company').value.trim() : '',
         employmentType: $('#cj-type').value,
+        category: $('#cj-category').value,
+        categoryOther: $('#cj-category-other').value.trim(),
         salaryText: $('#cj-salary').value.trim(),
         description: desc,
         skills: $('#cj-skills').value.split(',').map(s=>s.trim()).filter(Boolean),
