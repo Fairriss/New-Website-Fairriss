@@ -97,6 +97,8 @@ function dbJob(j) {
     description: j.description || '',
     skills: j.skills || [],
     requireResume: j.require_resume !== false,
+    category: j.category || 'other',
+    categoryOther: j.category_other || '',
     benefits: j.benefits || [],
     shiftSchedule: j.shift_schedule || '',
     status: j.status || 'open',
@@ -503,12 +505,25 @@ const LiveStore = {
       .eq('status', 'open')
       .order('created_at', { ascending: false });
     if (filters.kind && filters.kind !== 'all') q = q.eq('kind', filters.kind);
+    if (filters.category && filters.category !== 'all') q = q.eq('category', filters.category);
     if (filters.city) q = q.ilike('city', `%${filters.city}%`);
     if (filters.country) q = q.ilike('country', `%${filters.country}%`);
     if (filters.q) q = q.or(`title.ilike.%${filters.q}%,company.ilike.%${filters.q}%,description.ilike.%${filters.q}%`);
     const { data, error } = await q;
     if (error) throw error;
     return data.map(dbJob);
+  },
+
+  // Count of open listings per category (for the category chips). Respects the
+  // kind filter so counts match what the person is browsing.
+  async getJobCategoryCounts(kind) {
+    let q = window._supabase.from('job_postings').select('category').eq('status', 'open');
+    if (kind && kind !== 'all') q = q.eq('kind', kind);
+    const { data, error } = await q;
+    if (error) throw error;
+    const counts = {};
+    (data || []).forEach(r => { const k = r.category || 'other'; counts[k] = (counts[k] || 0) + 1; });
+    return counts;
   },
 
   async createJob(fields) {
@@ -526,6 +541,8 @@ const LiveStore = {
         description: fields.description || '',
         skills: fields.skills || [],
         require_resume: fields.requireResume !== false,
+        category: fields.category || 'other',
+        category_other: fields.category === 'other' ? (fields.categoryOther || '') : '',
         benefits: fields.benefits || [],
         shift_schedule: fields.shiftSchedule || '',
       })
@@ -827,6 +844,11 @@ async function patchStoreWithLive() {
   store.getJobs = async (filters) => {
     try { return await LiveStore.getJobs(filters); }
     catch(e) { console.error('getJobs failed:', e); return []; }
+  };
+
+  store.getJobCategoryCounts = async (kind) => {
+    try { return await LiveStore.getJobCategoryCounts(kind); }
+    catch(e) { console.error('getJobCategoryCounts failed:', e); return {}; }
   };
 
   store.createJob = async (fields) => {
