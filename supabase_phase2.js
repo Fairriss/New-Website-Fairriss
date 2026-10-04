@@ -551,6 +551,30 @@ const LiveStore = {
     return dbJob(data);
   },
 
+  async updateJob(jobId, fields) {
+    const { data, error } = await window._supabase
+      .from('job_postings')
+      .update({
+        title: fields.title,
+        company: fields.company || '',
+        city: fields.city || '',
+        country: fields.country || '',
+        employment_type: fields.employmentType || 'full_time',
+        salary_text: fields.salaryText || '',
+        description: fields.description || '',
+        skills: fields.skills || [],
+        category: fields.category || 'other',
+        category_other: fields.category === 'other' ? (fields.categoryOther || '') : '',
+        benefits: fields.benefits || [],
+        shift_schedule: fields.shiftSchedule || '',
+        require_resume: fields.requireResume !== false,
+      })
+      .eq('id', jobId)
+      .select().single();
+    if (error) throw error;
+    return dbJob(data);
+  },
+
   async applyToJob(jobId, resumeUrl, message) {
     const { error } = await window._supabase
       .from('job_applications')
@@ -849,6 +873,10 @@ async function patchStoreWithLive() {
   store.getJobCategoryCounts = async (kind) => {
     try { return await LiveStore.getJobCategoryCounts(kind); }
     catch(e) { console.error('getJobCategoryCounts failed:', e); return {}; }
+  };
+
+  store.updateJob = async (jobId, fields) => {
+    return await LiveStore.updateJob(jobId, fields);
   };
 
   store.createJob = async (fields) => {
