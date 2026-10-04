@@ -1206,6 +1206,13 @@ select.form-control { cursor: pointer; }
   .filter-bar { overflow-x: auto; flex-wrap: nowrap; padding-bottom: .5rem; }
   .filter-bar::-webkit-scrollbar { display: none; }
 
+  /* Jobs: City / Country / Search row — wrap instead of scrolling so nothing is cut off.
+     City and Country share one row (half each); Search gets its own full-width row. */
+  .job-search-bar { flex-wrap: wrap; overflow-x: visible; gap: .5rem; }
+  .job-search-bar > input.form-control { flex: 1 1 calc(50% - .25rem); min-width: 0; max-width: none !important; }
+  .job-search-bar > div { flex: 1 1 100%; margin-left: 0 !important; }
+  .job-search-bar > div > input.form-control { width: 100% !important; }
+
   /* Modals */
   .modal { max-width: 100%; margin: 0; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
   .modal-overlay { align-items: flex-end; padding: 0; }
