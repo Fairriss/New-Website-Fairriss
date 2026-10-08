@@ -535,7 +535,7 @@ function renderAuth(){
       .lp-nav { position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-bottom:1px solid #e8e8e8;padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between; }
       .lp-hero { min-height:100vh;position:relative;display:flex;align-items:center;overflow:hidden;padding-top:64px; }
       .lp-hero-content { position:relative;z-index:1;max-width:680px;padding:4rem 3rem; }
-      .lp-hero h1 { color:#fff;font-size:3.5rem;font-weight:900;line-height:1.1;margin:0 0 1.25rem;letter-spacing:-.03em; }
+      .lp-hero h1 { color:#fff;font-size:3.25rem;font-weight:900;line-height:1.1;margin:0 0 1.25rem;letter-spacing:-.03em; }
       .lp-grid-3 { display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;max-width:960px;margin:0 auto; }
       .lp-grid-6 { display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem; }
       .lp-grid-4 { display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem; }
@@ -543,11 +543,34 @@ function renderAuth(){
       .lp-btns { display:flex;gap:1rem;flex-wrap:wrap; }
       .lp-section { padding:6rem 2rem; }
       .lp-modal-grid { display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem; }
+      .lp-cmp { max-width:900px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(15,31,61,.08);overflow:hidden;text-align:left; }
+      .lp-cmp-row { display:grid;grid-template-columns:2.2fr 1fr 1fr 1fr;align-items:center;border-top:1px solid #eef1f6; }
+      .lp-cmp-row > div { padding:.9rem 1rem;font-size:.9375rem;color:#374151; }
+      .lp-cmp-row > div:not(:first-child) { text-align:center;font-weight:700; }
+      .lp-cmp-head { border-top:none;background:#0F1F3D; }
+      .lp-cmp-head > div { color:#fff !important;font-weight:800 !important;font-size:.875rem !important; }
+      .lp-cmp-head > div:nth-child(2) { color:#00C9A7 !important; }
+      .lp-cmp-row > div:nth-child(2) { background:rgba(0,201,167,.08); }
+      .lp-cmp-head > div:nth-child(2) { background:rgba(0,201,167,.12); }
+      .lp-yes { color:#059669; } .lp-no { color:#CBD5E1; } .lp-some { color:#94A3B8;font-weight:600;font-size:.8125rem; }
+      .lp-faq { max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:.75rem;text-align:left; }
+      .lp-faq details { background:#fff;border:1px solid #e5e9f0;border-radius:12px;padding:0 1.25rem; }
+      .lp-faq summary { cursor:pointer;list-style:none;padding:1.1rem 0;font-weight:700;font-size:1.0625rem;color:#0F1F3D;display:flex;justify-content:space-between;align-items:center;gap:1rem; }
+      .lp-faq summary::-webkit-details-marker { display:none; }
+      .lp-faq summary::after { content:'+';font-size:1.5rem;color:#00C9A7;font-weight:600;line-height:1; }
+      .lp-faq details[open] summary::after { content:'\\2212'; }
+      .lp-faq details p { margin:0;padding:0 0 1.25rem;color:#64748B;line-height:1.7;font-size:.9375rem; }
+      .lp-tags { display:flex;gap:.625rem;flex-wrap:wrap;margin-top:2.5rem; }
+      .lp-tags span { background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:99px;padding:.5rem 1.1rem;font-size:.9375rem;font-weight:600; }
       @media(max-width:768px){
+        .lp-cmp-row { grid-template-columns:1.7fr .9fr .9fr .9fr; }
+        .lp-cmp-row > div { padding:.75rem .5rem;font-size:.8125rem; }
+        .lp-cmp-head > div { font-size:.6875rem !important; }
+        .lp-faq summary { font-size:1rem; }
         .lp-nav { padding:0 1rem; }
         .lp-nav .nav-links span { display:none; }
         .lp-hero-content { padding:2rem 1.5rem; }
-        .lp-hero h1 { font-size:2.25rem; }
+        .lp-hero h1 { font-size:2.1rem; }
         .lp-grid-3 { grid-template-columns:1fr; }
         .lp-grid-6 { grid-template-columns:1fr 1fr; }
         .lp-grid-4 { grid-template-columns:1fr 1fr; }
@@ -558,6 +581,11 @@ function renderAuth(){
         .lp-section h2 { font-size:1.875rem !important; }
         .lp-modal-grid { grid-template-columns:1fr; }
         .lp-cta h2 { font-size:2rem !important; }
+      }
+      @media(max-width:380px){
+        .lp-nav { padding:0 .75rem; }
+        .lp-nav button { white-space:nowrap; padding:.5rem .75rem !important; font-size:.875rem !important; }
+        .lp-nav img + span { font-size:1.0625rem !important; }
       }
     </style>
     <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;background:#fff;overflow-x:hidden">
@@ -581,50 +609,66 @@ function renderAuth(){
             <span style="width:8px;height:8px;border-radius:50%;background:#00C9A7;display:inline-block"></span>
             <span style="color:#00C9A7;font-size:.8125rem;font-weight:600">The Network-Commerce Platform</span>
           </div>
-          <h1>Your Network.<br>Your Community.<br><span style="color:#00C9A7">Your Income.</span></h1>
-          <p style="color:rgba(255,255,255,.8);font-size:1.1875rem;line-height:1.65;margin:0 0 2.5rem;max-width:520px">Build Wheels where your network becomes your net worth. Post opportunities, close deals, and get paid all in one place.</p>
+          <h1>Post Jobs,<br>Apply For Jobs,<br>Network,<br><span style="color:#00C9A7">Build Your Business.</span></h1>
+          <p style="color:rgba(255,255,255,.8);font-size:1.1875rem;line-height:1.65;margin:0 0 2.5rem;max-width:520px">Post jobs free. Get applicants fast. Find work in your city, connect with your network, and grow your business, all in one place.</p>
           <div class="lp-btns">
             <button onclick="showAuthModal('signup')" style="background:#00C9A7;color:#0F1F3D;border:none;border-radius:10px;padding:1rem 2rem;font-size:1.0625rem;font-weight:800;cursor:pointer">Get Started Free</button>
             <button onclick="showAuthModal('login')" style="background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:10px;padding:1rem 2rem;font-size:1.0625rem;font-weight:700;cursor:pointer">Sign In</button>
           </div>
-          <div class="lp-stats">
-            <div style="display:flex;align-items:center;gap:.5rem"><span style="width:8px;height:8px;border-radius:50%;background:#00C9A7;display:inline-block"></span><span style="color:rgba(255,255,255,.85);font-size:.9375rem;font-weight:600">Professionals</span></div>
-            <div style="display:flex;align-items:center;gap:.5rem"><span style="width:8px;height:8px;border-radius:50%;background:#00C9A7;display:inline-block"></span><span style="color:rgba(255,255,255,.85);font-size:.9375rem;font-weight:600">Deals Closed</span></div>
-            <div style="display:flex;align-items:center;gap:.5rem"><span style="width:8px;height:8px;border-radius:50%;background:#00C9A7;display:inline-block"></span><span style="color:rgba(255,255,255,.85);font-size:.9375rem;font-weight:600">Active Wheels</span></div>
-          </div>
+          <div class="lp-tags"><span>Free to post</span><span>Apply in one tap</span><span>Browse by city &amp; category</span><span>Build your network</span></div>
         </div>
       </section>
 
       <section class="lp-section" style="background:#f8f9fc;text-align:center">
         <p style="color:#00C9A7;font-weight:700;font-size:.875rem;letter-spacing:.08em;text-transform:uppercase;margin:0 0 .75rem">How It Works</p>
-        <h2 style="color:#0F1F3D;font-size:2.5rem;font-weight:900;margin:0 0 1rem;letter-spacing:-.02em">Three steps to get paid</h2>
-        <p style="color:#64748B;font-size:1.0625rem;max-width:520px;margin:0 auto 4rem;line-height:1.6">Fairriss combines community, opportunities, and payments in one seamless platform.</p>
+        <h2 style="color:#0F1F3D;font-size:2.5rem;font-weight:900;margin:0 0 1rem;letter-spacing:-.02em">Three steps to get started</h2>
+        <p style="color:#64748B;font-size:1.0625rem;max-width:520px;margin:0 auto 4rem;line-height:1.6">Post or find jobs, grow your network, and build your business, all in one place.</p>
         <div class="lp-grid-3">
           <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(15,31,61,.06);text-align:left;position:relative">
             <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=600&q=80" style="width:100%;height:180px;object-fit:cover;display:block">
             <div style="padding:1.75rem 2rem;position:relative">
               <div style="position:absolute;top:1rem;right:1.5rem;font-size:3rem;font-weight:900;color:rgba(15,31,61,.06);line-height:1">1</div>
-              <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Create or Join a Wheel</h3>
-              <p style="color:#64748B;line-height:1.6;margin:0;font-size:.9375rem">Build your own community or join an existing one. Wheels are spaces where real deals happen.</p>
+              <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Join Free</h3>
+              <p style="color:#64748B;line-height:1.6;margin:0;font-size:.9375rem">Create your free account and set up your profile with your skills and resume, so you are ready to apply or hire.</p>
             </div>
           </div>
           <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(15,31,61,.06);text-align:left;position:relative">
             <img src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=600&q=80" style="width:100%;height:180px;object-fit:cover;display:block">
             <div style="padding:1.75rem 2rem;position:relative">
               <div style="position:absolute;top:1rem;right:1.5rem;font-size:3rem;font-weight:900;color:rgba(15,31,61,.06);line-height:1">2</div>
-              <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Post Opportunities</h3>
-              <p style="color:#64748B;line-height:1.6;margin:0;font-size:.9375rem">Share jobs, partnerships, referrals, and collaboration requests. Your network sees it first.</p>
+              <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Post or Apply for Jobs</h3>
+              <p style="color:#64748B;line-height:1.6;margin:0;font-size:.9375rem">Post a job in minutes or browse openings by city and category. Apply in one tap, and employers see every applicant in one list.</p>
             </div>
           </div>
           <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(15,31,61,.06);text-align:left;position:relative">
             <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&q=80" style="width:100%;height:180px;object-fit:cover;display:block">
             <div style="padding:1.75rem 2rem;position:relative">
               <div style="position:absolute;top:1rem;right:1.5rem;font-size:3rem;font-weight:900;color:rgba(15,31,61,.06);line-height:1">3</div>
-              <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Close Deals and Get Paid</h3>
-              <p style="color:#64748B;line-height:1.6;margin:0;font-size:.9375rem">Propose deals, agree on terms, and get paid through secure escrow. Fairriss takes just 10%.</p>
+              <h3 style="color:#0F1F3D;font-size:1.1875rem;font-weight:800;margin:0 0 .625rem">Network and Build Your Business</h3>
+              <p style="color:#64748B;line-height:1.6;margin:0;font-size:.9375rem">Join Wheels, message people, and close deals with secure escrow. Grow your network and your income.</p>
             </div>
           </div>
         </div>
+      </section>
+
+      <!-- WHY FAIRRISS CHART -->
+      <section class="lp-section" style="background:#fff;text-align:center">
+        <p style="color:#00C9A7;font-weight:700;font-size:.875rem;letter-spacing:.08em;text-transform:uppercase;margin:0 0 .75rem">Why Fairriss</p>
+        <h2 style="color:#0F1F3D;font-size:2.5rem;font-weight:900;margin:0 0 1rem;letter-spacing:-.02em">What Fairriss does for you</h2>
+        <p style="color:#64748B;font-size:1.0625rem;max-width:560px;margin:0 auto 2.5rem;line-height:1.6">Job ads on classifieds sites and social media groups leave you chasing calls and messages. Here is how Fairriss compares.</p>
+        <div class="lp-cmp">
+          <div class="lp-cmp-row lp-cmp-head"><div>Feature</div><div>Fairriss</div><div>Classified ads</div><div>Social media groups</div></div>
+          <div class="lp-cmp-row"><div>Free to post a job</div><div class="lp-yes">&#x2713;</div><div class="lp-some">Varies</div><div class="lp-yes">&#x2713;</div></div>
+          <div class="lp-cmp-row"><div>Apply in one tap, resume attached</div><div class="lp-yes">&#x2713;</div><div class="lp-no">&#x2715;</div><div class="lp-no">&#x2715;</div></div>
+          <div class="lp-cmp-row"><div>Every applicant and resume in one list</div><div class="lp-yes">&#x2713;</div><div class="lp-no">&#x2715;</div><div class="lp-no">&#x2715;</div></div>
+          <div class="lp-cmp-row"><div>Notified when someone applies</div><div class="lp-yes">&#x2713;</div><div class="lp-no">&#x2715;</div><div class="lp-no">&#x2715;</div></div>
+          <div class="lp-cmp-row"><div>Browse by city and category</div><div class="lp-yes">&#x2713;</div><div class="lp-yes">&#x2713;</div><div class="lp-some">Limited</div></div>
+          <div class="lp-cmp-row"><div>Shareable job link, viewable without an account</div><div class="lp-yes">&#x2713;</div><div class="lp-yes">&#x2713;</div><div class="lp-some">Varies</div></div>
+          <div class="lp-cmp-row"><div>Build a network and message people</div><div class="lp-yes">&#x2713;</div><div class="lp-no">&#x2715;</div><div class="lp-yes">&#x2713;</div></div>
+          <div class="lp-cmp-row"><div>Hire and get paid with secure escrow</div><div class="lp-yes">&#x2713;</div><div class="lp-no">&#x2715;</div><div class="lp-no">&#x2715;</div></div>
+        </div>
+        <p style="color:#94A3B8;font-size:.8125rem;max-width:640px;margin:1.25rem auto 0;line-height:1.5">Comparison reflects typical features. Individual sites and groups vary.</p>
+        <button onclick="showAuthModal('signup')" style="margin-top:2rem;background:#0F1F3D;color:#fff;border:none;border-radius:10px;padding:.875rem 2rem;font-size:1rem;font-weight:700;cursor:pointer">Join Free</button>
       </section>
 
       <!-- POPULAR SERVICES -->
@@ -713,10 +757,10 @@ function renderAuth(){
           <p style="color:#00C9A7;font-weight:700;font-size:.875rem;letter-spacing:.08em;text-transform:uppercase;margin:0 0 .75rem">Who It Is For</p>
           <h2 style="color:#fff;font-size:2.5rem;font-weight:900;margin:0 0 3rem;letter-spacing:-.02em">Built for every professional</h2>
           <div class="lp-grid-4">
-            <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:2rem 1.5rem"><h3 style="color:#fff;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Founders</h3><p style="color:rgba(255,255,255,.6);font-size:.875rem;line-height:1.6;margin:0">Share deal flow, co-invest, and find your next hire.</p></div>
-            <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:2rem 1.5rem"><h3 style="color:#fff;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Freelancers</h3><p style="color:rgba(255,255,255,.6);font-size:.875rem;line-height:1.6;margin:0">Get hired, get paid, build your reputation.</p></div>
-            <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:2rem 1.5rem"><h3 style="color:#fff;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Business Owners</h3><p style="color:rgba(255,255,255,.6);font-size:.875rem;line-height:1.6;margin:0">Find partners, contractors, and opportunities.</p></div>
-            <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:2rem 1.5rem"><h3 style="color:#fff;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Investors</h3><p style="color:rgba(255,255,255,.6);font-size:.875rem;line-height:1.6;margin:0">Access curated deal flow from trusted networks.</p></div>
+            <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:2rem 1.5rem"><h3 style="color:#fff;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Employers &amp; Agencies</h3><p style="color:rgba(255,255,255,.6);font-size:.875rem;line-height:1.6;margin:0">Post openings for free and see every applicant and resume in one place.</p></div>
+            <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:2rem 1.5rem"><h3 style="color:#fff;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Job Seekers</h3><p style="color:rgba(255,255,255,.6);font-size:.875rem;line-height:1.6;margin:0">Browse work by city and category, apply in one tap, or let employers find you.</p></div>
+            <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:2rem 1.5rem"><h3 style="color:#fff;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Tradespeople &amp; Freelancers</h3><p style="color:rgba(255,255,255,.6);font-size:.875rem;line-height:1.6;margin:0">Get hired, build your reputation, and get paid securely.</p></div>
+            <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:2rem 1.5rem"><h3 style="color:#fff;font-size:1.0625rem;font-weight:700;margin:0 0 .5rem">Business Owners</h3><p style="color:rgba(255,255,255,.6);font-size:.875rem;line-height:1.6;margin:0">Find staff, partners, and contractors, and grow your network.</p></div>
           </div>
         </div>
       </section>
@@ -724,10 +768,28 @@ function renderAuth(){
       <section class="lp-section lp-cta" style="background:linear-gradient(135deg,#00C9A7 0%,#0F1F3D 100%);text-align:center">
         <div style="display:flex;align-items:center;justify-content:center;gap:1.25rem;flex-wrap:wrap;margin-bottom:1rem">
           <img src="fairriss-logo.png" style="height:70px;width:auto;flex-shrink:0">
-          <h2 style="color:#fff;font-size:3rem;font-weight:900;margin:0;letter-spacing:-.03em">Ready to grow your network?</h2>
+          <h2 style="color:#fff;font-size:3rem;font-weight:900;margin:0;letter-spacing:-.03em">Ready to get started?</h2>
         </div>
-        <p style="color:rgba(255,255,255,.8);font-size:1.125rem;margin:0 0 2.5rem">Join thousands of professionals already on Fairriss. Free to join.</p>
+        <p style="color:rgba(255,255,255,.8);font-size:1.125rem;margin:0 0 2.5rem">Post jobs, apply for jobs, and build your network. Free to join.</p>
         <button onclick="showAuthModal('signup')" style="background:#fff;color:#0F1F3D;border:none;border-radius:10px;padding:1.125rem 2.5rem;font-size:1.125rem;font-weight:800;cursor:pointer">Get Started Free</button>
+      </section>
+
+      <!-- GOOD TO KNOW -->
+      <section class="lp-section" style="background:#f8f9fc;text-align:center">
+        <p style="color:#00C9A7;font-weight:700;font-size:.875rem;letter-spacing:.08em;text-transform:uppercase;margin:0 0 .75rem">Good to Know</p>
+        <h2 style="color:#0F1F3D;font-size:2.5rem;font-weight:900;margin:0 0 2.5rem;letter-spacing:-.02em">About Fairriss</h2>
+        <div class="lp-faq">
+          <details><summary>What is Fairriss?</summary><p>Fairriss is a network-commerce platform. You can post jobs, apply for jobs, build your network, and grow your business, all in one place.</p></details>
+          <details><summary>Is it free?</summary><p>Joining, posting jobs, and applying for jobs are free. A platform fee applies only when you close a paid deal through Fairriss escrow. See our Terms for details.</p></details>
+          <details><summary>How do I post a job?</summary><p>Create a free account, open the Jobs section, and tap Post a Job. Add the title, location, category, pay, schedule, and benefits. You can edit or delete your posting at any time.</p></details>
+          <details><summary>How do I apply for a job?</summary><p>Open any job and tap Apply. Your profile and resume are sent to the employer. Some jobs require a resume, so add yours to your profile first.</p></details>
+          <details><summary>How do employers see who applied?</summary><p>Every applicant shows up in one list under the job posting, with their resume and a Message button. You also get a notification each time someone applies.</p></details>
+          <details><summary>Can I share a job with people who are not on Fairriss?</summary><p>Yes. Every job has a share link. Anyone can open it and read the full posting without an account. They only need to join Fairriss when they want to apply.</p></details>
+          <details><summary>What kinds of jobs can I find?</summary><p>Jobs are organized by city, country, and category, including construction and trades, general labour, drivers and security, hospitality, healthcare, office, design, tech, media and fashion, and more.</p></details>
+          <details><summary>What is a Wheel?</summary><p>A Wheel is a community space where people in the same field or interest share posts, opportunities, and events. Anyone can start one or join one.</p></details>
+          <details><summary>Who can see my information?</summary><p>When you apply, only you and the person who posted the job can see your application and resume.</p></details>
+        </div>
+        <p style="color:#64748B;font-size:.9375rem;margin:2rem 0 0">Questions? Email <a href="mailto:hello@fairriss.com" style="color:#0F1F3D;font-weight:700">hello@fairriss.com</a></p>
       </section>
 
       <footer style="background:#0F1F3D;padding:2rem;text-align:center">
